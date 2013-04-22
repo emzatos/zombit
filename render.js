@@ -103,7 +103,7 @@ function srand(d,x,y,r,g,b) { //noise
 
 function sfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
-  var dm = 0.9+frand()*0.1;
+  var dm = 0.9+frand()*0.2*(y/3-~~(y/3));
   res[0] = ((d[ri(x-1,y)]+d[ri(x+1,y)])*0.5)*dm;
   res[1] = g*dm;
   res[2] = ((d[bi(x,y-1)]+d[bi(x,y+1)])*0.5)*dm;
