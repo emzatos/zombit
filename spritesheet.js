@@ -34,7 +34,7 @@ Sheet.prototype = {
 
 	returnOffset: function(spriteId) {
 		// loop through the sprites to return the on we need
-		for(var i = 0, l = this._sprites.length; i<len; i++) {
+		for(var i = 0, len = this._sprites.length; i<len; i++) {
 			var sprite = this._sprites[i];
 			if(sprite.name == spriteId) {
 				// multiply by sprite width

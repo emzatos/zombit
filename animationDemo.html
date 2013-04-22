@@ -1,15 +1,50 @@
 <html>
 <head>
 	<title>animationdemo|zombit</title>
+	<script type="text/javascript" src="frametimer.js"></script>
 	<script type="text/javascript" src="spritesheet.js"></script>
 	<script type="text/javascript" src="animation.js"></script>
 	<script>
 	window.onload = function() {
-		
-	}
+		var ft = new FrameTimer();
+		ft.tick();
+
+		var sprites = new Sheet({
+			width: 64,
+			height: 64,
+			sprites: [
+				{name:'stand'},
+				{name:'walk1', x:0, y:1},
+				{name:'walk2', x:0, y:1},
+			]
+		});
+
+		// create a canvas
+		var ctx = document.getElementById('canvas').getContext('2d');
+		var walk = new Animation([
+			{sprite:'walk1',time:0.3},
+			{sprite:'stand',time:0.3},
+			{sprite:'walk2',time:0.3},
+			{sprite:'stand',time:0.3}
+		], sprites);
+
+		var img = new Image();
+
+		img.onload = function() {
+			setInterval(function() {
+				walk.animate(ft.returnSeconds());
+				var frame = walk.returnSprite();
+				ctx.clearRect(0, 0, 64, 64);
+				ctx.drawImage(img, frame.x, frame.y, 32, 32, 0, 0, 32, 32);
+				ft.tick();
+			}, 5);
+		};
+
+		img.src = 'res/animate.gif'
+	};
 	</script>
 </head>
 <body>
-
+	<canvas id="canvas" width="64" height="64"></canvas>
 </body>
 </html>

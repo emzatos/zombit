@@ -27,7 +27,7 @@ var Animation = function(data, sprites) {
 	this._sprites = sprites;
 };
 
-Animation.prototype {
+Animation.prototype = {
 	_frames: [],
 	_frame: null,
 	_frameTime: 0,
