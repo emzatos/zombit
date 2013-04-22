@@ -49,7 +49,7 @@ for(var i=0; i<images.length; i++) {
 	console.log("loading image: "+images[i]);
 	var ii = new Image();
 	// load images from res
-	ii.src = "res/"+images[i];
+	ii.src = "res/tile/"+images[i];
 	images[i] = ii;
 }
 
