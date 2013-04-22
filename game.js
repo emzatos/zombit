@@ -1,4 +1,6 @@
 targetFPS = 60;
+fps = targetFPS;
+lt = new Date().getTime();
 
 function init() {
 	//create container to center canvas
@@ -30,9 +32,19 @@ function init() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0,0,viewWidth,viewHeight);
 
-	//TEST DRAWING, REMOVE
-	ctx.strokeStyle = "white";
-	strokeEllipse(ctx,viewWidth/4,viewHeight/4,viewWidth/2,viewHeight/2);
+	timer = setInterval(step,1000/targetFPS);
+}
 
-	timer = setInterval(render,1000/targetFPS);
+function step() {
+	fps = 1000/((new Date().getTime())-lt);
+	lt = new Date().getTime();
+	render();
+}
+
+frandArray = new Array(20000);
+for (var i=0; i<frandArray.length; i++) {frandArray[i] = Math.random();}
+frandPtr = 0;
+function frand() {
+	frandPtr=frandPtr==frandArray.length-1?0:frandPtr+1;
+	return frandArray[frandPtr];
 }
