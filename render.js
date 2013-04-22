@@ -13,13 +13,12 @@ function render() {
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,viewWidth,viewHeight);
 
-  //TEST DRAWING, REMOVE
-  ctx.strokeStyle = "white";
-  strokeEllipse(ctx,viewWidth/4,viewHeight/4,viewWidth/2,viewHeight/2);
+  //render the levels
+  drawLevel();
 
   //apply shaders
   //shader(srand);
-  shader(sblur);
+  //shader(sblur);
 
   //draw fps
   ctx.fillStyle = "black";
@@ -29,6 +28,30 @@ function render() {
   
 	//copy buffer to screen at proper scale
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
+}
+
+function drawLevel() {
+  var w = level.getWidth();
+  var h = level.getHeight();
+
+  //loop through portion of level within view
+  for (var x=~~(viewX/tileWidth); x<~~((viewX+viewWidth)/tileWidth)+1; x++) {
+    for (var y=~~(viewY/tileHeight); y<~~((viewY+viewHeight)/tileHeight)+1; y++) {
+      var sx = x*tileWidth-viewX; //pixel x
+      var sy = y*tileHeight-viewY; //pixel y
+
+      var tile = level.getTile(x,y); //get the tile at this position
+
+      if (tile!=null) {
+        //"color code" for tile.  temporary use until tile sprites added
+        var cc = ~~((255/4)*tile.id);
+        ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
+        ctx.fillRect(sx,sy,tileWidth,tileHeight);
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(sx,sy,tileWidth,tileHeight);
+      }
+    }
+  }
 }
 
 //shader function, pass function(data,xPixel,yPixel,RedVal,BlueVal,GreenVal) that returns [r,g,b]
