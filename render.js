@@ -43,12 +43,13 @@ function drawLevel() {
       var tile = level.getTile(x,y); //get the tile at this position
 
       if (tile!=null) {
+        ctx.drawImage(tileImage(1), sx, sy);
         //"color code" for tile.  temporary use until tile sprites added
-        var cc = ~~((255/4)*tile.id);
-        ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
-        ctx.fillRect(sx,sy,tileWidth,tileHeight);
-        ctx.strokeStyle = "black";
-        ctx.strokeRect(sx,sy,tileWidth,tileHeight);
+        //var cc = ~~((255/4)*tile.id);
+        //ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
+        //ctx.fillRect(sx,sy,tileWidth,tileHeight);
+        //ctx.strokeStyle = "black";
+        //ctx.strokeRect(sx,sy,tileWidth,tileHeight);
       }
     }
   }

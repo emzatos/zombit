@@ -40,6 +40,23 @@ function init() {
 	startGame();
 }
 
+// add the tile images into an array
+var images = new Array();
+// IMAGES MUST BE LOADED!!!
+images = ["1.png", "2.png", "3.png", "4.png"];
+// load the tile images
+for(var i=0; i<images.length; i++) {
+	console.log("loading image: "+images[i]);
+	var ii = new Image();
+	// load images from res
+	ii.src = "res/"+images[i];
+	images[i] = ii;
+}
+
+function tileImage(id) {
+	return images[id];
+}
+
 function startGame() {
 	//generate level
 	level = generateEmptyRoom(40,40);

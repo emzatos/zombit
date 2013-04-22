@@ -17,6 +17,12 @@ function Tile(id,x,y) {
 	this.y = y;
 }
 
+var images = new Array();
+images = ["1.png", "2.png", "3.png", "4.png"];
+function tileImage(id) {
+	return images[id];
+}
+
 function Level(levelData) {
 	this.data = levelData;
 }
