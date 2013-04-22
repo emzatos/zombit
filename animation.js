@@ -60,4 +60,4 @@ Animation.prototype {
 	returnSprite: function() {
 		return this._sprites.returnOffset(this._frames[this._frameIndex].sprite);
 	}
-}
+};
