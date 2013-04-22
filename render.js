@@ -18,7 +18,7 @@ function render() {
 
   //apply shaders
   //shader(srand);
-  //shader(sblur);
+  shader(sfx);
 
   //draw fps
   ctx.fillStyle = "black";
@@ -59,8 +59,8 @@ function shader(func) {
   var id = ctx.getImageData(0,0,viewWidth,viewHeight);
   var dat = id.data;
   //var d2 = dat.clone();
-  for (var x=0; x<viewWidth; x++) {
-    for (var y=0; y<viewHeight; y++) {
+  for (var x=1; x<viewWidth-1; x++) {
+    for (var y=1; y<viewHeight-1; y++) {
       var r = dat[ri(x,y)];
       var g = dat[bi(x,y)];
       var b = dat[gi(x,y)];
@@ -75,10 +75,14 @@ function shader(func) {
 }
 
 //color indexes
-function ri(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y*viewHeight))*4+0;}
-function gi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y*viewHeight))*4+1;}
-function bi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y*viewHeight))*4+2;}
-function ai(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y*viewHeight))*4+3;}
+function ri(x,y) {return ((x)+(y)*viewWidth)*4+0;}
+function gi(x,y) {return ((x)+(y)*viewWidth)*4+1;}
+function bi(x,y) {return ((x)+(y)*viewWidth)*4+2;}
+function ai(x,y) {return ((x)+(y)*viewWidth)*4+3;}
+//function ri(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+0;}
+//function gi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+1;}
+//function bi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+2;}
+//function ai(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+3;}
 
 function sthresh(d,x,y,r,g,b) { //threshold
   var res = [0,0,0];
@@ -97,11 +101,20 @@ function srand(d,x,y,r,g,b) { //noise
   return res;
 }
 
+function sfx(d,x,y,r,g,b) { //red channel blur + threshold
+  var res = [0,0,0];
+  var dm = 0.9+frand()*0.1;
+  res[0] = ((d[ri(x-1,y)]+d[ri(x+1,y)])*0.5)*dm;
+  res[1] = g*dm;
+  res[2] = ((d[bi(x,y-1)]+d[bi(x,y+1)])*0.5)*dm;
+  return res;
+}
+
 function sblur(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   res[0] = (d[ri(x-1,y)]+d[ri(x+1,y)])/2;
-  res[1] = g>127?255:0;
-  res[2] = b>127?255:0;
+  res[1] = g;
+  res[2] = (d[bi(x+2,y)]+d[bi(x,y)])/2;
   return res;
 }
 
