@@ -13,8 +13,8 @@ function render() {
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,viewWidth,viewHeight);
 
-  //render the levels
-  drawLevel();
+  //render the gameLevels
+  drawgameLevel();
 
   //draw overlay
   ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
@@ -33,17 +33,17 @@ function render() {
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
 }
 
-function drawLevel() {
-  var w = level.getWidth();
-  var h = level.getHeight();
+function drawgameLevel() {
+  var w = gameLevel.getWidth();
+  var h = gameLevel.getHeight();
 
-  //loop through portion of level within view
+  //loop through portion of gameLevel within view
   for (var x=~~(viewX/tileWidth); x<~~((viewX+viewWidth)/tileWidth)+1; x++) {
     for (var y=~~(viewY/tileHeight); y<~~((viewY+viewHeight)/tileHeight)+1; y++) {
       var sx = x*tileWidth-viewX; //pixel x
       var sy = y*tileHeight-viewY; //pixel y
 
-      var tile = level.getTile(x,y); //get the tile at this position
+      var tile = gameLevel.getTile(x,y); //get the tile at this position
 
       if (tile!=null) {
         var tid = tile.id;
@@ -110,9 +110,9 @@ function srand(d,x,y,r,g,b) { //noise
 function sfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   var dm = 0.8+frand()*0.2*(y/3-~~(y/3));
-  res[0] = ((d[ri(x-1,y)]+d[ri(x+1,y)])*0.5)*dm;
+  res[0] = ((d[ri(x-1,y)]+d[ri(x,y)])*0.5)*dm;
   res[1] = g*dm;
-  res[2] = ((d[bi(x,y)]+d[bi(x,y)])*0.5)*dm;
+  res[2] = ((d[bi(x,y+1)]+d[bi(x,y)])*0.5)*dm;
   return res;
 }
 

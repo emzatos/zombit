@@ -1,7 +1,7 @@
 var targetFPS = 100;
 var fps = targetFPS;
 var lt = new Date().getTime();
-var level = null;
+var gameLevel = null;
 
 var tileWidth = 16;
 var tileHeight = 16;
@@ -70,8 +70,9 @@ function tileImage(id) {
 }
 
 function startGame() {
-	//generate level
-	level = generateEmptyRoom(40,40);
+	//generate gameLevel
+	gameLevel = generateRectRooms(60,60,12);
+	gameLevel = generatePlants(gameLevel,0.8);
 
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
@@ -91,9 +92,9 @@ function step() {
 
 	//clip viewport position
 	if (viewX<0) {viewX = 0;}
-	if (viewX>level.getWidth()*tileWidth-viewWidth) {viewX = level.getWidth()*tileWidth-viewWidth;}
+	if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
 	if (viewY<0) {viewY = 0;}
-	if (viewY>level.getHeight()*tileHeight-viewHeight) {viewY = level.getHeight()*tileHeight-viewHeight;}
+	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
 
 	render();
 }
