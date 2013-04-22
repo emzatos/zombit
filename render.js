@@ -18,7 +18,7 @@ function render() {
   strokeEllipse(ctx,viewWidth/4,viewHeight/4,viewWidth/2,viewHeight/2);
 
   //apply shaders
-  shader(srand);
+  //shader(srand);
   shader(sblur);
 
   //draw fps
