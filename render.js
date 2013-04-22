@@ -16,6 +16,9 @@ function render() {
   //render the levels
   drawLevel();
 
+  //draw overlay
+  ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
+
   //apply shaders
   //shader(srand);
   shader(sfx);
@@ -43,7 +46,8 @@ function drawLevel() {
       var tile = level.getTile(x,y); //get the tile at this position
 
       if (tile!=null) {
-        ctx.drawImage(tileImage(1), sx, sy);
+        var tid = tile.id;
+        if (tid!=null) {ctx.drawImage(tileImage(tid), sx, sy);}
         //"color code" for tile.  temporary use until tile sprites added
         //var cc = ~~((255/4)*tile.id);
         //ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
@@ -59,6 +63,7 @@ function drawLevel() {
 function shader(func) {
   var id = ctx.getImageData(0,0,viewWidth,viewHeight);
   var dat = id.data;
+
   //var d2 = dat.clone();
   for (var x=1; x<viewWidth-1; x++) {
     for (var y=1; y<viewHeight-1; y++) {
@@ -104,10 +109,10 @@ function srand(d,x,y,r,g,b) { //noise
 
 function sfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
-  var dm = 0.9+frand()*0.2*(y/3-~~(y/3));
+  var dm = 0.8+frand()*0.2*(y/3-~~(y/3));
   res[0] = ((d[ri(x-1,y)]+d[ri(x+1,y)])*0.5)*dm;
   res[1] = g*dm;
-  res[2] = ((d[bi(x,y-1)]+d[bi(x,y+1)])*0.5)*dm;
+  res[2] = ((d[bi(x,y)]+d[bi(x,y)])*0.5)*dm;
   return res;
 }
 
