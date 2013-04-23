@@ -13,8 +13,18 @@ function render() {
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,viewWidth,viewHeight);
 
-  //render the gameLevels
+  //render the tiles
   drawgameLevel();
+
+  //render the entities
+  for (var ec = 0; ec<entities.length; ec++) {
+    ent = entities[ec];
+    if (ent instanceof Entity) {
+      if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
+        ent.render(ent.x-viewX,ent.y-viewY);
+      }
+    }
+  }
 
   //draw overlay
   ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
