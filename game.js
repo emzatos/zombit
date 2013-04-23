@@ -63,6 +63,25 @@ function loadResources() {
 	//load overlay
 	imgOverlay = new Image();
 	imgOverlay.src = "res/overlay.png";
+
+	// image animation strips
+	var aniImages = new Array();
+	aniImages = ["explode.png"]; // test
+	for(var ii = 0; ii < aniImages.length; ii++) {
+		console.log("loading animation: "+aniImages[ii]);
+		var jj = new Image();
+		jj.src = "res/animation/"+aniImages[ii];
+		aniImages[ii] = jj;
+	}
+}
+
+// allows us to get the image we want to animate
+function animateImage(id) {
+	aniImages[id].onload = function() {
+		w = aniImages[id].width;
+		h = aniImages[id].height;
+	}
+	return aniImages[id];
 }
 
 function tileImage(id) {
