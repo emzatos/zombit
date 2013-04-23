@@ -5,8 +5,8 @@ viewX = 0;
 viewY = 0;
 
 //output settings
-screenWidth = 640;
-screenHeight = 480;
+screenWidth = 800;
+screenHeight = 600;
 
 function render() {
   //clear screen
@@ -31,7 +31,7 @@ function render() {
 
   //apply shaders
   //shader(srand);
-  shader(sfx);
+  if (enableShaders==true) {shader(sfx);}
 
   //draw fps
   ctx.fillStyle = "black";
@@ -98,10 +98,10 @@ function shader(func) {
   //var d2 = dat.clone();
   for (var x=1; x<viewWidth-1; x++) {
     for (var y=1; y<viewHeight-1; y++) {
-      var r = dat[ri(x,y)];
-      var g = dat[bi(x,y)];
-      var b = dat[gi(x,y)];
-      var result = func(dat,x,y,r,g,b);
+      var cr = dat[ri(x,y)];
+      var cg = dat[gi(x,y)];
+      var cb = dat[bi(x,y)];
+      var result = func(dat,x,y,cr,cg,cb);
 
       dat[ri(x,y)]=result[0];
       dat[gi(x,y)]=result[1];
@@ -138,13 +138,26 @@ function srand(d,x,y,r,g,b) { //noise
   return res;
 }
 
-function sfx(d,x,y,r,g,b) { //red channel blur + threshold
+function sfxe(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   var dm = 0.8+frand()*0.2*(y/3-~~(y/3));
-  res[0] = ((d[ri(x-1,y)]+d[ri(x,y)])*0.5)*dm;
+  res[0] = r*dm;
   res[1] = g*dm;
-  res[2] = ((d[bi(x,y+1)]+d[bi(x,y)])*0.5)*dm;
+  res[2] = b*dm;
   return res;
+}
+
+function sfx(d,x,y,r,g,b) { //red channel blur + threshold
+  var res = [0,0,0];
+  var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
+  res[0] = colLevel(r,20,237)*dm;
+  res[1] = colLevel(g,38,202)*dm;
+  res[2] = colLevel(b,9,240)*dm;
+  return res;
+}
+
+function colLevel(col,min,max) {
+  return (col/255)*max+min;
 }
 
 function sblur(d,x,y,r,g,b) { //red channel blur + threshold

@@ -8,6 +8,9 @@ var tileHeight = 16;
 
 var entities = new Array();
 
+//settings
+var enableShaders = true;
+
 //fps monitoring
 var filterStrength = 20;
 var frameTime = 0, lastLoop = new Date, thisLoop;
