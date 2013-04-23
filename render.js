@@ -33,6 +33,27 @@ function render() {
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
 }
 
+// draw an animated image onto the canvas
+// TODO: COMPLETE THIS!
+function drawAnimatedImage(imgid, x, y, numFrames, frameSize) {
+  var index = 0, xpos = 0, ypos = 0;
+  setInterval(function() {
+    // draw the image on the canvas in the desired position
+    ctx.drawImage(animateImage(imgid),xpos,ypos,frameSize,frameSize,x,y,frameSize,frameSize);
+    xpos += frameSize;
+    index += 1;
+    if(index >= numFrames) {
+      xpos = 0;
+      ypos = 0;
+      index = 0;
+    }  else if(xpos + frameSize > w) {
+      xpos = 0;
+      ypos += frameSize;
+    }
+  }, 1000/24);
+}
+// ---------
+
 function drawgameLevel() {
   var w = gameLevel.getWidth();
   var h = gameLevel.getHeight();

@@ -48,7 +48,7 @@ function init() {
 	startGame();
 }
 
-var imgOverlay, imgEntityGeneric, imgPlayer;
+var imgOverlay, imgEntityGeneric, imgPlayer, aniImages;
 function loadResources() {
 	// add the tile images into an array
 	images = new Array();
@@ -75,7 +75,8 @@ function loadResources() {
 	imgOverlay.src = "res/overlay.png";
 
 	// image animation strips
-	var aniImages = new Array();
+	// loading images is complete.
+	aniImages = new Array();
 	aniImages = ["explode.png"]; // test
 	for(var ii = 0; ii < aniImages.length; ii++) {
 		console.log("loading animation: "+aniImages[ii]);
