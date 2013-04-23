@@ -1,12 +1,15 @@
 //viewport settings
-viewWidth = 320;
-viewHeight = 240;
-viewX = 0;
-viewY = 0;
+var viewWidth = 320;
+var viewHeight = 240;
+var viewX = 0;
+var viewY = 0;
 
 //output settings
-screenWidth = 800;
-screenHeight = 600;
+var screenWidth = 800;
+var screenHeight = 600;
+
+//advanced shader data
+var od,out;
 
 function render() {
   //clear screen
@@ -31,7 +34,7 @@ function render() {
 
   //apply shaders
   //shader(srand);
-  if (enableShaders==true) {shader(sfx);}
+  if (enableShaders==true) {xshader(xsfx);}
 
   //draw fps
   ctx.fillStyle = "black";
@@ -111,6 +114,26 @@ function shader(func) {
   ctx.putImageData(id,0,0);
 }
 
+function xshader(func) {
+  var id = ctx.getImageData(0,0,viewWidth,viewHeight);
+  var dat = id.data;
+
+  //var d2 = dat.clone();
+  for (var x=1; x<viewWidth-1; x++) {
+    for (var y=1; y<viewHeight-1; y++) {
+      var cr = dat[ri(x,y)];
+      var cg = dat[gi(x,y)];
+      var cb = dat[bi(x,y)];
+      var result = func(dat,x,y,cr,cg,cb);
+
+      dout[ri(x,y)]=result[0];
+      dout[gi(x,y)]=result[1];
+      dout[bi(x,y)]=result[2];
+    }
+  }
+  ctx.putImageData(oid,0,0);
+}
+
 //color indexes
 function ri(x,y) {return ((x)+(y)*viewWidth)*4+0;}
 function gi(x,y) {return ((x)+(y)*viewWidth)*4+1;}
@@ -153,6 +176,23 @@ function sfx(d,x,y,r,g,b) { //red channel blur + threshold
   res[0] = colLevel(r,20,237)*dm;
   res[1] = colLevel(g,38,202)*dm;
   res[2] = colLevel(b,9,240)*dm;
+  return res;
+}
+
+function xsfx(d,x,y,r,g,b) { //red channel blur + threshold
+  var res = [0,0,0];
+  var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
+  res[0] = colLevel(g,10,202)*dm;
+  res[1] = colLevel(g,10,232)*dm;
+  res[2] = colLevel(b,9,200)*dm;
+  return res;
+}
+
+function sdistort(d,x,y,r,g,b) { //red channel blur + threshold
+  var res = [0,0,0];
+  res[0] = d[ri(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
+  res[1] = d[gi(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
+  res[2] = d[bi(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
   return res;
 }
 

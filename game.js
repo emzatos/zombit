@@ -46,6 +46,11 @@ function init() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0,0,viewWidth,viewHeight);
 
+	//initialize advanced shader data
+	oid = ctx.createImageData(viewWidth,viewHeight);
+	dout = oid.data;
+	for (var i=3; i<dout.length; i+=4) {dout[i] = 255;} //set to opaque
+
 	loadResources();
 	addListeners();
 	startGame();
@@ -120,8 +125,11 @@ function d(s) {
 }
 
 function step() {
+	//store time
+	time = new Date().getTime();
+
 	//monitor fps
-	var thisFrameTime = (thisLoop=new Date) - lastLoop;
+	var thisFrameTime = (thisLoop=time) - lastLoop;
 	frameTime+= (thisFrameTime - frameTime) / filterStrength;
 	lastLoop = thisLoop;
 	fps = (1000/frameTime).toFixed(1);
