@@ -1,4 +1,4 @@
-var targetFPS = 100;
+var targetFPS = 60;
 var fps = targetFPS;
 var lt = new Date().getTime();
 var gameLevel = null;
@@ -112,6 +112,11 @@ function startGame() {
 
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
+}
+
+//delta function.  use to make fps scalable
+function d(s) {
+	return (60/fps)*s;
 }
 
 function step() {

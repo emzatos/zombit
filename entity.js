@@ -12,8 +12,8 @@ var Entity = klass(function (x,y) {
 })
 .methods({
 	step: function() {
-		this.x+=this.xs;
-		this.y+=this.ys;
+		this.x+=d(this.xs);
+		this.y+=d(this.ys);
 	},
 	render: function(x,y) {
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
@@ -47,9 +47,9 @@ var Player = Entity.extend(function(x,y,name){
 	},
 	control: function() {
 		//accept keyboard input
-		if (keys[VK_LEFT]) {this.xs-=1;}
-		if (keys[VK_RIGHT]) {this.xs+=1;}
-		if (keys[VK_UP]) {this.ys-=1;}
-		if (keys[VK_DOWN]) {this.ys+=1;}
+		if (keys[VK_LEFT]) {this.xs-=d(1);}
+		if (keys[VK_RIGHT]) {this.xs+=d(1);}
+		if (keys[VK_UP]) {this.ys-=d(1);}
+		if (keys[VK_DOWN]) {this.ys+=d(1);}
 	}
 });
