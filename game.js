@@ -6,6 +6,8 @@ var gameLevel = null;
 var tileWidth = 16;
 var tileHeight = 16;
 
+var entities = new Array();
+
 //fps monitoring
 var filterStrength = 20;
 var frameTime = 0, lastLoop = new Date, thisLoop;
@@ -46,6 +48,7 @@ function init() {
 	startGame();
 }
 
+var imgOverlay, imgEntityGeneric, imgPlayer;
 function loadResources() {
 	// add the tile images into an array
 	images = new Array();
@@ -59,6 +62,13 @@ function loadResources() {
 		ii.src = "res/tile/"+images[i];
 		images[i] = ii;
 	}
+
+	//load entity images
+	imgEntityGeneric = new Image();
+	imgEntityGeneric.src="res/entity.png";
+
+	imgPlayer = new Image();
+	imgPlayer.src="res/player.png";
 
 	//load overlay
 	imgOverlay = new Image();
@@ -74,15 +84,25 @@ function startGame() {
 	gameLevel = generateRectRooms(60,60,12);
 	gameLevel = generatePlants(gameLevel,0.8);
 
+	//create player
+	player = new Player(50,50,"Player");
+
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
 }
 
 function step() {
+	//monitor fps
 	var thisFrameTime = (thisLoop=new Date) - lastLoop;
 	frameTime+= (thisFrameTime - frameTime) / filterStrength;
 	lastLoop = thisLoop;
 	fps = (1000/frameTime).toFixed(1);
+
+	//process entities
+	for (var ec = 0; ec<entities.length; ec++) {
+    	ent = entities[ec];
+		if (ent instanceof Entity) {ent.step();}
+	}
 
 	//move view with arrow keys
 	if (keys[VK_LEFT]) {viewX-=3;}
@@ -94,6 +114,12 @@ function step() {
 	if (viewX<0) {viewX = 0;}
 	if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
 	if (viewY<0) {viewY = 0;}
+	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
+
+	//clip view pos
+	if (viewX<0) {viewX=0;}
+	if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
+	if (viewY<0) {viewY=0;}
 	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
 
 	render();
