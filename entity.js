@@ -51,8 +51,8 @@ var Entity = klass(function (x,y) {
 		var sy = Math.abs(d(this.ys));
 
 		//move for xspeed
+		var xm = this.xs>0?1:-1;
 		for (var xx=0; xx<sx; xx++) {
-			var xm = this.xs>0?1:-1;
 			var ctile = tileAt(this.x+xm+(xm*tileWidth*0.5),this.y);
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.x+=xm;
@@ -62,10 +62,11 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
+		if (tileAt(this.x+(this.xs%1)+(xm*tileWidth*0.5),this.y)) {this.x+=(this.xs%1);}
 
 		//move for yspeed
+		var ym = this.ys>0?1:-1;
 		for (var yy=0; yy<sy; yy++) {
-			var ym = this.ys>0?1:-1;
 			var ctile = tileAt(this.x,this.y+ym+(ym*tileHeight*0.5));
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.y+=ym;
@@ -75,6 +76,7 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
+		if (tileAt(this.y,this.y+(this.ys%1)+(ym*tileHeight*0.5))) {this.y+=(this.ys%1);}
 		
 		//deprecated
 		/*this.x+=d(this.xs);
@@ -153,6 +155,7 @@ var Hostile = Entity.extend(function(x,y,vr){
 
 var Zombie = Hostile.extend(function(x,y,vr){
 	this.image = imgZombie;
+	this.spd=0.3;
 })
 .methods({
 	step: function() {

@@ -134,6 +134,56 @@ Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
 
+var Item = klass(function (){
+	this.arrIndex = items.push(this);
+})
+.methods ({
+	step: function() {
+
+	},
+	destroy: function() {
+		items.splice(this.arrIndex,1);
+	}
+});
+
+var Weapon = Item.extend(function() {
+	
+})
+.methods ({
+
+});
+
+var Gun = Weapon.extend(function(clipsize,ammo,delay) {
+	this.clipsize=clipsize||20;
+	this.ammo=ammo||20;
+	this.delay=delay||5;
+	this.timer=0;
+})
+.methods({
+	step: function() {
+		this.supr();
+		if (this.timer>0) {this.timer-=1;}
+	},
+
+	fire: function() {
+		if (this.ammo>0) {
+			this.ammo-=1;
+			this.timer=delay;
+		}
+		else {
+			this.reload();
+		}
+	},
+
+	reload: function() {
+		this.ammo = this.clipsize;
+	},
+
+	bullet: function() {
+		//override and create bullet
+	}
+})
+
 //TODO: items+weapons with klass
 
 //deprecated

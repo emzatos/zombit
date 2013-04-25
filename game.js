@@ -7,6 +7,7 @@ var tileWidth = 16;
 var tileHeight = 16;
 
 var entities = new Array();
+var items = new Array();
 
 //settings
 var enableShaders = true;
@@ -58,32 +59,7 @@ function init() {
 
 var imgOverlay, imgEntityGeneric, imgPlayer, aniImages;
 function loadResources() {
-	// add the tile images into an array
-	images = new Array();
-	// IMAGES MUST BE LOADED!!!
-	images = ["1.png", "2.png", "3.png", "4.png"];
-	// load the tile images
-	for(var i=0; i<images.length; i++) {
-		console.log("loading image: "+images[i]);
-		var ii = new Image();
-		// load images from res
-		ii.src = "res/tile/"+images[i];
-		images[i] = ii;
-	}
-
-	//load entity images
-	imgEntityGeneric = new Image();
-	imgEntityGeneric.src="res/entity.png";
-
-	imgPlayer = new Image();
-	imgPlayer.src="res/player.png";
-
-	imgZombie = new Image();
-	imgZombie.src="res/zombie.png";
-
-	//load overlay
-	imgOverlay = new Image();
-	imgOverlay.src = "res/overlay.png";
+	//deprecated
 
 	// image animation strips
 	// loading images is complete.
@@ -154,6 +130,12 @@ function step() {
 	for (var ec = 0; ec<entities.length; ec++) {
     	ent = entities[ec];
 		if (ent instanceof Entity) {ent.step();}
+	}
+
+	//process items (gun timers, etc)
+	for (var ic = 0; ic<items.length; ic++) {
+    	ite = items[ic];
+		if (ite instanceof Item) {ite.step();}
 	}
 
 	//move view with arrow keys
