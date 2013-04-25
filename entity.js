@@ -7,6 +7,32 @@ function tileAt(ex, ey) {
 	else {return null;}
 }
 
+function pDir(x1,y1,x2,y2) {
+	return Math.atan2((y2-y1),(x2-x1));
+}
+
+function pDist(x1,y1,x2,y2) {
+	var xd = x2-x1;
+	var yd = y2-y1;
+	return Math.sqrt(xd*xd+yd*yd);
+}
+
+function lDirX(len,dir) {
+	return Math.cos(dir)*len;
+}
+
+function lDirY(len,dir) {
+	return Math.sin(dir)*len;
+}
+
+function radians(deg) {
+	return deg*0.01745;
+}
+
+function degrees(rad) {
+	return rad*57.29577;
+}
+
 var Entity = klass(function (x,y) {
 	this.x = x||50;
 	this.y = y||50;
@@ -93,5 +119,49 @@ var Player = Entity.extend(function(x,y,name){
 		if (keys[VK_RIGHT]) {this.xs+=d(this.spdInc);}
 		if (keys[VK_UP]) {this.ys-=d(this.spdInc);}
 		if (keys[VK_DOWN]) {this.ys+=d(this.spdInc);}
+	}
+});
+
+var T_SEARCH=0;
+var Hostile = Entity.extend(function(x,y,vr){
+	this.target = T_SEARCH;
+	this.visionRadius = vr||50;
+	this.spd = 1;
+})
+.methods({
+	step: function() {
+		this.supr();
+
+		if (this.target==T_SEARCH) { //need to find a target (the player for now)
+			if (pDist(this.x,this.y,player.x,player.y)<this.visionRadius) { //see if in range
+				this.target = player;
+			}
+		}
+		else {
+			if (pDist(this.x,this.y,this.target.x,this.target.y)>this.visionRadius*2) { //see if too far to follow
+				this.target = T_SEARCH; //reset target
+			}
+			else { //target is close enough to follow
+				//calculate direction to target and move toward it at constant speed
+				var pd = pDir(this.x,this.y,this.target.x,this.target.y);
+				this.xs = lDirX(this.spd,pd);
+				this.ys = lDirY(this.spd,pd);
+			}
+		}
+	}
+});
+
+var Zombie = Hostile.extend(function(x,y,vr){
+	this.image = imgZombie;
+})
+.methods({
+	step: function() {
+		this.supr();
+
+		//randumbly wander if no target
+		if (this.target==T_SEARCH && Math.random()<0.01) {
+			this.xs = -1+Math.random()*2;
+			this.ys = -1+Math.random()*2;
+		}
 	}
 });

@@ -134,7 +134,10 @@ Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
 
-//Game items:
+//TODO: items+weapons with klass
+
+//deprecated
+/*//Game items:
 ITEM=1, WEAPON=10, STATIC=100, GUN=200, PROJECTILE=300;
 BAT = 1000, PISTOL = 1001, BULLET = 1002;
 
@@ -169,4 +172,4 @@ Bullet = {
 	id: BULLET,
 	type: ITEM+WEAPON+PROJECTILE,
 	damage: 2
-}
+}*/

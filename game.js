@@ -78,6 +78,9 @@ function loadResources() {
 	imgPlayer = new Image();
 	imgPlayer.src="res/player.png";
 
+	imgZombie = new Image();
+	imgZombie.src="res/zombie.png";
+
 	//load overlay
 	imgOverlay = new Image();
 	imgOverlay.src = "res/overlay.png";
@@ -115,6 +118,18 @@ function startGame() {
 
 	//create player
 	player = new Player(50,50,"Player");
+
+	//spawn some zombies
+	for (var i=0; i<15; i++) {
+		var tx,ty,ta;
+		do {
+			tx = Math.round(Math.random()*(gameLevel.getWidth()-2))+1;
+			ty = Math.round(Math.random()*(gameLevel.getHeight()-2))+1;
+			ta = tileAt(tx,ty);
+			if (ta!=null && ta.id==FLOOR) {break;}
+		} while (true);
+		new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
+	}
 
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
