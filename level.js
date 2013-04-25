@@ -96,6 +96,17 @@ function generatePlants(level,prob) {
 	return level;
 }
 
+function punchOutWalls(level, prob) {
+	for (var x=1; x<level.getWidth()-1; x++) {
+		for (var y=1; y<level.getHeight()-1; y++) {
+			if (Math.random()<prob && level.getTile(x,y).id==WALL) {
+				level.setTile(new Tile(FLOOR,x,y),x,y);
+			}
+		}
+	}
+	return level;
+}
+
 //Game levels:
 EMPTY=0, FLOOR=1, WALL=2, PLANT=3, DESK=4;
 function Tile(id,x,y) {

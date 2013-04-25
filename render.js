@@ -161,15 +161,6 @@ function srand(d,x,y,r,g,b) { //noise
   return res;
 }
 
-function sfxe(d,x,y,r,g,b) { //red channel blur + threshold
-  var res = [0,0,0];
-  var dm = 0.8+frand()*0.2*(y/3-~~(y/3));
-  res[0] = r*dm;
-  res[1] = g*dm;
-  res[2] = b*dm;
-  return res;
-}
-
 function sfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
@@ -182,17 +173,9 @@ function sfx(d,x,y,r,g,b) { //red channel blur + threshold
 function xsfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
-  res[0] = colLevel(g,10,202)*dm;
+  res[0] = colLevel(r,10,202)*dm;
   res[1] = colLevel(g,10,232)*dm;
   res[2] = colLevel(b,9,200)*dm;
-  return res;
-}
-
-function sdistort(d,x,y,r,g,b) { //red channel blur + threshold
-  var res = [0,0,0];
-  res[0] = d[ri(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
-  res[1] = d[gi(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
-  res[2] = d[bi(x+Math.round(6*Math.sin(y/(viewHeight*0.1))),y+Math.round(6*Math.sin(x/(viewWidth*0.1))))];
   return res;
 }
 

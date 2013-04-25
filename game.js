@@ -110,7 +110,8 @@ function tileImage(id) {
 function startGame() {
 	//generate gameLevel
 	gameLevel = generateRectRooms(60,60,12);
-	gameLevel = generatePlants(gameLevel,0.8);
+	gameLevel = generatePlants(gameLevel,0.4);
+	gameLevel = punchOutWalls(gameLevel,0.1);
 
 	//create player
 	player = new Player(50,50,"Player");
