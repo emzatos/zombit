@@ -134,6 +134,61 @@ Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
 
+var Inventory = klass(function(size) {
+	this.size = size;
+	this.inv = new Array();
+})
+.methods({
+	push: function(item) {
+		if (item instanceof Item) {
+			if (this.inv.length<this.size) {
+				this.inv.push(item);
+				return this.inv.length-1;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	},
+
+	pop: function(index) {
+		index = Math.floor(index);
+		if (index>=0 && index<this.inv.length) {
+			return this.inv.splice(index,1);
+		}
+		else {
+			return false;
+		}
+	},
+
+	set: function(index,item) {
+		index = Math.floor(index);
+		if (index>=0 && index<this.inv.length) {
+			this.inv[index] = item;
+		}
+		else {
+			return false;
+		}
+	},
+
+	get: function(index) {
+		index = Math.floor(index);
+		if (index>=0 && index<this.inv.length) {
+			return this.inv[index];
+		}
+		else {
+			return false;
+		}
+	},
+
+	getArray: function() {
+		return array_pad(this.inv,this.size,null);
+	}
+})
+
 var Item = klass(function (){
 	this.arrIndex = items.push(this);
 })
@@ -168,11 +223,14 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay) {
 	fire: function() {
 		if (this.ammo>0) {
 			this.ammo-=1;
-			this.timer=delay;
+			this.bullet();
+			console.log("Fired! Ammo: "+this.ammo);
 		}
 		else {
+			console.log("Reloading");
 			this.reload();
 		}
+		this.timer=this.delay;
 	},
 
 	reload: function() {
@@ -182,7 +240,18 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay) {
 	bullet: function() {
 		//override and create bullet
 	}
+});
+
+var Pistol = Gun.extend(function(){
+	this.clipsize = 20;
+	this.ammo = 20;
+	this.delay = 4;
 })
+.methods({
+	bullet: function() {
+		console.log("BAM!");
+	}
+});
 
 //TODO: items+weapons with klass
 

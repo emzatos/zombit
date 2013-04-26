@@ -94,6 +94,7 @@ var Player = Entity.extend(function(x,y,name){
 	this.name = name;
 	this.image = imgPlayer;
 	this.spdInc = 0.5;
+	this.inv = new Inventory(5);
 })
 .methods({
 	step: function() {
