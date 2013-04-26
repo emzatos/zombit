@@ -43,7 +43,7 @@ var Entity = klass(function (x,y) {
 	this.image = imgEntityGeneric;
 
 	//entity management code
-	this.arrIndex = entities.push(this);
+	this.arrIndex = entities.push(this)-1;
 })
 .methods({
 	step: function() {
@@ -58,6 +58,7 @@ var Entity = klass(function (x,y) {
 				this.x+=xm;
 			}
 			else {
+				this.collide(ctile);
 				this.xs=0;
 				break;
 			}
@@ -72,6 +73,7 @@ var Entity = klass(function (x,y) {
 				this.y+=ym;
 			}
 			else {
+				this.collide(ctile);
 				this.ys=0;
 				break;
 			}
@@ -82,11 +84,22 @@ var Entity = klass(function (x,y) {
 		/*this.x+=d(this.xs);
 		this.y+=d(this.ys);*/
 	},
+	damage: function(amount) {
+		this.life-=amount;
+		if (this.life<0) {this.destroy();}
+	},
+	collide: function(tile) {
+		//override with collision logic
+	},
 	render: function(x,y) {
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 	},
 	destroy: function() {
 		entities.splice(this.arrIndex,1);
+		//shift index of other items
+		for (var i=this.arrIndex; i<entities.length; i++) {
+			entities[i].arrIndex-=1;
+		}
 	}
 })
 
@@ -169,3 +182,74 @@ var Zombie = Hostile.extend(function(x,y,vr){
 		}
 	}
 });
+
+var Projectile = Entity.extend(function(x,y,sender){
+	this.sender = sender||null;
+})
+.methods({
+	step: function() {
+		this.supr();
+
+		//check for entity collisions
+		var x1=this.x,y1=this.y,x2=this.x+this.xs,y2=this.y+this.ys;
+
+		var deres = 3;
+	    var dX,dY,iSteps;
+	    var xInc,yInc,iCount,x,y;
+
+	    dX = x1 - x2;
+	    dY = y1 - y2;
+
+	    if (Math.abs(dX) > Math.abs(dY))
+	    {
+	        iSteps = Math.abs(dX);
+	    }
+	    else
+	    {
+	        iSteps = Math.abs(dY);
+	    }
+
+	    xInc = dX/iSteps;
+	    yInc = dY/iSteps;
+
+	    x = x1;
+	    y = y1;
+
+	    var breakloop = false;
+	    for (iCount=1; iCount<=iSteps; iCount+=deres)
+	    {
+	    	for (var ec = 0; ec<entities.length; ec++) {
+		    	ent = entities[ec];
+				if (ent instanceof Entity) {
+					if (ent!=this.sender && ent!=this && !(ent instanceof Projectile) && pDist(ent.x,ent.y,this.x,this.y)<=4) {
+						this.collide(ent);
+						breakloop = true;
+						break;
+					}
+				}
+			}
+
+			if (breakloop) {break;}
+
+	        x -= xInc;
+	        y -= yInc;
+	    }
+	}
+});
+
+var Bullet = Projectile.extend(function(x,y,damage){
+	this.damage = damage||10;
+	this.xp=x;
+	this.yp=y;
+	this.image = imgBullet;
+})
+.methods({
+	collide: function(thing) {
+		if (thing instanceof Entity) {
+			//thing.damage(this.damage);
+			console.log("collided with ent");
+			//this.destroy();
+		}
+		this.destroy();
+	}
+})

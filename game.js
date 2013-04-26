@@ -94,6 +94,7 @@ function startGame() {
 
 	//create player
 	player = new Player(50,50,"Player");
+	player.inv.push(new Pistol());
 
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -132,6 +133,13 @@ function step() {
 		if (ent instanceof Entity) {ent.step();}
 	}
 
+	if (mouseLeft) {
+		var item = player.inv.getSelected();
+		if (item instanceof Gun) {
+			item.fire();
+		}
+	}
+
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {
     	ite = items[ic];
@@ -139,10 +147,10 @@ function step() {
 	}
 
 	//move view with arrow keys
-	if (keys[VK_LEFT]) {viewX-=3;}
+	/*if (keys[VK_LEFT]) {viewX-=3;}
 	if (keys[VK_RIGHT]) {viewX+=3;}
 	if (keys[VK_UP]) {viewY-=3;}
-	if (keys[VK_DOWN]) {viewY+=3;}
+	if (keys[VK_DOWN]) {viewY+=3;}*/
 
 	//clip viewport position
 	if (viewX<0) {viewX = 0;}
@@ -168,7 +176,7 @@ function irand(max) {
 function array_pad (input, pad_size, pad_value) {
   // http://kevin.vanzonneveld.net
   // +   original by: Waldo Malqui Silva
-  
+
   var pad = [],
     newArray = [],
     newLength,
@@ -190,6 +198,38 @@ function array_pad (input, pad_size, pad_value) {
   }
 
   return pad;
+}
+
+function doLine(x1,y1,x2,y2,functionToDo,deres)
+{
+	deres = deres||1;
+    var dX,dY,iSteps;
+    var xInc,yInc,iCount,x,y;
+
+    dX = x1 - x2;
+    dY = y1 - y2;
+
+    if (Math.abs(dX) > Math.abs(dY))
+    {
+        iSteps = Math.abs(dX);
+    }
+    else
+    {
+        iSteps = Math.abs(dY);
+    }
+
+    xInc = dX/iSteps;
+    yInc = dY/iSteps;
+
+    x = x1;
+    y = y1;
+
+    for (iCount=1; iCount<=iSteps; iCount+=deres)
+    {
+        functionToDo(Math.floor(x),Math.floor(y));
+        x -= xInc;
+        y -= yInc;
+    }
 }
 
 //store random numbers for very fast random number generation (for shaders, etc.)

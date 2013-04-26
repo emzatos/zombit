@@ -137,6 +137,7 @@ Level.prototype.setTile = function(tile,x,y) {
 var Inventory = klass(function(size) {
 	this.size = size;
 	this.inv = new Array();
+	this.selected = 0;
 })
 .methods({
 	push: function(item) {
@@ -184,6 +185,10 @@ var Inventory = klass(function(size) {
 		}
 	},
 
+	getSelected: function() {
+		return this.inv[this.selected];
+	},
+
 	getArray: function() {
 		return array_pad(this.inv,this.size,null);
 	}
@@ -221,16 +226,18 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay) {
 	},
 
 	fire: function() {
-		if (this.ammo>0) {
-			this.ammo-=1;
-			this.bullet();
-			console.log("Fired! Ammo: "+this.ammo);
+		if (this.timer==0) {
+			if (this.ammo>0) {
+				this.ammo-=1;
+				this.bullet();
+				console.log("Fired! Ammo: "+this.ammo);
+			}
+			else {
+				console.log("Reloading");
+				this.reload();
+			}
+			this.timer=this.delay;
 		}
-		else {
-			console.log("Reloading");
-			this.reload();
-		}
-		this.timer=this.delay;
 	},
 
 	reload: function() {
@@ -249,46 +256,21 @@ var Pistol = Gun.extend(function(){
 })
 .methods({
 	bullet: function() {
-		console.log("BAM!");
+
+		//player position corrected for view
+		var pcx = player.x-viewX;
+		var pcy = player.y-viewY;
+
+		//direction from corrected position to mouse
+		var dir = pDir(pcx,pcy,mouseX,mouseY);
+
+		//vector converted to xspeed/yspeed
+		var xs = lDirX(9,dir);
+		var ys = lDirY(9,dir);
+
+		//create bullet and set speeds
+		var blt = new Bullet(player.x,player.y,player);
+		blt.xs = xs;
+		blt.ys = ys;
 	}
 });
-
-//TODO: items+weapons with klass
-
-//deprecated
-/*//Game items:
-ITEM=1, WEAPON=10, STATIC=100, GUN=200, PROJECTILE=300;
-BAT = 1000, PISTOL = 1001, BULLET = 1002;
-
-//Items
-function Item(itemObj) { //generic constructable item container object
-	this.item = itemObj;
-
-	function isWeapon() {return (~~(item.type/10)%10)==1;}
-	function isProjectile() {return (~~(item.type/100)%10)==3;}
-	function isStatic() {return (~~(item.type/100)%10)==1;}
-	function isGun() {return (~~(item.type/100)%10)==2;}
-}
-
-//Weapons
-Bat = {
-	id: BAT,
-	type: ITEM+WEAPON+STATIC,
-	damage: 1,
-	delay: 4,
-	range: 10
-}
-
-Pistol = {
-	id: PISTOL,
-	type: ITEM+WEAPON+GUN,
-	damage: 3,
-	delay: 4,
-	range: 100
-}
-
-Bullet = {
-	id: BULLET,
-	type: ITEM+WEAPON+PROJECTILE,
-	damage: 2
-}*/

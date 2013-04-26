@@ -24,15 +24,21 @@ function mm(e) {
 }
 function md(e) {
 	if (!e) {e=event;}
+	e.preventDefault();
 	mp(e);
 	mouseLeft = true;
 }
 function mu(e) {
 	if (!e) {e=event;}
+	e.preventDefault();
 	mp(e);
 	mouseLeft = false;
 }
 function mp(e) {
 	mouseX = e.layerX||e.pageY-canvas.offsetLeft;
 	mouseY = e.layerY||e.pageX-canvas.offsetTop;
+	var mcx = mouseX*(viewWidth/screenWidth);
+	var mcy = mouseY*(viewHeight/screenHeight);
+	mouseX = mcx;
+	mouseY = mcy;
 }

@@ -41,6 +41,10 @@ function render() {
   ctx.fillRect(2,10,60,14);
   ctx.fillStyle = "white";
   ctx.fillText("FPS: "+(~~fps),4,20);
+
+  //draw mouse
+  ctx.fillStyle="red";
+  ctx.fillRect(mouseX,mouseY,1,1);
   
 	//copy buffer to screen at proper scale
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
