@@ -173,9 +173,9 @@ function sfx(d,x,y,r,g,b) { //red channel blur + threshold
 function xsfx(d,x,y,r,g,b) { //red channel blur + threshold
   var res = [0,0,0];
   var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
-  res[0] = colLevel(r,10,202)*dm;
-  res[1] = colLevel(g,10,232)*dm;
-  res[2] = colLevel(b,9,200)*dm;
+  res[0] = colLevel(r,13,202)*dm;
+  res[1] = colLevel(g,5,232)*dm;
+  res[2] = colLevel(b,10,200)*dm;
   return res;
 }
 
