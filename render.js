@@ -1,12 +1,12 @@
 //viewport settings
-var viewWidth = 320;
-var viewHeight = 240;
+var viewWidth = 600;
+var viewHeight = 400;
 var viewX = 0;
 var viewY = 0;
 
 //output settings
-var screenWidth = 800;
-var screenHeight = 600;
+var screenWidth = 1200;
+var screenHeight = 800;
 
 //advanced shader data
 var od,out;
@@ -43,8 +43,7 @@ function render() {
   ctx.fillText("FPS: "+(~~fps),4,20);
 
   //draw mouse
-  ctx.fillStyle="red";
-  ctx.fillRect(mouseX,mouseY,1,1);
+  ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
   
 	//copy buffer to screen at proper scale
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);

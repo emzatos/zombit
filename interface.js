@@ -6,7 +6,7 @@ function addListeners() {
 	canvas.addEventListener("mousedown",md,false);
 }
 
-VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40;
+VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68;
 var keys = new Array(2048);
 function kd(e) { //keydown
 	if (!e) {e=event;}

@@ -213,11 +213,14 @@ var Weapon = Item.extend(function() {
 
 });
 
-var Gun = Weapon.extend(function(clipsize,ammo,delay) {
+var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread) {
 	this.clipsize=clipsize||20;
 	this.ammo=ammo||20;
 	this.delay=delay||5;
 	this.timer=0;
+
+	this.damage = damage||10;
+	this.spread = spread||3;
 })
 .methods({
 	step: function() {
@@ -231,46 +234,57 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay) {
 				this.ammo-=1;
 				this.bullet();
 				console.log("Fired! Ammo: "+this.ammo);
+
+				this.timer=this.delay;
 			}
 			else {
 				console.log("Reloading");
 				this.reload();
 			}
-			this.timer=this.delay;
 		}
 	},
 
 	reload: function() {
 		this.ammo = this.clipsize;
+		this.timer = 100;
 	},
 
 	bullet: function() {
-		//override and create bullet
+		//player position corrected for view
+		var pcx = player.x-viewX;
+		var pcy = player.y-viewY;
+		console.log(pcx+","+pcy)
+
+		//direction from corrected position to mouse
+		var dir = pDir(pcx,pcy,mouseX,mouseY);
+
+		//vector converted to xspeed/yspeed
+		var xs = lDirX(20,dir)+Math.random()*this.spread-this.spread*0.5;
+		var ys = lDirY(20,dir)+Math.random()*this.spread-this.spread*0.5;
+
+		//create bullet and set speeds
+		var blt = new Bullet(player.x,player.y,this.damage,player);
+		blt.xs = xs;
+		blt.ys = ys;
 	}
 });
 
 var Pistol = Gun.extend(function(){
 	this.clipsize = 20;
 	this.ammo = 20;
-	this.delay = 4;
+	this.delay = 9;
+	this.damage = 10;
+	this.spread = 3;
 })
 .methods({
-	bullet: function() {
+});
 
-		//player position corrected for view
-		var pcx = player.x-viewX;
-		var pcy = player.y-viewY;
-
-		//direction from corrected position to mouse
-		var dir = pDir(pcx,pcy,mouseX,mouseY);
-
-		//vector converted to xspeed/yspeed
-		var xs = lDirX(9,dir);
-		var ys = lDirY(9,dir);
-
-		//create bullet and set speeds
-		var blt = new Bullet(player.x,player.y,player);
-		blt.xs = xs;
-		blt.ys = ys;
-	}
+var AssaultRifle = Gun.extend(function(){
+	this.clipsize = 35;
+	this.ammo = this.clipsize;
+	this.delay = 4;
+	this.damage = 15;
+	this.spread = 2;
+})
+.methods({
 });

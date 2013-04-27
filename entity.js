@@ -41,6 +41,8 @@ var Entity = klass(function (x,y) {
 	this.life = 100;
 
 	this.image = imgEntityGeneric;
+	this.width = tileWidth;
+	this.height = tileHeight;
 
 	//entity management code
 	this.arrIndex = entities.push(this)-1;
@@ -53,7 +55,7 @@ var Entity = klass(function (x,y) {
 		//move for xspeed
 		var xm = this.xs>0?1:-1;
 		for (var xx=0; xx<sx; xx++) {
-			var ctile = tileAt(this.x+xm+(xm*tileWidth*0.5),this.y);
+			var ctile = tileAt(this.x+xm+(xm*this.width*0.5),this.y);
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.x+=xm;
 			}
@@ -63,12 +65,12 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
-		if (tileAt(this.x+(this.xs%1)+(xm*tileWidth*0.5),this.y)) {this.x+=(this.xs%1);}
+		if (tileAt(this.x+(this.xs%1)+(xm*this.width*0.5),this.y)) {this.x+=(this.xs%1);}
 
 		//move for yspeed
 		var ym = this.ys>0?1:-1;
 		for (var yy=0; yy<sy; yy++) {
-			var ctile = tileAt(this.x,this.y+ym+(ym*tileHeight*0.5));
+			var ctile = tileAt(this.x,this.y+ym+(ym*this.height*0.5));
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.y+=ym;
 			}
@@ -78,7 +80,7 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
-		if (tileAt(this.y,this.y+(this.ys%1)+(ym*tileHeight*0.5))) {this.y+=(this.ys%1);}
+		if (tileAt(this.y,this.y+(this.ys%1)+(ym*this.height*0.5))) {this.y+=(this.ys%1);}
 		
 		//deprecated
 		/*this.x+=d(this.xs);
@@ -86,7 +88,10 @@ var Entity = klass(function (x,y) {
 	},
 	damage: function(amount) {
 		this.life-=amount;
-		if (this.life<0) {this.destroy();}
+		if (this.life<=0) {this.die();}
+	},
+	die: function() {
+		this.destroy();
 	},
 	collide: function(tile) {
 		//override with collision logic
@@ -128,13 +133,22 @@ var Player = Entity.extend(function(x,y,name){
 		//move view to player
 		viewX = ~~(this.x-viewWidth/2);
 		viewY = ~~(this.y-viewHeight/2);
+
+		//clip view pos
+		if (viewX<0) {viewX=0;}
+		if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
+		if (viewY<0) {viewY=0;}
+		if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
+	},
+	die: function() {
+
 	},
 	control: function() {
 		//accept keyboard input
-		if (keys[VK_LEFT]) {this.xs-=d(this.spdInc);}
-		if (keys[VK_RIGHT]) {this.xs+=d(this.spdInc);}
-		if (keys[VK_UP]) {this.ys-=d(this.spdInc);}
-		if (keys[VK_DOWN]) {this.ys+=d(this.spdInc);}
+		if (keys[VK_A]) {this.xs-=d(this.spdInc);}
+		if (keys[VK_D]) {this.xs+=d(this.spdInc);}
+		if (keys[VK_W]) {this.ys-=d(this.spdInc);}
+		if (keys[VK_S]) {this.ys+=d(this.spdInc);}
 	}
 });
 
@@ -170,6 +184,7 @@ var Hostile = Entity.extend(function(x,y,vr){
 var Zombie = Hostile.extend(function(x,y,vr){
 	this.image = imgZombie;
 	this.spd=0.3;
+	this.visionRadius = 80;
 })
 .methods({
 	step: function() {
@@ -185,6 +200,8 @@ var Zombie = Hostile.extend(function(x,y,vr){
 
 var Projectile = Entity.extend(function(x,y,sender){
 	this.sender = sender||null;
+	this.width = 4;
+	this.height = 4;
 })
 .methods({
 	step: function() {
@@ -193,7 +210,7 @@ var Projectile = Entity.extend(function(x,y,sender){
 		//check for entity collisions
 		var x1=this.x,y1=this.y,x2=this.x+this.xs,y2=this.y+this.ys;
 
-		var deres = 3;
+		var deres = 1;
 	    var dX,dY,iSteps;
 	    var xInc,yInc,iCount,x,y;
 
@@ -221,7 +238,7 @@ var Projectile = Entity.extend(function(x,y,sender){
 	    	for (var ec = 0; ec<entities.length; ec++) {
 		    	ent = entities[ec];
 				if (ent instanceof Entity) {
-					if (ent!=this.sender && ent!=this && !(ent instanceof Projectile) && pDist(ent.x,ent.y,this.x,this.y)<=4) {
+					if (ent!=this.sender && ent!=this && !(ent instanceof Projectile) && pDist(ent.x,ent.y,this.x,this.y)<=ent.width*0.5) {
 						this.collide(ent);
 						breakloop = true;
 						break;
@@ -237,19 +254,35 @@ var Projectile = Entity.extend(function(x,y,sender){
 	}
 });
 
-var Bullet = Projectile.extend(function(x,y,damage){
-	this.damage = damage||10;
-	this.xp=x;
-	this.yp=y;
+var Bullet = Projectile.extend(function(x,y,damage,sender){
+	this.damage = damage||20;
+	this.xp=null;
+	this.yp=null;
 	this.image = imgBullet;
+	this.sender = sender;
 })
 .methods({
+	step: function() {
+		this.supr();
+	},
 	collide: function(thing) {
 		if (thing instanceof Entity) {
 			//thing.damage(this.damage);
-			console.log("collided with ent");
+				thing.damage(this.damage);
+			//console.log("damaged ent! new health "+thing.life);
 			//this.destroy();
 		}
 		this.destroy();
+	},
+	render: function(x,y) {
+		if (this.xp!=null) {
+		ctx.strokeStyle = "white";
+		ctx.beginPath();
+		ctx.moveTo(this.xp,this.yp);
+		ctx.lineTo(x,y);
+		ctx.stroke();
+		}
+		this.xp=x;
+		this.yp=y;
 	}
 })

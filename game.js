@@ -10,7 +10,7 @@ var entities = new Array();
 var items = new Array();
 
 //settings
-var enableShaders = true;
+var enableShaders = false;
 
 //fps monitoring
 var filterStrength = 20;
@@ -26,6 +26,7 @@ function init() {
 	canvas = document.createElement("canvas");
 	canvas.width = screenWidth;
 	canvas.height = screenHeight;
+	canvas.style.cursor = "none";
 	canvContainer.appendChild(canvas);
 	sctx = canvas.getContext("2d"); //screen context, shouldn't be draw onto usually
 
@@ -88,13 +89,13 @@ function tileImage(id) {
 
 function startGame() {
 	//generate gameLevel
-	gameLevel = generateRectRooms(60,60,12);
-	gameLevel = generatePlants(gameLevel,0.4);
+	gameLevel = generateRectRooms(120,120,16);
+	gameLevel = generatePlants(gameLevel,0.1);
 	gameLevel = punchOutWalls(gameLevel,0.1);
 
 	//create player
 	player = new Player(50,50,"Player");
-	player.inv.push(new Pistol());
+	player.inv.push(new AssaultRifle());
 
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -158,11 +159,6 @@ function step() {
 	if (viewY<0) {viewY = 0;}
 	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
 
-	//clip view pos
-	if (viewX<0) {viewX=0;}
-	if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
-	if (viewY<0) {viewY=0;}
-	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
 
 	render();
 }
