@@ -7,6 +7,7 @@ function addListeners() {
 }
 
 VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68;
+VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_7 = 55, VK_8 = 56, VK_9 = 57; 
 var keys = new Array(2048);
 function kd(e) { //keydown
 	if (!e) {e=event;}

@@ -95,8 +95,10 @@ function startGame() {
 
 	//create player
 	player = new Player(50,50,"Player");
+	player.inv.push(new Pistol());
 	player.inv.push(new AssaultRifle());
-
+	player.inv.push(new Typhoon());
+	
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
 		var tx,ty,ta;
@@ -139,6 +141,10 @@ function step() {
 		if (item instanceof Gun) {
 			item.fire();
 		}
+	}
+
+	for (var nk=49; nk<58; nk++) {
+		if (keys[nk]) {player.inv.select(nk-49);}
 	}
 
 	//process items (gun timers, etc)

@@ -175,6 +175,16 @@ var Inventory = klass(function(size) {
 		}
 	},
 
+	select: function(index) {
+		if (index>=0 && index<this.inv.length) {
+			this.selected = index;
+			return index;
+		}
+		else {
+			return false;
+		}
+	},
+
 	get: function(index) {
 		index = Math.floor(index);
 		if (index>=0 && index<this.inv.length) {
@@ -194,7 +204,8 @@ var Inventory = klass(function(size) {
 	}
 })
 
-var Item = klass(function (){
+var Item = klass(function (name){
+	this.name = name||"Item (Generic)";
 	this.arrIndex = items.push(this);
 })
 .methods ({
@@ -213,7 +224,7 @@ var Weapon = Item.extend(function() {
 
 });
 
-var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread) {
+var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd) {
 	this.clipsize=clipsize||20;
 	this.ammo=ammo||20;
 	this.delay=delay||5;
@@ -221,31 +232,35 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread) {
 
 	this.damage = damage||10;
 	this.spread = spread||3;
+	this.spd = spd||17;
 })
 .methods({
 	step: function() {
 		this.supr();
 		if (this.timer>0) {this.timer-=1;}
+		else if (this.ammo=="R") {this.ammo=this.clipsize;}
 	},
 
 	fire: function() {
 		if (this.timer==0) {
+			if (this.ammo=="R") {this.ammo=this.clipsize;}
+
 			if (this.ammo>0) {
 				this.ammo-=1;
 				this.bullet();
-				console.log("Fired! Ammo: "+this.ammo);
+				//console.log("Fired! Ammo: "+this.ammo);
 
 				this.timer=this.delay;
 			}
 			else {
-				console.log("Reloading");
+				//console.log("Reloading");
 				this.reload();
 			}
 		}
 	},
 
 	reload: function() {
-		this.ammo = this.clipsize;
+		this.ammo = "R";
 		this.timer = 100;
 	},
 
@@ -259,8 +274,8 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread) {
 		var dir = pDir(pcx,pcy,mouseX,mouseY);
 
 		//vector converted to xspeed/yspeed
-		var xs = lDirX(20,dir)+Math.random()*this.spread-this.spread*0.5;
-		var ys = lDirY(20,dir)+Math.random()*this.spread-this.spread*0.5;
+		var xs = lDirX(this.spd,dir)+Math.random()*this.spread-this.spread*0.5;
+		var ys = lDirY(this.spd,dir)+Math.random()*this.spread-this.spread*0.5;
 
 		//create bullet and set speeds
 		var blt = new Bullet(player.x,player.y,this.damage,player);
@@ -270,21 +285,37 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread) {
 });
 
 var Pistol = Gun.extend(function(){
+	this.name = "Pistol";
 	this.clipsize = 20;
 	this.ammo = 20;
 	this.delay = 9;
 	this.damage = 10;
 	this.spread = 3;
+	this.spd=17;
 })
 .methods({
 });
 
 var AssaultRifle = Gun.extend(function(){
+	this.name = "Assault Rifle";
 	this.clipsize = 35;
 	this.ammo = this.clipsize;
 	this.delay = 4;
 	this.damage = 15;
 	this.spread = 2;
+	this.spd = 24;
+})
+.methods({
+});
+
+var Typhoon = Gun.extend(function(){
+	this.name = "Typhoon";
+	this.clipsize = 100;
+	this.ammo = this.clipsize;
+	this.delay = 1;
+	this.damage = 4;
+	this.spread = 4;
+	this.spd = 22;
 })
 .methods({
 });

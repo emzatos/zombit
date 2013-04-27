@@ -16,6 +16,8 @@ function render() {
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,viewWidth,viewHeight);
 
+  ctx.font = '12px "uni"';
+
   //render the tiles
   drawgameLevel();
 
@@ -27,6 +29,25 @@ function render() {
         ent.render(ent.x-viewX,ent.y-viewY);
       }
     }
+  }
+
+  //draw gui
+
+  //draw inventory item gui
+  ctx.fillStyle = "rgba(234,240,90,0.3)";
+  ctx.strokeStyle = "rgba(244,250,60,0.6)";
+  ctx.fillRect(viewWidth-90,4,80,25);
+  ctx.strokeRect(viewWidth-90,4,80,25);
+
+  ctx.fillStyle = "rgba(255,255,255,1)";
+  var ii = player.inv.getSelected();
+  ctx.font = '9px "uni"';
+  ctx.fillText(ii.name,viewWidth-80,13);
+
+  ctx.font = '12px "uni"';
+  if (ii instanceof Gun) {
+    ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
+    ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
   }
 
   //draw overlay
