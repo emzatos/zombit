@@ -36,10 +36,22 @@ function mu(e) {
 	mouseLeft = false;
 }
 function mp(e) {
-	mouseX = e.layerX||e.pageY-canvas.offsetLeft;
-	mouseY = e.layerY||e.pageX-canvas.offsetTop;
-	var mcx = mouseX*(viewWidth/screenWidth);
-	var mcy = mouseY*(viewHeight/screenHeight);
+	var posx = 0;
+	var posy = 0;
+
+	if (e.pageX || e.pageY) 	{
+		posx = e.pageX;
+		posy = e.pageY;
+	}
+	else if (e.clientX || e.clientY) 	{
+		posx = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		posy = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+
+	var mcx = (posx-canvas.offsetLeft)*(viewWidth/screenWidth);
+	var mcy = (posy-canvas.offsetTop)*(viewHeight/screenHeight);
 	mouseX = mcx;
 	mouseY = mcy;
 }
