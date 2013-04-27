@@ -134,8 +134,9 @@ Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
 
-var Inventory = klass(function(size) {
+var Inventory = klass(function(size,owner) {
 	this.size = size;
+	this.owner = owner;
 	this.inv = new Array();
 	this.selected = 0;
 })
@@ -143,6 +144,7 @@ var Inventory = klass(function(size) {
 	push: function(item) {
 		if (item instanceof Item) {
 			if (this.inv.length<this.size) {
+				item.user = this.owner;
 				this.inv.push(item);
 				return this.inv.length-1;
 			}
@@ -158,6 +160,7 @@ var Inventory = klass(function(size) {
 	pop: function(index) {
 		index = Math.floor(index);
 		if (index>=0 && index<this.inv.length) {
+			this.inv[index].user = null;
 			return this.inv.splice(index,1);
 		}
 		else {
@@ -224,7 +227,69 @@ var Weapon = Item.extend(function() {
 
 });
 
-var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd) {
+var Melee = Weapon.extend(function (range,width,delay,damage,user){
+	this.range = range||5;
+	this.width = width||10;
+	this.delay = delay||10;
+	this.damage = damage||5;
+	this.timer = 0;
+	this.user = user||player;
+})
+.methods({
+	step: function() {
+		this.supr();
+		if (this.timer>0) {this.timer-=1;}
+	},
+	fire: function() {
+		if (this.timer==0) {
+			//find all entities within range
+			for (var ec = 0; ec<entities.length; ec++) {
+		    	var ent = entities[ec];
+				if (ent instanceof Entity) {
+					var dst = pDist(this.user.x,this.user.y,ent.x,ent.y);
+					var dr = Math.abs(pDir(this.user.x,this.user.y,ent.x,ent.y)-this.user.facing);
+					//console.log("dist: "+dst+", dir: "+dr);
+					if (dst<=this.range && ent!=this.user && dr<=radians(this.width)) {
+						this.hit(ent);
+						console.log("hit! "+ent);
+					}
+				}
+			}
+
+			this.timer = this.delay;
+		}
+	},
+	hit: function(entity) {
+		//can override to perform custom effect
+		entity.damage(this.damage);
+	}
+});
+
+var WoodenBat = Melee.extend(function(){
+	this.range = 40;
+	this.width = 40;
+	this.delay = 5;
+	this.damage = 55;
+
+	this.name = "Wood Bat";
+})
+.methods({
+
+});
+
+var ZombieAttack = Melee.extend(function(){
+	this.range = 25;
+	this.width = 40;
+	this.delay = 5;
+	this.damage = 5;
+
+	this.name = "ZombieAttack";
+})
+.methods({
+
+});
+
+var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	this.clipsize=clipsize||20;
 	this.ammo=ammo||20;
 	this.delay=delay||5;
@@ -233,6 +298,9 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd) {
 	this.damage = damage||10;
 	this.spread = spread||3;
 	this.spd = spd||17;
+	this.friction = 0.001;
+
+	this.user = user||player;
 })
 .methods({
 	step: function() {
@@ -265,22 +333,17 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd) {
 	},
 
 	bullet: function() {
-		//player position corrected for view
-		var pcx = player.x-viewX;
-		var pcy = player.y-viewY;
-		console.log(pcx+","+pcy)
-
-		//direction from corrected position to mouse
-		var dir = pDir(pcx,pcy,mouseX,mouseY);
-
 		//vector converted to xspeed/yspeed
-		var xs = lDirX(this.spd,dir)+Math.random()*this.spread-this.spread*0.5;
-		var ys = lDirY(this.spd,dir)+Math.random()*this.spread-this.spread*0.5;
+		var dir = this.user.facing+radians(Math.random()*this.spread-this.spread*0.5);
+		var xs = lDirX(this.spd,dir);
+		var ys = lDirY(this.spd,dir);
 
 		//create bullet and set speeds
-		var blt = new Bullet(player.x,player.y,this.damage,player);
+		var blt = new Bullet(this.user.x,this.user.y,this.damage,this.user);
 		blt.xs = xs;
 		blt.ys = ys;
+		blt.friction = this.friction;
+		return blt;
 	}
 });
 
@@ -291,7 +354,7 @@ var Pistol = Gun.extend(function(){
 	this.delay = 9;
 	this.damage = 10;
 	this.spread = 3;
-	this.spd=17;
+	this.spd=19;
 })
 .methods({
 });
@@ -310,12 +373,25 @@ var AssaultRifle = Gun.extend(function(){
 
 var Typhoon = Gun.extend(function(){
 	this.name = "Typhoon";
-	this.clipsize = 100;
+	this.clipsize = 200;
 	this.ammo = this.clipsize;
 	this.delay = 1;
 	this.damage = 4;
-	this.spread = 4;
-	this.spd = 22;
+	this.spread = 14;
+	this.spd = 18;
+	this.friction = 0.05;
+})
+.methods({
+});
+
+var Gauss = Gun.extend(function(){
+	this.name = "Gauss Rifle";
+	this.clipsize = 8;
+	this.ammo = this.clipsize;
+	this.delay = 40;
+	this.damage = 55;
+	this.spread = 0.5;
+	this.spd = 35;
 })
 .methods({
 });

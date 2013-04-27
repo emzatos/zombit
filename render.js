@@ -31,9 +31,27 @@ function render() {
     }
   }
 
-  //draw gui
+  //draw inventory GUI
+  ctx.fillStyle = "rgba(234,240,90,0.3)";
+  for (var i=0; i<player.inv.size; i++) {
+    var item = player.inv.get(i);
+    ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
 
-  //draw inventory item gui
+    var bx = viewWidth-92-(18*(player.inv.size-i));
+    ctx.fillRect(bx,4,16,16);
+    ctx.strokeRect(bx,4,16,16);
+  }
+
+  //draw healthbar
+  ctx.fillStyle = "rgba(234,20,53,0.5)";
+  ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
+  ctx.fillStyle = "rgba(20,230,53,1)";
+  ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
+  ctx.font = '8px "uni"';
+  ctx.fillStyle = "white";
+  ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
+
+  //draw selected item GUI
   ctx.fillStyle = "rgba(234,240,90,0.3)";
   ctx.strokeStyle = "rgba(244,250,60,0.6)";
   ctx.fillRect(viewWidth-90,4,80,25);

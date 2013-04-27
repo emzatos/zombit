@@ -13,13 +13,31 @@ function load() {
 	for (var i=0; i<1000; i++) {
 		ctx.drawImage(img, 50, 50);
 	}
-	console.log((new Date().getTime()-time));
+	console.log("Image x1000: "+(new Date().getTime()-time));
 
 	time = new Date().getTime();
 	for (var i=0; i<1000; i++) {
 		drawRotatedImage(img, 50, 50, Math.random()*360);
 	}
-	console.log((new Date().getTime()-time));
+	console.log("Rotated image x1000: "+(new Date().getTime()-time));
+
+	time = new Date().getTime();
+	for (var i=0; i<1000000; i++) {
+		var y = (23*23);
+	}
+	console.log("(x*x): "+(new Date().getTime()-time));
+
+	time = new Date().getTime();
+	for (var i=0; i<1000000; i++) {
+		var y = Math.pow(23,2);
+	}
+	console.log("Math.pow(x,2): "+(new Date().getTime()-time));
+
+	time = new Date().getTime();
+	for (var i=0; i<1000000; i++) {
+		var y = Math.sqrt(141);
+	}
+	console.log("Math.sqrt(x): "+(new Date().getTime()-time));
 }
 
 var TO_RADIANS = Math.PI/180; 

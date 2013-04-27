@@ -98,6 +98,8 @@ function startGame() {
 	player.inv.push(new Pistol());
 	player.inv.push(new AssaultRifle());
 	player.inv.push(new Typhoon());
+	player.inv.push(new Gauss());
+	player.inv.push(new WoodenBat());
 	
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -138,14 +140,18 @@ function step() {
 
 	if (mouseLeft) {
 		var item = player.inv.getSelected();
-		if (item instanceof Gun) {
+		if (item instanceof Weapon) {
 			item.fire();
 		}
 	}
 
+	//inv selection keys
 	for (var nk=49; nk<58; nk++) {
 		if (keys[nk]) {player.inv.select(nk-49);}
 	}
+
+	//reload
+	if (keys[VK_R]) {if (player.inv.getSelected() instanceof Gun) {player.inv.getSelected().reload();}}
 
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {
