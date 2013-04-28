@@ -11,7 +11,7 @@ function pDir(x1,y1,x2,y2) {
 	var xd = x2-x1;
 	var yd = y2-y1;
 
-	return Math.atan2(yd,xd);
+	return fast_atan2(yd,xd);
 }
 
 function pDist(x1,y1,x2,y2) {
