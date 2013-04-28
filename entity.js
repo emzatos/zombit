@@ -124,7 +124,7 @@ var Entity = klass(function (x,y) {
 
 		//move for xspeed
 		var xm = this.xs>0?1:-1;
-		for (var xx=0; xx<sx; xx++) {
+		for (var xx=0; xx<Math.floor(sx); xx++) {
 			var ctile = tileAt(this.x+xm+(xm*this.width*0.5),this.y);
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.x+=xm;
@@ -135,11 +135,12 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
-		if (tileAt(this.x+(this.xs%1)+(xm*this.width*0.5),this.y)) {this.x+=(this.xs%1);}
+		var curtile = tileAt(this.x+(this.xs%1)+(xm*this.width*0.5),this.y);
+		if (curtile!=null && curtile.id==FLOOR) {this.x+=(this.xs%1);}
 
 		//move for yspeed
 		var ym = this.ys>0?1:-1;
-		for (var yy=0; yy<sy; yy++) {
+		for (var yy=0; yy<Math.floor(sy); yy++) {
 			var ctile = tileAt(this.x,this.y+ym+(ym*this.height*0.5));
 			if (ctile!=null && ctile.id==FLOOR) {
 				this.y+=ym;
@@ -150,7 +151,8 @@ var Entity = klass(function (x,y) {
 				break;
 			}
 		}
-		if (tileAt(this.y,this.y+(this.ys%1)+(ym*this.height*0.5))) {this.y+=(this.ys%1);}
+		curtile = tileAt(this.x,this.y+(this.ys%1)+(ym*this.height*0.5));
+		if (curtile!=null && curtile.id==FLOOR) {this.y+=(this.ys%1);}
 
 		//apply friction
 		this.xs*=1-this.friction;
@@ -301,7 +303,7 @@ var Hostile = Entity.extend(function(x,y,vr){
 
 var Zombie = Hostile.extend(function(x,y,vr){
 	this.image = imgZombie;
-	this.spd=0.3;
+	this.spd=0.8;
 	this.visionRadius = 160
 	this.life = Math.round(Math.random()*150);
 	this.pointValue = Math.round(0.5*this.life);
