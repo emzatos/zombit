@@ -6,6 +6,8 @@ var playlistIndex = 0;
 
 function loadAudio() {
 	sndDie = loadSoundFile("res/die.wav");
+	sndHit = loadSoundFile("res/hit.wav",4);
+	sndKill = loadSoundFile("res/kill.wav",4);
 	sndGun1 = loadSoundFile("res/gun1.wav",4);
 	sndGun2 = loadSoundFile("res/gun2.wav",8);
 	sndGun3 = loadSoundFile("res/gun3.wav",16);

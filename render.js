@@ -16,6 +16,9 @@ var showFPS = true;
 //advanced shader data
 var od,out;
 
+//particles
+var particles = new Array();
+
 function render() {
   if (dmode==GAME) {
     //clear screen
@@ -27,9 +30,19 @@ function render() {
     //render the tiles
     drawgameLevel();
 
+    //render particles (they're entities, but they must be drawn below the others)
+    for (var ec = 0; ec<particles.length; ec++) {
+      var prt = particles[ec];
+      if (prt instanceof Particle) {
+        if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
+          prt.render(prt.x-viewX,prt.y-viewY);
+        }
+      }
+    }
+
     //render the entities
     for (var ec = 0; ec<entities.length; ec++) {
-      ent = entities[ec];
+      var ent = entities[ec];
       if (ent instanceof Entity) {
         if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
           ent.render(ent.x-viewX,ent.y-viewY);

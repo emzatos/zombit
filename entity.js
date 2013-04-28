@@ -100,6 +100,15 @@ function collisionLine(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,return
 	}
 }
 
+function collisionCircle(c1x,c1y,c1r,c2x,c2y,c2r) {
+	if (pDist(c1x,c1y,c2x,c2y)<=c1r+c2r) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 var Entity = klass(function (x,y) {
 	this.x = x||50;
 	this.y = y||50;
@@ -107,6 +116,7 @@ var Entity = klass(function (x,y) {
 	this.ys = 0;
 	this.friction = 0;
 	this.life = 100;
+	this.maxlife = this.life;
 
 	this.facing = null;
 
@@ -164,9 +174,15 @@ var Entity = klass(function (x,y) {
 	},
 	damage: function(amount) {
 		this.life-=amount;
+		for (var i=0; i<Math.ceil((amount/(this.maxlife>0?this.maxlife:1))*6); i++) {
+			new BloodSplat(this.x-this.width*0.5+irand(this.width),this.y-this.height*0.5+irand(this.height),0,0);
+		}
 		if (this.life<=0) {this.die();}
 	},
 	die: function() {
+		for (var i=0; i<6; i++) {
+			new BloodSplat(this.x-this.width+irand(this.width*2),this.y-this.height+irand(this.height*2),0,0);
+		}
 		this.destroy();
 	},
 	collide: function(tile) {
@@ -195,6 +211,7 @@ var Player = Entity.extend(function(x,y,name){
 .methods({
 	step: function() {
 		this.supr();
+
 		if (Math.abs(this.xs)<0.1) {this.xs = 0;}
 		if (Math.abs(this.ys)<0.1) {this.ys = 0;}
 
@@ -225,6 +242,10 @@ var Player = Entity.extend(function(x,y,name){
 		//direction from corrected position to mouse
 		var dir = pDir(pcx,pcy,mouseX,mouseY);
 		player.facing = dir;
+	},
+	damage: function(amount) {
+		this.supr(amount);
+		sndHit.play();
 	},
 	die: function() {
 		gameScore = 0;
@@ -298,6 +319,7 @@ var Hostile = Entity.extend(function(x,y,vr){
 	die: function() {
 		this.supr();
 		gameScore+=this.pointValue;
+		sndKill.play();
 	}
 });
 
@@ -375,6 +397,24 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	render: function(x,y) {
 		if (this.xp!=null) {
+		var grad= ctx.createLinearGradient(x, y, this.xp, this.yp);
+		grad.addColorStop(0, "rgba(255,255,255,1)");
+		grad.addColorStop(1, "rgba(255,255,255,0.5)");
+
+		var grad1= ctx.createLinearGradient(x, y, this.xp, this.yp);
+		grad1.addColorStop(0, "rgba(255,205,0,1)");
+		grad1.addColorStop(1, "rgba(220,170,0,0)");
+
+		ctx.lineCap = "round";
+
+		ctx.lineWidth = 3;
+		ctx.strokeStyle = grad1;
+		ctx.beginPath();
+		ctx.moveTo(this.xp,this.yp);
+		ctx.lineTo(x,y);
+		ctx.stroke();
+
+		ctx.lineWidth = 1;
 		ctx.strokeStyle = "white";
 		ctx.beginPath();
 		ctx.moveTo(this.xp,this.yp);
@@ -384,4 +424,49 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 		this.xp=x;
 		this.yp=y;
 	}
+});
+
+var Particle = klass(function(x,y,xs,ys,life) {
+	this.x = x;
+	this.y = y;
+	this.xs = xs;
+	this.ys = ys;
+	this.maxlife = life;
+	this.life = life;
+	this.arrIndex = particles.push(this)-1;
+	this.image = imgBloodSplat;
 })
+.methods({
+	step: function() {
+		this.x+=this.xs;
+		this.y+=this.ys;
+
+		this.life-=1;
+		if (this.life<0) {this.destroy();}
+	},
+	render: function(x,y) {
+		ctx.globalAlpha = this.life/this.maxlife;
+		ctx.drawImage(this.image,x-this.image.width/2,y-this.image.height/2);
+		ctx.globalAlpha = 1;
+	},
+	destroy: function() {
+		particles.splice(this.arrIndex,1);
+		//shift index of other items
+		for (var i=this.arrIndex; i<particles.length; i++) {
+			particles[i].arrIndex-=1;
+		}
+	},
+});
+
+var BloodSplat = Particle.extend(function(x,y,xs,ys){
+	this.x = x;
+	this.y = y;
+	this.xs = xs;
+	this.ys = ys;
+	this.life = 400;
+	this.maxlife = this.life;
+	this.image = imgBloodSplat;
+})
+.methods ({
+
+});

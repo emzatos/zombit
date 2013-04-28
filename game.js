@@ -158,8 +158,14 @@ function step() {
 
 	//process entities
 	for (var ec = 0; ec<entities.length; ec++) {
-    	ent = entities[ec];
+    	var ent = entities[ec];
 		if (ent instanceof Entity) {ent.step();}
+	}
+
+	//process particles
+	for (var ec = 0; ec<particles.length; ec++) {
+    	var prt = particles[ec];
+		if (prt instanceof Particle) {prt.step();}
 	}
 
 	if (mouseLeft) {

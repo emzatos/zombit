@@ -276,7 +276,7 @@ var WoodenBat = Melee.extend(function(){
 	this.delay = 5;
 	this.damage = 55;
 
-	this.name = "Wood Bat";
+	this.name = "Wooden Bat";
 })
 .methods({
 
@@ -362,7 +362,7 @@ var Pistol = Gun.extend(function(){
 	this.ammo = 20;
 	this.delay = 9;
 	this.damage = 10;
-	this.spread = 3;
+	this.spread = 7;
 	this.spd=19;
 	this.snd = sndGun2;
 })
@@ -375,7 +375,7 @@ var AssaultRifle = Gun.extend(function(){
 	this.ammo = this.clipsize;
 	this.delay = 4;
 	this.damage = 15;
-	this.spread = 2;
+	this.spread = 3;
 	this.spd = 24;
 	this.snd = sndGun1;
 })
@@ -400,10 +400,10 @@ var Gauss = Gun.extend(function(){
 	this.name = "Gauss Rifle";
 	this.clipsize = 8;
 	this.ammo = this.clipsize;
-	this.delay = 40;
+	this.delay = 50;
 	this.damage = 55;
-	this.spread = 0.5;
-	this.spd = 35;
+	this.spread = 1;
+	this.spd = 40;
 	this.snd = sndGun2;
 })
 .methods({
