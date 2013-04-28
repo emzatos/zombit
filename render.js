@@ -8,81 +8,153 @@ var viewY = 0;
 var screenWidth = 1200;
 var screenHeight = 800;
 
+var INTRO=0,GAME=1;
+var dmode = INTRO;
+var intime = null;
+var showFPS = true;
+
 //advanced shader data
 var od,out;
 
 function render() {
-  //clear screen
-  ctx.fillStyle = "black";
-  ctx.fillRect(0,0,viewWidth,viewHeight);
+  if (dmode==GAME) {
+    //clear screen
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0,viewWidth,viewHeight);
 
-  ctx.font = '12px "uni"';
+    ctx.font = '12px "uni"';
 
-  //render the tiles
-  drawgameLevel();
+    //render the tiles
+    drawgameLevel();
 
-  //render the entities
-  for (var ec = 0; ec<entities.length; ec++) {
-    ent = entities[ec];
-    if (ent instanceof Entity) {
-      if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
-        ent.render(ent.x-viewX,ent.y-viewY);
+    //render the entities
+    for (var ec = 0; ec<entities.length; ec++) {
+      ent = entities[ec];
+      if (ent instanceof Entity) {
+        if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
+          ent.render(ent.x-viewX,ent.y-viewY);
+        }
       }
     }
+
+    //draw inventory GUI
+    ctx.fillStyle = "rgba(234,240,90,0.3)";
+    for (var i=0; i<player.inv.size; i++) {
+      var item = player.inv.get(i);
+      ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
+
+      var bx = viewWidth-92-(18*(player.inv.size-i));
+      ctx.fillRect(bx,4,16,16);
+      ctx.strokeRect(bx,4,16,16);
+    }
+
+    //draw healthbar
+    ctx.fillStyle = "rgba(234,20,53,0.5)";
+    ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
+    ctx.fillStyle = "rgba(20,230,53,1)";
+    ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
+    ctx.font = '8px "uni"';
+    ctx.fillStyle = "white";
+    ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
+
+    //draw selected item GUI
+    ctx.fillStyle = "rgba(234,240,90,0.3)";
+    ctx.strokeStyle = "rgba(244,250,60,0.6)";
+    ctx.fillRect(viewWidth-90,4,80,25);
+    ctx.strokeRect(viewWidth-90,4,80,25);
+
+    ctx.fillStyle = "rgba(255,255,255,1)";
+    var ii = player.inv.getSelected();
+    ctx.font = '9px "uni"';
+    ctx.fillText(ii.name,viewWidth-80,13);
+
+    ctx.font = '12px "uni"';
+    if (ii instanceof Gun) {
+      ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
+      ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
+    }
+
+    //draw score
+    ctx.fillStyle = "rgba(234,240,90,0.3)";
+    ctx.strokeStyle = "rgba(244,250,60,0.6)";
+    ctx.fillRect(viewWidth/2-40,4,80,20);
+    ctx.strokeRect(viewWidth/2-40,4,80,20);
+
+    ctx.font = '13px "uni"';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = "white";
+    ctx.fillText(gameScore,viewWidth/2,18);
+    ctx.textAlign = 'left';
+
+    //ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
+
+    //draw overlay
+    ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
+
+    //apply shaders
+    //shader(srand);
+    if (enableShaders==true) {xshader(xsfx);}
+
+    //draw fps
+    if (showFPS) {
+      ctx.font = '8px "uni"';
+      //ctx.fillStyle = "rgba(0,0,0,0.2)";
+      //ctx.fillRect(2,10,40,4);
+      ctx.fillStyle = "white";
+      ctx.fillText("FPS: "+(~~fps),4,12);
+    }
+
+    //draw mouse
+    ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
   }
+  else if (dmode==INTRO) {
+    if (intime==null) {intime=new Date().getTime();}
+    var delta = new Date().getTime()-intime;
 
-  //draw inventory GUI
-  ctx.fillStyle = "rgba(234,240,90,0.3)";
-  for (var i=0; i<player.inv.size; i++) {
-    var item = player.inv.get(i);
-    ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
+    //clear screen
+    ctx.fillStyle = "rgb(40,36,38)";
+    ctx.fillRect(0,0,viewWidth,viewHeight);
 
-    var bx = viewWidth-92-(18*(player.inv.size-i));
-    ctx.fillRect(bx,4,16,16);
-    ctx.strokeRect(bx,4,16,16);
+    ctx.font = '12px "uni"';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = "white";
+
+    var vpos = viewHeight/2-100;
+
+    ctx.font = '40px "uni"';
+    ctx.fillText("Zombit",viewWidth/2,30+vpos);
+
+    if (delta>750) {
+    ctx.fillStyle = "lightgray";
+    ctx.font = '13px "uni"';
+    ctx.fillText("Programming & Design by",viewWidth/2,70+vpos);
+    ctx.fillStyle = "white";
+    ctx.font = '22px "uni"';
+    ctx.fillText("Nondefault",viewWidth/2,90+vpos);
+    }
+
+    if (delta>1500) {
+    ctx.fillStyle = "lightgray";
+    ctx.font = '13px "uni"';
+    ctx.fillText("Graphics & Additional Programming by",viewWidth/2,110+vpos);
+    ctx.fillStyle = "white";
+    ctx.font = '22px "uni"';
+    ctx.fillText("Sachittome",viewWidth/2,130+vpos);
+    }
+
+    if (delta>2250) {
+    ctx.fillStyle = "lightgray";
+    ctx.font = '9px "uni"';
+    ctx.fillText("Music by",viewWidth/2,150+vpos);
+    ctx.fillStyle = "white";
+    ctx.font = '15px "uni"';
+    ctx.fillText("Sycamore Drive",viewWidth/2,165+vpos);
+    ctx.font = '12px "uni"';
+    ctx.fillText("http://sycamoredrive.co.uk/",viewWidth/2,180+vpos);
+    }
+
+    ctx.textAlign = 'left';
   }
-
-  //draw healthbar
-  ctx.fillStyle = "rgba(234,20,53,0.5)";
-  ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
-  ctx.fillStyle = "rgba(20,230,53,1)";
-  ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
-  ctx.font = '8px "uni"';
-  ctx.fillStyle = "white";
-  ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
-
-  //draw selected item GUI
-  ctx.fillStyle = "rgba(234,240,90,0.3)";
-  ctx.strokeStyle = "rgba(244,250,60,0.6)";
-  ctx.fillRect(viewWidth-90,4,80,25);
-  ctx.strokeRect(viewWidth-90,4,80,25);
-
-  ctx.fillStyle = "rgba(255,255,255,1)";
-  var ii = player.inv.getSelected();
-  ctx.font = '9px "uni"';
-  ctx.fillText(ii.name,viewWidth-80,13);
-
-  ctx.font = '12px "uni"';
-  if (ii instanceof Gun) {
-    ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
-    ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
-  }
-
-  //draw overlay
-  ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
-
-  //apply shaders
-  //shader(srand);
-  if (enableShaders==true) {xshader(xsfx);}
-
-  //draw fps
-  ctx.fillStyle = "black";
-  ctx.fillRect(2,10,60,14);
-  ctx.fillStyle = "white";
-  ctx.fillText("FPS: "+(~~fps),4,20);
-
-  //draw mouse
-  ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
   
 	//copy buffer to screen at proper scale
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);

@@ -21,11 +21,25 @@ function pDist(x1,y1,x2,y2) {
 }
 
 function lDirX(len,dir) {
-	return Math.cos(dir)*len;
+	var val = Math.cos(dir)*len
+	return Math.abs(val)<0?0:val;
 }
 
 function lDirY(len,dir) {
-	return Math.sin(dir)*len;
+	var val = Math.sin(dir)*len
+	return Math.abs(val)<0?0:val;
+}
+
+function pVector(x1,y1,x2,y2,speed) {
+	var dx = x2 - x1;
+	var dy = y2 - y1;
+	var norm = Math.sqrt(dx * dx + dy * dy);
+	if (norm)
+	{
+	    dx *= (speed / norm);
+	    dy *= (speed / norm);
+	}
+	return [dx,dy];
 }
 
 function radians(deg) {
@@ -211,7 +225,17 @@ var Player = Entity.extend(function(x,y,name){
 		player.facing = dir;
 	},
 	die: function() {
+		gameScore = 0;
 		this.life = 100;
+		this.x = 50;
+		this.y = 50;
+		sndDie.play();
+		for (var ec = 0; ec<entities.length; ec++) {
+	    	var ent = entities[ec];
+			if (ent instanceof Hostile) {
+				ent.destroy();
+			}
+		}
 	},
 	control: function() {
 		//accept keyboard input
@@ -229,6 +253,7 @@ var Hostile = Entity.extend(function(x,y,vr){
 	this.spd = 1;
 	this.facing = 0;
 	this.inv = new Inventory(1,this);
+	this.pointValue = 10;
 })
 .methods({
 	step: function() {
@@ -266,13 +291,20 @@ var Hostile = Entity.extend(function(x,y,vr){
 	attack: function(entity) {
 		this.inv.getSelected().fire();
 		//can be overriden to provide custom attack behavior
+	},
+
+	die: function() {
+		this.supr();
+		gameScore+=this.pointValue;
 	}
 });
 
 var Zombie = Hostile.extend(function(x,y,vr){
 	this.image = imgZombie;
 	this.spd=0.3;
-	this.visionRadius = 80;
+	this.visionRadius = 160
+	this.life = Math.round(Math.random()*150);
+	this.pointValue = Math.round(0.5*this.life);
 	this.inv.push(new ZombieAttack());
 })
 .methods({

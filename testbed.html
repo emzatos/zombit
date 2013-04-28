@@ -46,7 +46,7 @@ function load() {
 
 	time = new Date().getTime();
 	for (var i=0; i<10000000; i++) {
-		var y = Math.sqrt(141);
+		var y = Math.sqrt(i);
 	}
 	console.log("Math.sqrt(x): "+(new Date().getTime()-time));
 
@@ -64,13 +64,13 @@ function load() {
 
 	time = new Date().getTime();
 	for (var i=0; i<10000000; i++) {
-		var y = Math.sin(141.2);
+		var y = Math.sin(i);
 	}
 	console.log("Math.sin(x): "+(new Date().getTime()-time));
 
 	time = new Date().getTime();
 	for (var i=0; i<10000000; i++) {
-		var y = Math.abs(-141.2);
+		var y = Math.abs(i);
 	}
 	console.log("Math.abs(x): "+(new Date().getTime()-time));
 }

@@ -9,6 +9,8 @@ var tileHeight = 16;
 var entities = new Array();
 var items = new Array();
 
+var gameScore = 0;
+
 //settings
 var enableShaders = false;
 
@@ -54,6 +56,7 @@ function init() {
 	for (var i=3; i<dout.length; i+=4) {dout[i] = 255;} //set to opaque
 
 	loadResources();
+	loadAudio();
 	addListeners();
 	startGame();
 }
@@ -113,13 +116,34 @@ function startGame() {
 		new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 	}
 
+	//tell zombies to spawn continuously
+	setInterval(function(){
+		if (entities.length<50) {
+		for (var i=0; i<1; i++) {
+			var tx,ty,ta;
+			do {
+				tx = Math.round(Math.random()*(gameLevel.getWidth()-2))+1;
+				ty = Math.round(Math.random()*(gameLevel.getHeight()-2))+1;
+				ta = tileAt(tx,ty);
+				if (ta!=null && ta.id==FLOOR) {break;}
+			} while (true);
+			new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
+		}}
+	},500);
+
+	//start music
+	setTimeout(startPlaylist,4900);
+
+	setTimeout(function(){dmode=GAME;},5000);
+
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
 }
 
 //delta function.  use to make fps scalable
 function d(s) {
-	return (60/fps)*s;
+	return s;
+	//return (60/fps)*s;
 }
 
 function step() {

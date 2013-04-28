@@ -87,7 +87,7 @@ function generatePlants(level,prob) {
 			var td = level.getTile(x,y+1).id==WALL;
 			if (tl&&tu || tu&&tr || tr&&td || td&&tl) {
 				if (Math.random()<prob) {
-					console.log("planted at "+x+","+y);
+					//console.log("planted at "+x+","+y);
 					level.setTile(new Tile(PLANT,x,y),x,y);
 				}
 			}
@@ -210,6 +210,7 @@ var Inventory = klass(function(size,owner) {
 var Item = klass(function (name){
 	this.name = name||"Item (Generic)";
 	this.arrIndex = items.push(this);
+	this.snd = null;
 })
 .methods ({
 	step: function() {
@@ -242,6 +243,8 @@ var Melee = Weapon.extend(function (range,width,delay,damage,user){
 	},
 	fire: function() {
 		if (this.timer==0) {
+			if (this.snd) {this.snd.play();}
+
 			//find all entities within range
 			for (var ec = 0; ec<entities.length; ec++) {
 		    	var ent = entities[ec];
@@ -251,7 +254,7 @@ var Melee = Weapon.extend(function (range,width,delay,damage,user){
 					//console.log("dist: "+dst+", dir: "+dr);
 					if (dst<=this.range && ent!=this.user && dr<=radians(this.width)) {
 						this.hit(ent);
-						console.log("hit! "+ent);
+						//console.log("hit! "+ent);
 					}
 				}
 			}
@@ -261,7 +264,9 @@ var Melee = Weapon.extend(function (range,width,delay,damage,user){
 	},
 	hit: function(entity) {
 		//can override to perform custom effect
-		entity.damage(this.damage);
+		if (entity instanceof Entity) {
+			entity.damage(this.damage);
+		}
 	}
 });
 
@@ -301,6 +306,8 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	this.friction = 0.001;
 
 	this.user = user||player;
+
+	this.snd = sndGun1;
 })
 .methods({
 	step: function() {
@@ -333,6 +340,8 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	},
 
 	bullet: function() {
+		if (this.snd) {this.snd.play();}
+
 		//vector converted to xspeed/yspeed
 		var dir = this.user.facing+radians(Math.random()*this.spread-this.spread*0.5);
 		var xs = lDirX(this.spd,dir);
@@ -355,6 +364,7 @@ var Pistol = Gun.extend(function(){
 	this.damage = 10;
 	this.spread = 3;
 	this.spd=19;
+	this.snd = sndGun2;
 })
 .methods({
 });
@@ -367,6 +377,7 @@ var AssaultRifle = Gun.extend(function(){
 	this.damage = 15;
 	this.spread = 2;
 	this.spd = 24;
+	this.snd = sndGun1;
 })
 .methods({
 });
@@ -375,11 +386,12 @@ var Typhoon = Gun.extend(function(){
 	this.name = "Typhoon";
 	this.clipsize = 200;
 	this.ammo = this.clipsize;
-	this.delay = 1;
+	this.delay = 2;
 	this.damage = 4;
 	this.spread = 14;
 	this.spd = 18;
 	this.friction = 0.05;
+	this.snd = sndGun3;
 })
 .methods({
 });
@@ -392,6 +404,7 @@ var Gauss = Gun.extend(function(){
 	this.damage = 55;
 	this.spread = 0.5;
 	this.spd = 35;
+	this.snd = sndGun2;
 })
 .methods({
 });
