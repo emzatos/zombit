@@ -1,2 +1,4 @@
 # Ignore PSD
 *.psd
+# Ignore bugreport folder for nondefault
+bugs/

@@ -5,20 +5,20 @@ var playlist;
 var playlistIndex = 0;
 
 function loadAudio() {
-	sndDie = loadSoundFile("res/die.wav");
-	sndHit = loadSoundFile("res/hit.wav",4);
-	sndKill = loadSoundFile("res/kill.wav",4);
-	sndGun1 = loadSoundFile("res/gun1.wav",4);
-	sndGun2 = loadSoundFile("res/gun2.wav",8);
-	sndGun3 = loadSoundFile("res/gun3.wav",16);
+	sndDie = loadSoundFile("res/die");
+	sndHit = loadSoundFile("res/hit",4);
+	sndKill = loadSoundFile("res/kill",4);
+	sndGun1 = loadSoundFile("res/gun1",4);
+	sndGun2 = loadSoundFile("res/gun2",8);
+	sndGun3 = loadSoundFile("res/gun3",16);
 
-	sndTrack1 = loadSoundFile("res/moves.mp3");
+	sndTrack1 = loadSoundFile("res/moves");
 	sndTrack1.volume = 0.2;
 
-	sndTrack2 = loadSoundFile("res/untoldStory.mp3");
+	sndTrack2 = loadSoundFile("res/untoldStory");
 	sndTrack2.volume = 0.2;
 
-	sndTrack3 = loadSoundFile("res/citySounds.mp3");
+	sndTrack3 = loadSoundFile("res/citySounds");
 	sndTrack3.volume = 0.2;
 
 	playlist = [sndTrack1, sndTrack2, sndTrack3];
@@ -29,7 +29,18 @@ function loadAudio() {
 
 function loadSoundFile(src,nchannels) {
 	console.log("Loading sound: "+src);
-	var au = new Audio(src);
+	var au = new Audio();
+
+	var source= document.createElement('source');
+	if (au.canPlayType('audio/mpeg;')) {
+	    source.type= 'audio/mpeg';
+	    source.src= src+'.mp3';
+	} else {
+	    source.type= 'audio/ogg';
+	    source.src= src+'.ogg';
+	}
+	au.appendChild(source);
+
 	au.load();
 	document.body.appendChild(au);
 

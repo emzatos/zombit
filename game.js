@@ -22,7 +22,7 @@ var fps = targetFPS;
 function init() {
 	//create container to center canvas
 	canvContainer = document.createElement("center");
-	document.body.appendChild(canvContainer);
+	document.getElementById("cc").appendChild(canvContainer);
 
 	//create canvas element
 	canvas = document.createElement("canvas");
@@ -209,6 +209,11 @@ function step() {
 function irand(max) {
 	if (max) {return Math.round(Math.random()*max);}
 	else {return Math.round(Math.random());}
+}
+
+function grand(max) {
+	if (max) {return (((Math.random()+Math.random())/2)*max);}
+	else {return ((Math.random()+Math.random())/2);}
 }
 
 function array_pad (input, pad_size, pad_value) {

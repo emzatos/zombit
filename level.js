@@ -343,7 +343,7 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 		if (this.snd) {this.snd.play();}
 
 		//vector converted to xspeed/yspeed
-		var dir = this.user.facing+radians(Math.random()*this.spread-this.spread*0.5);
+		var dir = this.user.facing+radians(grand()*this.spread-this.spread*0.5);
 		var xs = lDirX(this.spd,dir);
 		var ys = lDirY(this.spd,dir);
 
@@ -351,7 +351,7 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 		var blt = new Bullet(this.user.x,this.user.y,this.damage,this.user);
 		blt.xs = xs;
 		blt.ys = ys;
-		blt.friction = this.friction;
+		blt.friction = this.friction*(0.8+grand(0.4));
 		return blt;
 	}
 });
@@ -388,9 +388,9 @@ var Typhoon = Gun.extend(function(){
 	this.ammo = this.clipsize;
 	this.delay = 2;
 	this.damage = 4;
-	this.spread = 14;
-	this.spd = 18;
-	this.friction = 0.05;
+	this.spread = 19;
+	this.spd = 22;
+	this.friction = 0.07;
 	this.snd = sndGun3;
 })
 .methods({

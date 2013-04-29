@@ -384,7 +384,7 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 .methods({
 	step: function() {
 		this.supr();
-		if (Math.abs(this.xs)+Math.abs(this.ys)<5) {this.destroy();}
+		if (Math.abs(this.xs)+Math.abs(this.ys)<3) {this.destroy();}
 	},
 	collide: function(thing) {
 		if (thing instanceof Entity) {
