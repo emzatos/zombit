@@ -5,12 +5,12 @@ var playlist;
 var playlistIndex = 0;
 
 function loadAudio() {
-	sndDie = loadSoundFile("res/die");
-	sndHit = loadSoundFile("res/hit",4);
+	sndDie = loadSoundFile("res/die",2);
+	sndHit = loadSoundFile("res/hit",2);
 	sndKill = loadSoundFile("res/kill",4);
 	sndGun1 = loadSoundFile("res/gun1",4);
-	sndGun2 = loadSoundFile("res/gun2",8);
-	sndGun3 = loadSoundFile("res/gun3",16);
+	sndGun2 = loadSoundFile("res/gun2",4);
+	sndGun3 = loadSoundFile("res/gun3",4);
 
 	sndTrack1 = loadSoundFile("res/moves");
 	sndTrack1.volume = 0.2;
@@ -72,9 +72,13 @@ function Sound(audioObj,channels) {
 }
 Sound.prototype.play = function(){
 	if (this.channels.length>0) {
+		this.channels[this.cic].currentTime=0;
 		this.channels[this.cic].play();
 		this.cic = this.cic==this.channels.length-1?0:this.cic+1; //inc ptr
 	}
+}
+Sound.prototype.setVolume = function(vol) {
+	this.audio.volume = vol;
 }
 
 function startPlaylist() {

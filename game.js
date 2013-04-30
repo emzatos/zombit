@@ -103,6 +103,7 @@ function startGame() {
 	player.inv.push(new Typhoon());
 	player.inv.push(new Gauss());
 	player.inv.push(new WoodenBat());
+	player.inv.push(new NyanGun());
 	
 	//spawn some zombies
 	for (var i=0; i<15; i++) {

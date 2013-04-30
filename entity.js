@@ -204,7 +204,7 @@ var Player = Entity.extend(function(x,y,name){
 	this.name = name;
 	this.image = imgPlayer;
 	this.spdInc = 0.5;
-	this.inv = new Inventory(5,this);
+	this.inv = new Inventory(6,this);
 	this.friction = 0.2;
 	this.facing = 0;
 })
@@ -380,6 +380,9 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 	this.yp=null;
 	this.image = imgBullet;
 	this.sender = sender;
+
+	this.col1 = "rgba(255,205,0,1)";
+	this.col2 = "rgba(220,170,0,0)";
 })
 .methods({
 	step: function() {
@@ -402,8 +405,8 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 		grad.addColorStop(1, "rgba(255,255,255,0.5)");
 
 		var grad1= ctx.createLinearGradient(x, y, this.xp, this.yp);
-		grad1.addColorStop(0, "rgba(255,205,0,1)");
-		grad1.addColorStop(1, "rgba(220,170,0,0)");
+		grad1.addColorStop(0, this.col1);
+		grad1.addColorStop(1, this.col2);
 
 		ctx.lineCap = "round";
 
