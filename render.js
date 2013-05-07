@@ -7,6 +7,8 @@ var viewY = 0;
 //output settings
 var screenWidth = 1200;
 var screenHeight = 800;
+var defaultScreenWidth = screenWidth;
+var defaultScreenHeight = screenHeight;
 
 var INTRO=0,GAME=1;
 var dmode = INTRO;

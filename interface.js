@@ -4,6 +4,8 @@ function addListeners() {
 	canvas.addEventListener("mousemove",mm,false);
 	canvas.addEventListener("mouseup",mu,false);
 	canvas.addEventListener("mousedown",md,false);
+
+	window.onresize = resizeCheck;
 }
 
 VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68, VK_R=82;
@@ -54,4 +56,29 @@ function mp(e) {
 	var mcy = (posy-canvas.offsetTop)*(viewHeight/screenHeight);
 	mouseX = mcx;
 	mouseY = mcy;
+}
+
+function resizeCheck(e) {
+	if (screen.availWidth==window.innerWidth && screen.availHeight==window.innerHeight) { //if fullscreen
+		canvas.style.position = "absolute";
+		canvas.style.left = "0px";
+		canvas.style.top = "0px";
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		screenWidth = window.innerWidth;
+		screenHeight = window.innerHeight;
+		sctx.webkitImageSmoothingEnabled = false;
+		sctx.mozImageSmoothingEnabled = false;
+		sctx.imageSmoothingEnabled = false;	
+	}
+	else {
+		canvas.style.position = "relative";
+		canvas.width = defaultScreenWidth;
+		canvas.height = defaultScreenHeight;
+		screenWidth = defaultScreenWidth;
+		screenHeight = defaultScreenHeight;
+		sctx.webkitImageSmoothingEnabled = false;
+		sctx.mozImageSmoothingEnabled = false;
+		sctx.imageSmoothingEnabled = false;	
+	}
 }
