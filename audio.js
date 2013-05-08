@@ -5,20 +5,20 @@ var playlist;
 var playlistIndex = 0;
 
 function loadAudio() {
-	sndDie = loadSoundFile("res/die",2);
-	sndHit = loadSoundFile("res/hit",2);
-	sndKill = loadSoundFile("res/kill",4);
-	sndGun1 = loadSoundFile("res/gun1",4);
-	sndGun2 = loadSoundFile("res/gun2",4);
-	sndGun3 = loadSoundFile("res/gun3",4);
+	sndDie = loadSoundFile("res/sound/die",2);
+	sndHit = loadSoundFile("res/sound/hit",2);
+	sndKill = loadSoundFile("res/sound/kill",4);
+	sndGun1 = loadSoundFile("res/sound/gun1",4);
+	sndGun2 = loadSoundFile("res/sound/gun2",4);
+	sndGun3 = loadSoundFile("res/sound/gun3",4);
 
-	sndTrack1 = loadSoundFile("res/moves");
+	sndTrack1 = loadSoundFile("res/sound/moves");
 	sndTrack1.volume = 0.2;
 
-	sndTrack2 = loadSoundFile("res/untoldStory");
+	sndTrack2 = loadSoundFile("res/sound/untoldStory");
 	sndTrack2.volume = 0.2;
 
-	sndTrack3 = loadSoundFile("res/citySounds");
+	sndTrack3 = loadSoundFile("res/sound/citySounds");
 	sndTrack3.volume = 0.2;
 
 	playlist = [sndTrack1, sndTrack2, sndTrack3];
