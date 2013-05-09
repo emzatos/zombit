@@ -61,7 +61,7 @@ function init() {
 	startGame();
 }
 
-var imgOverlay, imgEntityGeneric, imgPlayer, aniImages;
+var imgOverlay, imgEntityGeneric, imgPlayer, aniImages=0;
 function loadResources() {
 	//deprecated
 	for(var ii = 0; ii < aniImages.length; ii++) {
@@ -176,7 +176,7 @@ function step() {
 		if (ite instanceof Item) {ite.step();}
 	}
 
-	//move view with arrow keys
+	// Switch sprites on key events (for player)
 	/*if (keys[VK_LEFT]) {viewX-=3;}
 	if (keys[VK_RIGHT]) {viewX+=3;}
 	if (keys[VK_UP]) {viewY-=3;}
