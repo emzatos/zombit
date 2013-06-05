@@ -1,7 +1,11 @@
 mpServer="localhost";
 mpPort=1337;
+mpReady=false;
+mpActive=false;
+mpConnected=false;
 
 function mpStart(server, port) {
+	mpActive = true;
 	if (!server) {server=mpServer;}
 	if (!port) {port=mpPort;}
 	
@@ -14,7 +18,12 @@ function mpConnect() {
 	var socket = io.connect("http://"+mpServer+":"+mpPort);
 	
 	socket.on("connect", function(data) {
+		mpConnected=true;
 		socket.emit("setnick", "MyUsername");
+	});
+
+	socket.on("ready", function() {
+		mpReady = true;
 	});
 	
 	socket.on("info", function(data) {
@@ -32,6 +41,12 @@ function mpConnect() {
 	socket.on("kick", function(data) {
 		//TODO: Print to chat
 		console.log("Kicked: "+data.reason);
+	});
+
+	socket.on("disconnect", function() {
+		mpActive = false;
+		mpReady = false;
+		mpConnected = false;
 	});
 }
 

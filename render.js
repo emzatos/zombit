@@ -119,6 +119,21 @@ function render() {
       ctx.fillText("FPS: "+(~~fps),4,12);
     }
 
+    //draw multiplayer overlay
+    if (mpActive && !mpReady) {
+      ctx.fillStyle = "rgba(0,0,0,0.5)";
+      ctx.fillRect(0,0,viewWidth,viewHeight);
+
+      ctx.fillRect(0,viewHeight/2-24,viewWidth,48);
+      var txt = mpConnected?"Loading level...":"Connecting...";
+
+      ctx.font = '24px "uni"';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = "white";
+      ctx.fillText(txt,viewWidth/2,viewHeight/2);
+      ctx.textAlign = 'left';
+    }
+
     //draw mouse
     ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
   }
