@@ -202,7 +202,7 @@ var Entity = klass(function (x,y) {
 
 var Player = Entity.extend(function(x,y,name){
 	this.name = name;
-	this.image = imgPlayer;
+	this.image = imgPlayer_W; // facing foward
 	this.spdInc = 0.5;
 	this.inv = new Inventory(6,this);
 	this.friction = 0.2;
@@ -260,12 +260,17 @@ var Player = Entity.extend(function(x,y,name){
 			}
 		}
 	},
+
+	/*
+	* Change the player's image to face the
+	* direction its moving.
+	*/
 	control: function() {
 		//accept keyboard input
-		if (keys[VK_A]) {this.xs-=d(this.spdInc);}
-		if (keys[VK_D]) {this.xs+=d(this.spdInc);}
-		if (keys[VK_W]) {this.ys-=d(this.spdInc);}
-		if (keys[VK_S]) {this.ys+=d(this.spdInc);}
+		if (keys[VK_A]) {this.image=imgPlayer_A;this.xs-=d(this.spdInc);}
+		if (keys[VK_D]) {this.image=imgPlayer_D;this.xs+=d(this.spdInc);}
+		if (keys[VK_W]) {this.image=imgPlayer_W;this.ys-=d(this.spdInc);}
+		if (keys[VK_S]) {this.image=imgPlayer_S;this.ys+=d(this.spdInc);}
 	}
 });
 
