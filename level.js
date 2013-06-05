@@ -49,12 +49,12 @@ generateRectRooms = function(w,h,n)
     return level;
 }
 
-generateNoise = function(w,h,types) {
+generateNoise = function(w,h,tt) {
 	var lev = new Array(w);
 	for (var x=0; x<w; x++) {
 		lev[x]=new Array(h);
 		for (var y=0; y<h; y++) {
-			lev[x][y] = new Tile(types[irand(types.length)],x,y);
+			lev[x][y] = new Tile(tt[irand(tt.length-1)],x,y);
 		}
 	}
 	return new Level(lev);

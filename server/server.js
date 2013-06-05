@@ -1,7 +1,7 @@
 klass = require('klass');
 var level = require('../level.js');
 var utils = require('../utils.js');
-var io = require('socket.io').listen(1337);
+var io = require('socket.io').listen(8001);
 
 //make level
 var gameLevel = generateRectRooms(100,100,20);
@@ -25,12 +25,15 @@ io.sockets.on('connection', function (socket) {
   });
   
   var tileUpdates = setInterval(function() {
+	var chunk = gameLevel.getChunk(ccx*chunkSize,ccy*chunkSize,chunkSize,chunkSize);
+	socket.emit("chunk",chunk);
+	
 	ccx+=1;
 	if (ccx>gameLevel.getWidth()/chunkSize) {ccx=0; ccy+=1;}
-	if (ccy>gameLevel.getHeight()/chunkSize) {ccx=0; ccy=0;}
-	
-	var chunk = gameLevel.getChunk(ccx*chunkSize,ccy*chunkSize,chunkSize,chunkSize);
-	
-	socket.emit("chunk",chunk);
+	if (ccy>gameLevel.getHeight()/chunkSize) {
+		ccx=0; 
+		ccy=0;
+		gameLevel = generateNoise(100,100,[WALL,FLOOR,FLOOR,FLOOR,FLOOR]);
+	}
   },10);
 });
