@@ -78,8 +78,8 @@ function tileImage(id) {
 
 function startGame() {
 	//generate gameLevel
-	//gameLevel = generateRectRooms(120,120,16);
-	gameLevel = generateNoise(120,120,[WALL,FLOOR]);
+	gameLevel = generateRectRooms(120,120,16);
+	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);
 	gameLevel = generatePlants(gameLevel,0.1);
 	gameLevel = punchOutWalls(gameLevel,0.1);
 
