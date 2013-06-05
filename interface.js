@@ -5,14 +5,23 @@ function addListeners() {
 	canvas.addEventListener("mouseup",mu,false);
 	canvas.addEventListener("mousedown",md,false);
 
-	window.onresize = resizeCheck;
+	//window.onresize = resizeCheck;
 }
 
 VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68, VK_R=82;
 VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_7 = 55, VK_8 = 56, VK_9 = 57; 
+VK_F11 = 122;
 var keys = new Array(2048);
 function kd(e) { //keydown
 	if (!e) {e=event;}
+	if (e.keyCode==VK_F11) {
+		if (!window.screenTop && !window.screenLeft) {
+			fullscreen(true);
+		}
+		else {
+			fullscreen(false);
+		}
+	}
 	keys[e.keyCode] = true;
 }
 function ku(e) { //keyup
@@ -58,8 +67,8 @@ function mp(e) {
 	mouseY = mcy;
 }
 
-function resizeCheck(e) {
-	if (screen.availWidth==window.innerWidth && screen.availHeight==window.innerHeight) { //if fullscreen
+function fullscreen(on) {
+	if (on) { //if fullscreen
 		canvas.style.position = "absolute";
 		canvas.style.left = "0px";
 		canvas.style.top = "0px";
