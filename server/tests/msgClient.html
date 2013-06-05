@@ -1,0 +1,26 @@
+<html>
+<body>
+<div id="msgbox">Messages: <br></div><br>
+<input type="text" id="msgin"/>
+<input type="button" id="send" text="send" onclick="send()"/>
+
+<script src="http://localhost:1337/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:1337');
+  
+  socket.on("connect", function(data) {
+	socket.emit("setnick", "MyUsername");
+  });
+  
+  socket.on('msg', function (data) {
+    document.getElementById("msgbox").innerHTML+=(data+"<br>");
+    //socket.emit('my other event', { my: 'data' });
+  });
+  
+  function send() {
+	var txt = document.getElementById("msgin").value;
+	socket.emit("msg",{content: txt});
+  }
+</script>
+</body>
+</html>
