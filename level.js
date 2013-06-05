@@ -1,4 +1,5 @@
-function generateEmptyRoom(w,h) { //generates a level containing a floor with walls on the sides
+
+generateEmptyRoom = function(w,h) { //generates a level containing a floor with walls on the sides
 	var lev = new Array(w);
 	for (var x=0; x<w; x++) {
 		lev[x]=new Array(h);
@@ -9,7 +10,7 @@ function generateEmptyRoom(w,h) { //generates a level containing a floor with wa
 	return new Level(lev);
 }
 
-function generateRectRooms(w,h,n)
+generateRectRooms = function(w,h,n)
 {
 	var level = generateEmptyRoom(w,h);
     var minX = 0;
@@ -48,7 +49,18 @@ function generateRectRooms(w,h,n)
     return level;
 }
 
-function fillTileRect(level, x1, y1, x2, y2, type)
+generateNoise = function(w,h,types) {
+	var lev = new Array(w);
+	for (var x=0; x<w; x++) {
+		lev[x]=new Array(h);
+		for (var y=0; y<h; y++) {
+			lev[x][y] = new Tile(types[irand(types.length)],x,y);
+		}
+	}
+	return new Level(lev);
+}
+
+fillTileRect = function(level, x1, y1, x2, y2, type)
 {
     for (var x=x1; x<=x2; x++)
     {
@@ -61,7 +73,7 @@ function fillTileRect(level, x1, y1, x2, y2, type)
     return level;
 }
 
-function drawTileRect(level, x1, y1, x2, y2, type)
+drawTileRect = function(level, x1, y1, x2, y2, type)
 {
     for (var x=x1; x<=x2; x++)
     {
@@ -78,7 +90,7 @@ function drawTileRect(level, x1, y1, x2, y2, type)
     return level;
 }
 
-function generatePlants(level,prob) {
+generatePlants = function(level,prob) {
 	for (var x=1; x<level.getWidth()-1; x++) {
 		for (var y=1; y<level.getHeight()-1; y++) {
 			var tl = level.getTile(x-1,y).id==WALL;
@@ -96,7 +108,7 @@ function generatePlants(level,prob) {
 	return level;
 }
 
-function punchOutWalls(level, prob) {
+punchOutWalls = function(level, prob) {
 	for (var x=1; x<level.getWidth()-1; x++) {
 		for (var y=1; y<level.getHeight()-1; y++) {
 			if (Math.random()<prob && level.getTile(x,y).id==WALL) {
@@ -109,20 +121,20 @@ function punchOutWalls(level, prob) {
 
 //Game levels:
 EMPTY=0, FLOOR=1, WALL=2, PLANT=3, DESK=4;
-function Tile(id,x,y) {
+Tile = function(id,x,y) {
 	this.id = id;
 	this.x = x;
 	this.y = y;
 	//implement solid
 }
 
-var images = new Array();
+images = new Array();
 images = ["1.png", "2.png", "3.png", "4.png"];
-function tileImage(id) {
+tileImage = function(id) {
 	return images[id];
 }
 
-function Level(levelData) {
+Level = function(levelData) {
 	this.data = levelData;
 }
 Level.prototype.getWidth = function(){return this.data.length;}
@@ -133,8 +145,47 @@ Level.prototype.getTile = function(x,y) {
 Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
+Level.prototype.chunkSet = function(chunk) {
+	console.log("set");
+	//if (chunk.x>=0 && chunk.x+chunk.w<this.getWidth() && chunk.y>=0 && chunk.y+h<this.getHeight()) {
+		for (var x=chunk.x; x<chunk.x+chunk.w; x++) {
+			for (var y=chunk.y; y<chunk.y+chunk.h; y++) {
+				this.setTile(chunk.tiles[x-chunk.x][y-chunk.y],x,y);
+			}
+		}
+	//}
+}
+Level.prototype.getChunk = function(x,y,w,h) {
+	var chunk = new Array();
+	for (var i=0; i<w; i++) {
+		chunk[i] = new Array();
+		for (var j=0; j<h; j++) {
+			chunk[i][j] = null;
+		}
+	}
+	for (var xx=x; xx<x+w; xx++) {
+		for (var yy=y; yy<y+h; yy++) {
+			chunk[xx-x][yy-y] = this.getTile(xx,yy);
+		}
+	}
+	return new Chunk(x,y,chunk);
+}
 
-var Inventory = klass(function(size,owner) {
+chunkSize = 5;
+Chunk = klass(function (x,y,tiles){
+	this.x = x;
+	this.y = y;
+	this.tiles = tiles;
+	this.w = tiles.length;
+	this.h = tiles[0].length;
+})
+.methods ({
+	getTile: function(x,y) {
+		return tiles[x-this.x][y-this.y];
+	}
+});
+
+Inventory = klass(function(size,owner) {
 	this.size = size;
 	this.owner = owner;
 	this.inv = new Array();
@@ -207,7 +258,7 @@ var Inventory = klass(function(size,owner) {
 	}
 })
 
-var Item = klass(function (name){
+Item = klass(function (name){
 	this.name = name||"Item (Generic)";
 	this.arrIndex = items.push(this);
 	this.snd = null;
@@ -228,7 +279,7 @@ var Weapon = Item.extend(function() {
 
 });
 
-var Melee = Weapon.extend(function (range,width,delay,damage,user){
+Melee = Weapon.extend(function (range,width,delay,damage,user){
 	this.range = range||5;
 	this.width = width||10;
 	this.delay = delay||10;
@@ -270,7 +321,7 @@ var Melee = Weapon.extend(function (range,width,delay,damage,user){
 	}
 });
 
-var WoodenBat = Melee.extend(function(){
+WoodenBat = Melee.extend(function(){
 	this.range = 40;
 	this.width = 40;
 	this.delay = 5;
@@ -282,7 +333,7 @@ var WoodenBat = Melee.extend(function(){
 
 });
 
-var ZombieAttack = Melee.extend(function(){
+ZombieAttack = Melee.extend(function(){
 	this.range = 25;
 	this.width = 40;
 	this.delay = 5;
@@ -294,7 +345,7 @@ var ZombieAttack = Melee.extend(function(){
 
 });
 
-var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
+Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	this.clipsize=clipsize||20;
 	this.ammo=ammo||20;
 	this.delay=delay||5;
@@ -356,7 +407,7 @@ var Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	}
 });
 
-var Pistol = Gun.extend(function(){
+Pistol = Gun.extend(function(){
 	this.name = "Pistol";
 	this.clipsize = 20;
 	this.ammo = 20;
@@ -369,7 +420,7 @@ var Pistol = Gun.extend(function(){
 .methods({
 });
 
-var AssaultRifle = Gun.extend(function(){
+AssaultRifle = Gun.extend(function(){
 	this.name = "Assault Rifle";
 	this.clipsize = 35;
 	this.ammo = this.clipsize;
@@ -382,7 +433,7 @@ var AssaultRifle = Gun.extend(function(){
 .methods({
 });
 
-var Typhoon = Gun.extend(function(){
+Typhoon = Gun.extend(function(){
 	this.name = "Typhoon";
 	this.clipsize = 200;
 	this.ammo = this.clipsize;
@@ -396,7 +447,7 @@ var Typhoon = Gun.extend(function(){
 .methods({
 });
 
-var Gauss = Gun.extend(function(){
+Gauss = Gun.extend(function(){
 	this.name = "Gauss Rifle";
 	this.clipsize = 8;
 	this.ammo = this.clipsize;
@@ -409,7 +460,7 @@ var Gauss = Gun.extend(function(){
 .methods({
 });
 
-var NyanGun = Gun.extend(function(){
+NyanGun = Gun.extend(function(){
 	this.name = "Nyan Gun";
 	this.clipsize = 500;
 	this.ammo = this.clipsize;
