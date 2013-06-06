@@ -11,6 +11,8 @@ var gaussIcon = new Image();
 gaussIcon.src = "res/icon/gauss.png";
 var batIcon = new Image();
 batIcon.src = "res/icon/bat.png";
+var genericIcon = new Image();
+genericIcon.src = "res/icon/generic.png";
 
 // Direction specific player images
 var imgPlayer_W = new Image();

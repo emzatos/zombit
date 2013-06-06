@@ -262,6 +262,7 @@ Item = klass(function (name){
 	this.name = name||"Item (Generic)";
 	this.arrIndex = items.push(this);
 	this.snd = null;
+	this.icon = genericIcon;
 })
 .methods ({
 	step: function() {
@@ -273,7 +274,7 @@ Item = klass(function (name){
 });
 
 var Weapon = Item.extend(function() {
-	
+
 })
 .methods ({
 
@@ -328,6 +329,7 @@ WoodenBat = Melee.extend(function(){
 	this.damage = 55;
 
 	this.name = "Wooden Bat";
+	this.icon = batIcon
 })
 .methods({
 
@@ -416,6 +418,7 @@ Pistol = Gun.extend(function(){
 	this.spread = 7;
 	this.spd=19;
 	this.snd = sndGun2;
+	this.icon = pistolIcon;
 })
 .methods({
 });
@@ -429,6 +432,7 @@ AssaultRifle = Gun.extend(function(){
 	this.spread = 3;
 	this.spd = 24;
 	this.snd = sndGun1;
+	this.icon = assultIcon;
 })
 .methods({
 });
@@ -443,6 +447,7 @@ Typhoon = Gun.extend(function(){
 	this.spd = 22;
 	this.friction = 0.07;
 	this.snd = sndGun3;
+	this.icon = typhoonIcon;
 })
 .methods({
 });
@@ -456,6 +461,7 @@ Gauss = Gun.extend(function(){
 	this.spread = 1;
 	this.spd = 40;
 	this.snd = sndGun2;
+	this.icon = gaussIcon;
 })
 .methods({
 });
