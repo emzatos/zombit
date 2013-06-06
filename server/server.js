@@ -1,16 +1,35 @@
+/*
+      d88888D  .d88b.  .88b  d88. d8888b. d888888b d888888b 
+      YP  d8' .8P  Y8. 88'YbdP`88 88  `8D   `88'   `~~88~~' 
+         d8'  88    88 88  88  88 88oooY'    88       88    
+        d8'   88    88 88  88  88 88~~~b.    88       88    
+       d8' db `8b  d8' 88  88  88 88   8D   .88.      88    
+      d88888P  `Y88P'  YP  YP  YP Y8888P' Y888888P    YP    
+                                                            
+*/
+
 klass = require('klass');
 var level = require('../level.js');
 var utils = require('../utils.js');
-var io = require('socket.io').listen(8001);
+var entity = require('../entity.js');
+var game = require('../server/game.js');
+CircularJSON = require('circular-json');
+io = require('socket.io').listen(8001);
 //io.set("log level",1); //disable debug logging
 
 nicknames = new Array();
 
-//make level
-var gameLevel = generateRectRooms(100,100,20);
-
-
 io.sockets.on('connection', function (socket) {
+  socket.keys = new Array(2048);
+
+  //create a player
+  socket.player = new Player(50,50,"Player",socket);
+  socket.player.inv.push(new Pistol());
+  socket.player.inv.push(new AssaultRifle());
+  socket.player.inv.push(new Typhoon());
+  socket.player.inv.push(new Gauss());
+  socket.player.inv.push(new WoodenBat());
+
   function sendLevel() {
     var ccx = 0;
     var ccy = 0;
@@ -24,6 +43,9 @@ io.sockets.on('connection', function (socket) {
       if (ccy>gameLevel.getHeight()/chunkSize) {
         clearInterval(intv);
         socket.emit("ready");
+        socket.get('nickname', function(err, name) {
+          socket.broadcast.emit("info", {display: true, content: name+" has joined the game!"});
+        });
       }
     }
     var intv = setInterval(sendChunk,20); //begin transmitting level
@@ -33,6 +55,7 @@ io.sockets.on('connection', function (socket) {
     if (nicknames.indexOf(name)<0) {
       socket.set('nickname', name, function () {
         nicknames.push(name);
+        socket.emit("playerind",socket.player.arrIndex);
         sendLevel();
       });
     }
@@ -40,6 +63,28 @@ io.sockets.on('connection', function (socket) {
       socket.emit("kick",{reason: "Nickname in use, choose another."});
       socket.disconnect();
     }
+  });
+
+  socket.on('input', function(input) {
+    if (input.type == INPUT_KB) {
+      socket.keys[input.code] = input.val;
+      console.log("Input: "+input.code+" to "+input.val);
+    }
+    else if (input.type == INPUT_MOUSE) {
+
+    }
+    else {
+      console.log("Unsupported input.");
+    }
+  })
+
+  socket.on('disconnect', function() {
+    socket.get('nickname', function(err, name) {
+      socket.broadcast.emit("info", {display: true, content: name+" has left the game."});
+
+      var ind = nicknames.indexOf(name);
+      nicknames.splice(ind,1);
+    });
   });
 
   socket.on('msg', function (msg) {

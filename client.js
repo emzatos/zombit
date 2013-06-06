@@ -38,15 +38,28 @@ function mpConnect() {
 	});
 	
 	mpSocket.on("info", function(data) {
+		console.log("INFO - "+data.content);
 		if (data.display) {
-			console.log(data.text);
-			mpAddMessage("INFO - "+data.text);
+			mpAddMessage("INFO - "+data.content);
 		}
+	});
+
+	mpSocket.on("playerind", function(ind) {
+		//store player id and set player to correct ent
+		mpPlayer = ind;
+		player = entities[ind];
 	});
 	
 	mpSocket.on("chunk", function(chunk) {
 		console.log(chunk);
 		gameLevel.chunkSet(chunk);
+	});
+
+	mpSocket.on("entity", function(entity){
+		console.log("Recv. ent:");
+		console.log(entity);
+		var deser = CircularJSON.parse(entity);
+		entities[deser.arrIndex] = deser;
 	});
 
 	mpSocket.on("msg", function(message) {

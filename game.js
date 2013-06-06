@@ -77,6 +77,8 @@ function tileImage(id) {
 }
 
 function startGame() {
+	mpMode = CLIENT;
+
 	//generate gameLevel
 	gameLevel = generateRectRooms(120,120,16);
 	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);

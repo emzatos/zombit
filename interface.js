@@ -47,6 +47,7 @@ function kd(e) { //keydown
 			document.body.removeChild(mpChatInput);
 		},false);*/
 		mpChatInput.focus();
+		e.preventDefault();
 	}
 	else if (e.keyCode==VK_ESCAPE && mpChatOpen) {
 		try {
@@ -62,11 +63,18 @@ function kd(e) { //keydown
 		} catch (e) {}
 		
 	}
-	if (!mpChatOpen) {keys[e.keyCode] = true;}
+	if (!mpChatOpen) {
+		keys[e.keyCode] = true;
+
+		//send input to server
+		if (mpActive) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
+	}
 }
 function ku(e) { //keyup
 	if (!e) {e=event;}
 	keys[e.keyCode] = false;
+
+	if (mpActive) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: false});}
 }
 
 mouseX = 0, mouseY = 0, mouseLeft = false;

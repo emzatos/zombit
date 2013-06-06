@@ -1,4 +1,4 @@
-function tileAt(ex, ey) {
+tileAt = function(ex, ey) {
 	var bx = Math.floor(ex/tileWidth);
 	var by = Math.floor(ey/tileHeight);
 	if (bx>0 && by>0 && bx<gameLevel.getWidth() && by<gameLevel.getHeight()) {
@@ -7,30 +7,30 @@ function tileAt(ex, ey) {
 	else {return null;}
 }
 
-function pDir(x1,y1,x2,y2) {
+pDir = function(x1,y1,x2,y2) {
 	var xd = x2-x1;
 	var yd = y2-y1;
 
 	return fast_atan2(yd,xd);
 }
 
-function pDist(x1,y1,x2,y2) {
+pDist = function(x1,y1,x2,y2) {
 	var xd = x2-x1;
 	var yd = y2-y1;
 	return Math.sqrt(xd*xd+yd*yd);
 }
 
-function lDirX(len,dir) {
+lDirX = function(len,dir) {
 	var val = Math.cos(dir)*len
 	return Math.abs(val)<0?0:val;
 }
 
-function lDirY(len,dir) {
+lDirY = function(len,dir) {
 	var val = Math.sin(dir)*len
 	return Math.abs(val)<0?0:val;
 }
 
-function pVector(x1,y1,x2,y2,speed) {
+pVector = function(x1,y1,x2,y2,speed) {
 	var dx = x2 - x1;
 	var dy = y2 - y1;
 	var norm = Math.sqrt(dx * dx + dy * dy);
@@ -42,15 +42,15 @@ function pVector(x1,y1,x2,y2,speed) {
 	return [dx,dy];
 }
 
-function radians(deg) {
+radians = function(deg) {
 	return deg*0.01745;
 }
 
-function degrees(rad) {
+degrees = function(rad) {
 	return rad*57.29577;
 }
 
-function collisionLine(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,returnPoints) {
+collisionLine = function(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,returnPoints) {
 	//modified from: http://stackoverflow.com/questions/1073336/circle-line-collision-detection
 	var dlineX2lineX1 = (lineX2-lineX1);
 	var dlineY2lineY1 = (lineY2-lineY1);
@@ -100,7 +100,7 @@ function collisionLine(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,return
 	}
 }
 
-function collisionCircle(c1x,c1y,c1r,c2x,c2y,c2r) {
+collisionCircle = function(c1x,c1y,c1r,c2x,c2y,c2r) {
 	if (pDist(c1x,c1y,c2x,c2y)<=c1r+c2r) {
 		return true;
 	}
@@ -109,7 +109,7 @@ function collisionCircle(c1x,c1y,c1r,c2x,c2y,c2r) {
 	}
 }
 
-var Entity = klass(function (x,y) {
+Entity = klass(function (x,y) {
 	this.x = x||50;
 	this.y = y||50;
 	this.xs = 0;
@@ -120,7 +120,8 @@ var Entity = klass(function (x,y) {
 
 	this.facing = null;
 
-	this.image = imgEntityGeneric;
+	try {this.image = imgEntityGeneric;}
+	catch (e) {}
 	this.width = tileWidth;
 	this.height = tileHeight;
 
@@ -167,6 +168,9 @@ var Entity = klass(function (x,y) {
 		//apply friction
 		this.xs*=1-this.friction;
 		this.ys*=1-this.friction;
+
+		//tell server to send updates
+		this.mpUpdate();
 		
 		//deprecated
 		/*this.x+=d(this.xs);
@@ -197,12 +201,19 @@ var Entity = klass(function (x,y) {
 		for (var i=this.arrIndex; i<entities.length; i++) {
 			entities[i].arrIndex-=1;
 		}
+	},
+	mpUpdate: function() {
+		if (mpMode==SERVER) {
+			io.sockets.emit("entity",CircularJSON.stringify(this));
+		}
 	}
-})
+});
 
-var Player = Entity.extend(function(x,y,name){
+Player = Entity.extend(function(x,y,name,owner){
 	this.name = name;
-	this.image = imgPlayer_W; // facing foward
+	this.owner = owner||window;
+	try {this.image = imgPlayer_W;}
+	catch (e) {}
 	this.spdInc = 0.5;
 	this.inv = new Inventory(6,this);
 	this.friction = 0.2;
@@ -224,24 +235,29 @@ var Player = Entity.extend(function(x,y,name){
 		if (this.ys<-5) {this.ys=-5;}
 
 		//move view to player
-		viewX = ~~(this.x-viewWidth/2);
-		viewY = ~~(this.y-viewHeight/2);
+		if (mpMode==CLIENT) {
+			viewX = ~~(this.x-viewWidth/2);
+			viewY = ~~(this.y-viewHeight/2);
 
-		//clip view pos
-		if (viewX<0) {viewX=0;}
-		if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
-		if (viewY<0) {viewY=0;}
-		if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
+			//clip view pos
+			
+			if (viewX<0) {viewX=0;}
+			if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
+			if (viewY<0) {viewY=0;}
+			if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
+		}
 
 		//point player toward mouse
 		//player position corrected for view
-		var pcx = player.x-viewX;
-		var pcy = player.y-viewY;
-		//console.log(pcx+","+pcy)
+		if (mpMode==CLIENT) {
+			var pcx = this.x-viewX;
+			var pcy = this.y-viewY;
+			//console.log(pcx+","+pcy)
 
-		//direction from corrected position to mouse
-		var dir = pDir(pcx,pcy,mouseX,mouseY);
-		player.facing = dir;
+			//direction from corrected position to mouse
+			var dir = pDir(pcx,pcy,mouseX,mouseY);
+			player.facing = dir;
+		}
 	},
 	damage: function(amount) {
 		this.supr(amount);
@@ -267,15 +283,15 @@ var Player = Entity.extend(function(x,y,name){
 	*/
 	control: function() {
 		//accept keyboard input
-		if (keys[VK_A]) {this.image=imgPlayer_A;this.xs-=d(this.spdInc);}
-		if (keys[VK_D]) {this.image=imgPlayer_D;this.xs+=d(this.spdInc);}
-		if (keys[VK_W]) {this.image=imgPlayer_W;this.ys-=d(this.spdInc);}
-		if (keys[VK_S]) {this.image=imgPlayer_S;this.ys+=d(this.spdInc);}
+		if (this.owner.keys[VK_A]) {this.image=imgPlayer_A;this.xs-=d(this.spdInc);}
+		if (this.owner.keys[VK_D]) {this.image=imgPlayer_D;this.xs+=d(this.spdInc);}
+		if (this.owner.keys[VK_W]) {this.image=imgPlayer_W;this.ys-=d(this.spdInc);}
+		if (this.owner.keys[VK_S]) {this.image=imgPlayer_S;this.ys+=d(this.spdInc);}
 	}
 });
 
-var T_SEARCH=0;
-var Hostile = Entity.extend(function(x,y,vr){
+T_SEARCH=0;
+Hostile = Entity.extend(function(x,y,vr){
 	this.target = T_SEARCH;
 	this.visionRadius = vr||50;
 	this.spd = 1;
@@ -288,8 +304,21 @@ var Hostile = Entity.extend(function(x,y,vr){
 		this.supr();
 
 		if (this.target==T_SEARCH) { //need to find a target (the player for now)
-			if (pDist(this.x,this.y,player.x,player.y)<this.visionRadius) { //see if in range
-				this.target = player;
+			//find the nearest target
+			var minDist=Infinity,targ=null;
+			for (var i=0; i<entities.length; i++) {
+				if (entities[i] instanceof Player) {
+					var dist = pDist(this.x,this.y,entities[i].x,entities[i].y);
+					if (dist<minDist) {
+						minDist = dist;
+						targ = entities[i];
+					}
+				}
+			}
+			if (targ!=null) {
+				if (pDist(this.x,this.y,targ.x,targ.y)<this.visionRadius) { //see if in range
+					this.target = targ;
+				}
 			}
 		}
 		else {
@@ -328,8 +357,9 @@ var Hostile = Entity.extend(function(x,y,vr){
 	}
 });
 
-var Zombie = Hostile.extend(function(x,y,vr){
-	this.image = imgZombie;
+Zombie = Hostile.extend(function(x,y,vr){
+	try {this.image = imgZombie;}
+	catch (e) {}
 	this.spd=0.8;
 	this.visionRadius = 160
 	this.life = Math.round(Math.random()*150);
@@ -350,7 +380,7 @@ var Zombie = Hostile.extend(function(x,y,vr){
 	}
 });
 
-var Projectile = Entity.extend(function(x,y,sender){
+Projectile = Entity.extend(function(x,y,sender){
 	this.sender = sender||null;
 	this.width = 1;
 	this.height = 1;
@@ -379,11 +409,12 @@ var Projectile = Entity.extend(function(x,y,sender){
 	}
 });
 
-var Bullet = Projectile.extend(function(x,y,damage,sender){
+Bullet = Projectile.extend(function(x,y,damage,sender){
 	this.damage = damage||20;
 	this.xp=null;
 	this.yp=null;
-	this.image = imgBullet;
+	try{his.image = imgBullet;}
+	catch (e) {}
 	this.sender = sender;
 
 	this.col1 = "rgba(255,205,0,1)";
@@ -434,7 +465,7 @@ var Bullet = Projectile.extend(function(x,y,damage,sender){
 	}
 });
 
-var Particle = klass(function(x,y,xs,ys,life) {
+Particle = klass(function(x,y,xs,ys,life) {
 	this.x = x;
 	this.y = y;
 	this.xs = xs;
@@ -442,7 +473,8 @@ var Particle = klass(function(x,y,xs,ys,life) {
 	this.maxlife = life;
 	this.life = life;
 	this.arrIndex = particles.push(this)-1;
-	this.image = imgBloodSplat;
+	try {this.image = imgBloodSplat;}
+	catch (e) {}
 })
 .methods({
 	step: function() {
@@ -466,15 +498,17 @@ var Particle = klass(function(x,y,xs,ys,life) {
 	},
 });
 
-var BloodSplat = Particle.extend(function(x,y,xs,ys){
+BloodSplat = Particle.extend(function(x,y,xs,ys){
 	this.x = x;
 	this.y = y;
 	this.xs = xs;
 	this.ys = ys;
 	this.life = 400;
 	this.maxlife = this.life;
-	this.image = imgBloodSplat;
+	try {this.image = imgBloodSplat;}
+	catch (e) {}
 })
 .methods ({
 
 });
+

@@ -1,3 +1,11 @@
+//shut up, this is a great place to define these!
+INPUT_KB = 1;
+INPUT_MOUSE = 2;
+
+CLIENT = 1;
+SERVER = 2;
+mpMode = SERVER;
+
 //util
 irand = function(max) {
 	if (max) {return Math.round(Math.random()*max);}

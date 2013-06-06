@@ -1,4 +1,3 @@
-
 generateEmptyRoom = function(w,h) { //generates a level containing a floor with walls on the sides
 	var lev = new Array(w);
 	for (var x=0; x<w; x++) {
