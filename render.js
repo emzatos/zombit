@@ -61,6 +61,13 @@ function render() {
       var bx = viewWidth-92-(18*(player.inv.size-i));
       ctx.fillRect(bx,4,16,16);
       ctx.strokeRect(bx,4,16,16);
+
+      // fill row with weapon icons
+      ctx.drawImage(pistolIcon, viewWidth-92-(18*(player.inv.size-0)), 4);
+      ctx.drawImage(assultIcon, viewWidth-92-(18*(player.inv.size-1)), 4);
+      ctx.drawImage(typhoonIcon, viewWidth-92-(18*(player.inv.size-2)), 4);
+      ctx.drawImage(gaussIcon, viewWidth-92-(18*(player.inv.size-3)), 4);
+      ctx.drawImage(batIcon, viewWidth-92-(18*(player.inv.size-4)), 4);
     }
 
     //draw healthbar
