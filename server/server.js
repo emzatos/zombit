@@ -2,6 +2,9 @@ klass = require('klass');
 var level = require('../level.js');
 var utils = require('../utils.js');
 var io = require('socket.io').listen(8001);
+//io.set("log level",1); //disable debug logging
+
+nicknames = new Array();
 
 //make level
 var gameLevel = generateRectRooms(100,100,20);
@@ -27,15 +30,22 @@ io.sockets.on('connection', function (socket) {
   }
 
   socket.on('setnick', function (name) {
-    socket.set('nickname', name, function () {
-      sendLevel();
-    });
+    if (nicknames.indexOf(name)<0) {
+      socket.set('nickname', name, function () {
+        nicknames.push(name);
+        sendLevel();
+      });
+    }
+    else {
+      socket.emit("kick",{reason: "Nickname in use, choose another."});
+      socket.disconnect();
+    }
   });
 
   socket.on('msg', function (msg) {
     socket.get('nickname', function (err, name) {
       console.log('msg (' + name + "): " + msg.content);
-      socket.broadcast.emit("msg",[name,msg.content]); //echo message to all players
+      socket.broadcast.emit("msg",{player: name, content: msg.content}); //echo message to all players
     });
   });
 });

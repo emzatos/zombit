@@ -120,7 +120,7 @@ function startGame() {
 	},500);
 
 	//start music
-	setTimeout(startPlaylist,4900);
+	//setTimeout(startPlaylist,4900);
 
 	setTimeout(function(){dmode=GAME;},5000);
 

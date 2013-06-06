@@ -119,6 +119,26 @@ function render() {
       ctx.fillText("FPS: "+(~~fps),4,12);
     }
 
+    //draw chat overlay
+    if (mpChatOpen) {
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillRect(8,viewHeight-24,viewWidth-16,16);
+
+      ctx.font = '14px "uni"';
+      ctx.fillStyle = "white";
+      ctx.fillText(mpTypedChat,10,viewHeight-12);
+    }
+
+    //draw chat messages
+    if (mpChatOpen || new Date().getTime()-mpLastMessageTime<mpMessageFadeTime) {
+      var msgOpacity = mpChatOpen?1:1-(new Date().getTime()-mpLastMessageTime)/mpMessageFadeTime;
+      ctx.fillStyle = "rgba(255,255,255,"+msgOpacity.toFixed(2)+")";
+      ctx.font = '8px "uni"';
+      for (var i=0; i<mpMessages.length; i++) {
+        ctx.fillText(mpMessages[i],8,viewHeight-28-10*i);
+      }
+    }
+
     //draw multiplayer overlay
     if (mpActive && !mpReady) {
       ctx.fillStyle = "rgba(0,0,0,0.5)";

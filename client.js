@@ -3,51 +3,85 @@ mpPort=1337;
 mpReady=false;
 mpActive=false;
 mpConnected=false;
+mpNick="player";
+mpChatOpen=false;
+mpTypedChat="";
+mpMessages=new Array();
+mpLastMessageTime=new Date().getTime();
+mpMessageFadeTime=5000;
+mpSocket = null;
 
-function mpStart(server, port) {
+function mpStart(nick, server, port) {
 	mpActive = true;
 	if (!server) {server=mpServer;}
 	if (!port) {port=mpPort;}
+	if (!nick) {nick=mpNick;}
 	
 	mpServer = server;
 	mpPort = port;
+	mpNick = nick;
 	loadScript("http://"+server+":"+port+"/socket.io/socket.io.js",mpConnect);
+
+	mpMessages = new Array();
 }
 
 function mpConnect() {
-	var socket = io.connect("http://"+mpServer+":"+mpPort);
+	mpSocket = io.connect("http://"+mpServer+":"+mpPort);
 	
-	socket.on("connect", function(data) {
+	mpSocket.on("connect", function(data) {
 		mpConnected=true;
-		socket.emit("setnick", "MyUsername");
+		mpSocket.emit("setnick", mpNick);
 	});
 
-	socket.on("ready", function() {
+	mpSocket.on("ready", function() {
 		mpReady = true;
 	});
 	
-	socket.on("info", function(data) {
+	mpSocket.on("info", function(data) {
 		if (data.display) {
-			//TODO: Print to chat
 			console.log(data.text);
+			mpAddMessage("INFO - "+data.text);
 		}
 	});
 	
-	socket.on("chunk", function(chunk) {
+	mpSocket.on("chunk", function(chunk) {
 		console.log(chunk);
 		gameLevel.chunkSet(chunk);
 	});
+
+	mpSocket.on("msg", function(message) {
+		console.log(message.player+": "+message.content);
+		mpAddMessage(message.player+": "+message.content);
+	});
 	
-	socket.on("kick", function(data) {
+	mpSocket.on("kick", function(data) {
 		//TODO: Print to chat
 		console.log("Kicked: "+data.reason);
+		alert("Kicked: "+data.reason);
 	});
 
-	socket.on("disconnect", function() {
+	mpSocket.on("disconnect", function() {
+		alert("Disconnected from server.");
 		mpActive = false;
 		mpReady = false;
 		mpConnected = false;
 	});
+}
+
+function mpAddMessage(text) {
+	mpMessages.unshift(text);
+	mpLastMessageTime = new Date().getTime();
+	if (mpMessages.length>8) {
+		mpMessages = mpMessages.slice(0,8);
+	}
+}
+
+function mpSendChat() {
+	if (mpReady) {
+		mpSocket.emit("msg",{content: mpTypedChat});
+	}
+	mpAddMessage(mpNick+": "+mpTypedChat);
+	mpTypedChat = "";
 }
 
 function loadScript(url, callback){
