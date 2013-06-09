@@ -8,12 +8,22 @@
                                                             
 */
 
+
 klass = require('klass');
-var level = require('../level.js');
-var utils = require('../utils.js');
-var entity = require('../entity.js');
-var game = require('../server/game.js');
+//console.log("klass OK");
 CircularJSON = require('circular-json');
+//console.log("circular-json OK");
+var entity = require('../entity.js');
+//console.log("entity OK");
+var level = require('../level.js');
+//console.log("level OK");
+var utils = require('../utils.js');
+//console.log("utils OK");
+var ftrig = require('../fasttrig.js');
+//console.log("fasttrig OK");
+var game = require('../server/game.js');
+//console.log("game OK");
+
 io = require('socket.io').listen(8001);
 //io.set("log level",1); //disable debug logging
 
@@ -55,6 +65,8 @@ io.sockets.on('connection', function (socket) {
     if (nicknames.indexOf(name)<0) {
       socket.set('nickname', name, function () {
         nicknames.push(name);
+        //socket.emit("entity",CircularJSON.stringify(socket.player, safeJSON));
+        socket.emit("entity",socket.player.serialize());
         socket.emit("playerind",socket.player.arrIndex);
         sendLevel();
       });

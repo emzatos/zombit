@@ -9,11 +9,15 @@ mpSocket = null; //provide compatibility for some clientside code
 
 mpMode = SERVER;
 
+//console.log("generation starting...");
+
 //generate gameLevel
-gameLevel = generateRectRooms(120,120,16);
+gameLevel = generateRectRooms(50,50,16);
 //gameLevel = generateNoise(120,120,[WALL,FLOOR]);
 gameLevel = generatePlants(gameLevel,0.1);
 gameLevel = punchOutWalls(gameLevel,0.1);
+
+//console.log("def step...");
 
 step = function() {
 	//process entities
@@ -31,6 +35,8 @@ step = function() {
 
 d = function(i) {return i;} //compatibility
 
+//console.log("spawning...");
+
 //spawn some zombies
 for (var i=0; i<15; i++) {
 	var tx,ty,ta;
@@ -42,6 +48,8 @@ for (var i=0; i<15; i++) {
 	} while (true);
 	new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 }
+
+//console.log("setting interval...");
 
 //tell zombies to spawn continuously
 setInterval(function(){

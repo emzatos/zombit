@@ -7,16 +7,16 @@ var fv 		= new Float32Array(buffer);
 var lv		= new Uint32Array(buffer);
 var th 		= 1.5;
 
-function radians(degrees) {
+radians = function(degrees) {
 	return degrees * (Math.PI / 180.0);
 }
       
-function degrees(radians) {
+degrees = function(radians) {
 	return radians * (180.0 / Math.PI);
 }
 
 // generate lookup tables
-function genTable(res, method) {
+genTable = function(res, method) {
 	var table = [];
 	var i = 360.0/res;
 
@@ -47,7 +47,7 @@ var cos 	= genTable(cos_res, Math.cos); // generate the tables for sin and cos
 var sin 	= genTable(sin_res, Math.sin);
 
 // generate the tables for sin and cos
-function genSinCosTables() {
+genSinCosTables = function() {
 	var icos_m	= cos_res / 360.0;
 	var isin_m	= sin_res / 360.0;
 	var cos 	= genTable(cos_res, Math.cos); // generate the tables for sin and cos
@@ -55,7 +55,7 @@ function genSinCosTables() {
 }
 
 // fast atan2
-function fast_atan2(y, x) {
+fast_atan2 = function(y, x) {
     var cf_1 = Math.PI / 4.0;
     var cf_2 = 3.0 * cf_1;
     var abs_y = Math.abs(y);
@@ -73,7 +73,7 @@ function fast_atan2(y, x) {
 
 // extremely fast inverse sqrt
 // same one used in Quake II
-function invsqrt(x) {
+invsqrt = function(x) {
 	var x2 = x * 0.5;
 	fv[0] = x;
 	lv[0] = 0x5f3759df-(lv[0]>>1);
@@ -83,7 +83,7 @@ function invsqrt(x) {
 	return y;
 }
 
-function fast_sin(x) {
+fast_sin = function(x) {
 
 }
 

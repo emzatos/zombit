@@ -55,11 +55,45 @@ function mpConnect() {
 		gameLevel.chunkSet(chunk);
 	});
 
+	mpSocket.on("newent", function(ind,type,ser){
+		var ent = null;
+		switch (type) {
+			case ENTITY:
+				ent = new Entity();
+			break;
+			case PLAYER:
+				ent = new Player();
+			break;
+			case HOSTILE:
+				ent = new Hostile();
+			break;
+			case ZOMBIE:
+				ent = new Zombie();
+			break;
+			case PROJECTILE:
+				ent = new Projectile();
+			break;
+			case BULLET:
+				ent = new Bullet();
+			break;
+			case PARTICLE:
+				ent = new Particle();
+			break;
+			case BLOODSPLAT:
+				ent = new BloodSplat();
+			break;
+		}
+		entities[ind] = ent;
+		deserializeEntity(ser);
+	})
+
 	mpSocket.on("entity", function(entity){
 		console.log("Recv. ent:");
 		console.log(entity);
-		var deser = CircularJSON.parse(entity);
-		entities[deser.arrIndex] = deser;
+		
+		deserializeEntity(entity);
+		//var deser = CircularJSON.parse(entity);
+		//entities[deser.arrIndex] = deser;
 	});
 
 	mpSocket.on("msg", function(message) {
