@@ -6,18 +6,22 @@ var gameLevel = null;
 var tileWidth = 16;
 var tileHeight = 16;
 
-var entities = new Array();
-var items = new Array();
+var entities = [];
+var items = [];
 
 var gameScore = 0;
 
 //settings
-var enableShaders = false;
+var enableShaders = false; //this works, but it's probably too slow
 
 //fps monitoring
 var filterStrength = 20;
 var frameTime = 0, lastLoop = new Date, thisLoop;
 var fps = targetFPS;
+
+particlesEnabled = true;
+
+uArgs = null;
 
 function init() {
 	//create container to center canvas
@@ -54,6 +58,12 @@ function init() {
 	oid = ctx.createImageData(viewWidth,viewHeight);
 	dout = oid.data;
 	for (var i=3; i<dout.length; i+=4) {dout[i] = 255;} //set to opaque
+	
+	//parse URL flags
+	var loc = document.location.href;
+	uArgs = loc.lastIndexOf("#")>loc.lastIndexOf("/")?loc.substring(loc.lastIndexOf("#")+1).split("&"):"";
+	if (uArgs.indexOf("nointro")>=0) {dmode = GAME;}
+	if (uArgs.indexOf("nomusic")<0) {/*setTimeout(startPlaylist,4900);*/}
 
 	loadResources();
 	loadAudio();
@@ -147,8 +157,13 @@ function step() {
 	fps = (1000/frameTime).toFixed(1);
 
 	//process entities
-	for (var ec = 0; ec<entities.length; ec++) {
+	/*for (var ec = 0; ec<entities.length; ec++) {
     	var ent = entities[ec];
+		if (ent instanceof Entity) {ent.step();}
+	}*/
+	
+	for (var ec in entities) {
+		var ent = entities[ec];
 		if (ent instanceof Entity) {ent.step();}
 	}
 

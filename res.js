@@ -31,8 +31,12 @@ var imgBullet = new Image();
 imgBullet.src = "res/entity/bullet.png";
 var imgCursor = new Image();
 imgCursor.src = "res/entity/cursor.png";
-var imgBloodSplat = new Image();
-imgBloodSplat.src = "res/entity/bloodsplat.png";
+var imgBloodSplat1 = new Image();
+imgBloodSplat1.src = "res/entity/bloodsplat2.png";
+var imgBloodSplat2 = new Image();
+imgBloodSplat2.src = "res/entity/bloodsplat3.png";
+var imgBloodSplat3 = new Image();
+imgBloodSplat3.src = "res/entity/bloodsplat4.png";
 
 var images = new Array(4);
 for (var i=0; i<images.length; i++) {images[i] = new Image();}

@@ -17,6 +17,8 @@ function mpStart(nick, server, port) {
 	if (!port) {port=mpPort;}
 	if (!nick) {nick=mpNick;}
 	
+	entities = new Array();
+
 	mpServer = server;
 	mpPort = port;
 	mpNick = nick;
@@ -55,9 +57,12 @@ function mpConnect() {
 		gameLevel.chunkSet(chunk);
 	});
 
-	mpSocket.on("newent", function(ind,type,ser){
+	mpSocket.on("newent", function(entity){
 		var ent = null;
-		switch (type) {
+		console.log("New entity of type "+entity[2].type+" at index "+entity[2].arrIndex+".");
+		console.dir(entity);
+		entity.type = 110;
+		switch (entity.type) {
 			case ENTITY:
 				ent = new Entity();
 			break;
@@ -83,15 +88,16 @@ function mpConnect() {
 				ent = new BloodSplat();
 			break;
 		}
-		entities[ind] = ent;
-		deserializeEntity(ser);
+		entities[entity[2].arrIndex] = ent;
+		entities[entity[2].arrIndex].deserialize(entity[2]);
 	})
 
 	mpSocket.on("entity", function(entity){
 		console.log("Recv. ent:");
 		console.log(entity);
 		
-		deserializeEntity(entity);
+		entities[entity.arrIndex].deserialize(entity);
+		//deserializeEntity(entity);
 		//var deser = CircularJSON.parse(entity);
 		//entities[deser.arrIndex] = deser;
 	});

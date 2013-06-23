@@ -56,6 +56,7 @@ function render() {
     ctx.fillStyle = "rgba(234,240,90,0.3)";
     for (var i=0; i<player.inv.size; i++) {
       var item = player.inv.get(i);
+      if (item!=null) {
       ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
 
       var bx = viewWidth-92-(18*(player.inv.size-i));
@@ -69,6 +70,7 @@ function render() {
       //ctx.drawImage(typhoonIcon, viewWidth-92-(18*(player.inv.size-2)), 4);
       //ctx.drawImage(gaussIcon, viewWidth-92-(18*(player.inv.size-3)), 4);
       //ctx.drawImage(batIcon, viewWidth-92-(18*(player.inv.size-4)), 4);
+      }
     }
 
     //draw healthbar

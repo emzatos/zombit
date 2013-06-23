@@ -126,6 +126,52 @@ BULLET = 1310;
 PARTICLE = 410;
 BLOODSPLAT = 1410;
 
+EntityReference = function(obj) {
+	this.arrIndex = null;
+
+	this.make = function(obj) {
+		this = makeEntityReference(obj);
+	}
+	
+	this.get = function() {
+		thisgetEntityReference(this);
+	}
+	
+	this.serializable = function() {
+		return {arrIndex: this.arrIndex}; //because we don't want to send the functions, and we want this to be automagically serializable by Entity
+	}
+	
+	this.unserialize = function(src,dest) {
+		dest = new EntityReference(getEntityReference(src)); //again, because we want automagic unserialization
+	}
+	
+	makeEntityReference(obj);
+}
+getEntityReference = function(erObj) { //works for literals and ER instances
+	if (erObj.arrIndex!=null) {
+		return entities[erObj.arrIndex];
+	}
+	else {return null;}
+}
+makeEntityReference = function(x) { //works for indexes, entities, and serialized ERs
+	if (typeof x === 'number') {
+		return {arrIndex: x};
+	}
+	else if (typeof x.arrIndex !== 'undefined') {
+		return {arrIndex: x.arrIndex};
+	}
+	else {
+		return null;
+	}
+}
+
+findSlot = function() {
+	if (entities.length==0) {return 0;}
+	for (var i=0, j=entities.length; i<j; i++) {
+		if (entities[i] == undefined) {return i;}
+	}
+	return entities.length;
+}
 Entity = klass(function (x,y) {
 	this.x = x||50;
 	this.y = y||50;
@@ -145,7 +191,18 @@ Entity = klass(function (x,y) {
 	this.height = tileHeight;
 
 	//entity management code
-	this.arrIndex = entities.push(this)-1;
+	if (!mpActive || mpMode==SERVER) {
+		var slot = findSlot()
+		entities[slot] = this;
+		this.arrIndex = slot;
+		
+		//this.arrIndex = entities.push(this)-1;
+	}
+
+	if (!(typeof io === 'undefined') && mpMode==SERVER) {
+		console.dir([this.arrIndex,this.type,this.serializable()]);
+		io.sockets.emit("newent",[this.arrIndex,this.type,this.serializable()]);
+	}
 })
 .methods({
 	step: function() {
@@ -197,14 +254,18 @@ Entity = klass(function (x,y) {
 	},
 	damage: function(amount) {
 		this.life-=amount;
-		for (var i=0; i<Math.ceil((amount/(this.maxlife>0?this.maxlife:1))*6); i++) {
-			new BloodSplat(this.x-this.width*0.5+irand(this.width),this.y-this.height*0.5+irand(this.height),0,0);
+		if (particlesEnabled) {
+			for (var i=0; i<Math.ceil((amount/(this.maxlife>0?this.maxlife:1))*6); i++) {
+				new BloodSplat(this.x-this.width*0.5+irand(this.width),this.y-this.height*0.5+irand(this.height),0,0);
+			}
 		}
 		if (this.life<=0) {this.die();}
 	},
 	die: function() {
-		for (var i=0; i<6; i++) {
-			new BloodSplat(this.x-this.width+irand(this.width*2),this.y-this.height+irand(this.height*2),0,0);
+		if (mpMode==CLIENT) {
+			for (var i=0; i<6; i++) {
+				new BloodSplat(this.x-this.width+irand(this.width*2),this.y-this.height+irand(this.height*2),0,0);
+			}
 		}
 		this.destroy();
 	},
@@ -215,18 +276,21 @@ Entity = klass(function (x,y) {
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 	},
 	destroy: function() {
-		entities.splice(this.arrIndex,1);
+		/*entities.splice(this.arrIndex,1);
 		//shift index of other items
 		for (var i=this.arrIndex; i<entities.length; i++) {
 			entities[i].arrIndex-=1;
-		}
+		}*/
+		
+		//delete entities[this.arrIndex];
+		entities[this.arrIndex] = undefined;
 	},
 	mpUpdate: function() {
 		if (mpMode==SERVER && !this instanceof Player) {
 			try {
 				//io.sockets.emit("entity",CircularJSON.stringify(this, safeJSON));
 				
-				var ser = this.serialize();
+				var ser = this.serializable();
 				io.sockets.emit("entity",ser);
 				console.log(ser);
 			}
@@ -236,53 +300,53 @@ Entity = klass(function (x,y) {
 			}
 		}
 	},
-	serialize: function() {
-		var str = this.arrIndex+"{";
-		for (prop in this) {
-			if (typeof this[prop] != "function") {
-				str+="||"+prop+"::"+(typeof this[prop]=="string"?'"':'')+this[prop]+(typeof this[prop]=="string"?'"':'');
+	serializable: function(output) {
+		if (!output) {output = {};}
+		//else {output = EntityReference.make(this);}
+		
+		for (var prop in this) {
+			if (this[prop] != null && this[prop] != undefined) {
+			//console.log("setting "+prop);
+				if (prop == "owner") {
+					//this has to be here for some reason
+				}
+				else if (typeof this[prop] === 'undefined') {
+					output[prop] = undefined;
+				}
+				else if (typeof this[prop].serializable === 'function') {
+					output = this[prop].serializable(output);
+				}
+				else if (!(typeof this[prop] === 'function')) {			
+					if (typeof this[prop] === 'object') {
+						//needs a serializer
+					}
+					else {
+						output[prop] = this[prop];
+					}
+				}
 			}
 		}
-		str+="}";
-		return str;
-
-		/*function safety(key,val) {
-			if (key.indexOf("mpUpdate")>0 || key=="owner") {
-				return undefined;
+		
+		delete output.owner; //shhh it's okay
+		
+		return output;
+	},
+	unserialize: function(src,dest) {
+		if (typeof dest === 'undefined') {dest = this;}
+		for (var prop in src) {
+			//console.log("    src["+prop+"] = "+src[prop]);
+			if (typeof dest[prop] === 'undefined') {dest[prop] = {};}
+			if (typeof src[prop] === 'object') {
+				this.unserialize(src[prop],dest[prop]);
 			}
-			else {return val;}
+			else {
+				dest[prop] = src[prop];
+			}
 		}
-
-		return CircularJSON.stringify(this,safety);*/
 	}
 });
-
-deserializeEntity = function(ser) {
-	var temp = CircularJSON.parse(ser);
-	var ind = temp.arrIndex;
-	for (prop in temp) {
-		entities[arrIndex] = temp[prop];
-	}
-	/*var ind = parseInt(ser.substring(0,ser.indexOf("{")));
-
-	var splt = ser.substring(ser.indexOf("{"),ser.length-1).split("||");
-	for (kv in splt) {
-		kv = kv.split("::");
-		var key = kv[0];
-		var val = kv[1];
-
-		var setTo = null;
-		if (val.charAt(0)=='"' && val.charAt(val.length-1)=='"') {
-			setTo = val.substring(1,val.length-1);
-		}
-		else {
-			if (val=="undefined") {setTo = undefined;}
-			else if (val=="null") {setTo = null;}
-			else {setTo = Number(val);}
-		}
-
-		entities[ind] = setTo;
-	}*/
+makeNewent = function(ent) {
+	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
 
 Player = Entity.extend(function(x,y,name,owner){
@@ -327,7 +391,7 @@ Player = Entity.extend(function(x,y,name,owner){
 
 		//point player toward mouse
 		//player position corrected for view
-		if (mpMode==CLIENT) {
+		if (mpMode==CLIENT && !(typeof player === 'undefined')) {
 			var pcx = this.x-viewX;
 			var pcy = this.y-viewY;
 			//console.log(pcx+","+pcy)
@@ -397,17 +461,18 @@ Hostile = Entity.extend(function(x,y,vr){
 			}
 			if (targ!=null) {
 				if (pDist(this.x,this.y,targ.x,targ.y)<this.visionRadius) { //see if in range
-					this.target = targ;
+					this.target = makeEntityReference(targ);
 				}
 			}
 		}
 		else {
-			var targetDist = pDist(this.x,this.y,this.target.x,this.target.y);
-			var targetDir = pDir(this.x,this.y,this.target.x,this.target.y);
+			var targ = getEntityReference(this.target);
+			var targetDist = pDist(this.x,this.y,targ.x,targ.y);
+			var targetDir = pDir(this.x,this.y,targ.x,targ.y);
 			this.facing = targetDir;
 
 			if (targetDist>this.visionRadius*2) { //see if too far to follow
-				this.target = T_SEARCH; //reset target
+				targ = T_SEARCH; //reset target
 			}
 			else { //target is close enough to follow
 				//calculate direction to target and move toward it at constant speed
@@ -419,7 +484,7 @@ Hostile = Entity.extend(function(x,y,vr){
 			var invSelected = this.inv.getSelected();
 			if (invSelected instanceof Weapon) {
 				if (targetDist<invSelected.range) {
-					this.attack(this.target);
+					this.attack(targ);
 				}
 			}
 		}
@@ -463,7 +528,7 @@ Zombie = Hostile.extend(function(x,y,vr){
 });
 
 Projectile = Entity.extend(function(x,y,sender){
-	this.sender = sender||null;
+	this.sender = makeEntityReference(sender)||null;
 	this.width = 1;
 	this.height = 1;
 	this.friction = 0;
@@ -480,10 +545,11 @@ Projectile = Entity.extend(function(x,y,sender){
 		var x2=this.x;
 		var y2=this.y;
 
+		var senderObj = getEntityReference(this.sender);
     	for (var ec = 0; ec<entities.length; ec++) {
 	    	ent = entities[ec];
 			if (ent instanceof Entity) {
-				if (ent!=this.sender && ent!=this && !(ent instanceof Projectile)) {
+				if (ent!=senderObj && ent!=this && !(ent instanceof Projectile)) {
 					if (collisionLine(ent.x,ent.y,ent.width*0.5,x1,y1,x2,y2,false)) {
 						this.collide(ent);
 					}
@@ -499,7 +565,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	this.yp=null;
 	try{this.image = imgBullet;}
 	catch (e) {}
-	this.sender = sender;
+	this.sender = makeEntityReference(sender);
 
 	this.col1 = "rgba(255,205,0,1)";
 	this.col2 = "rgba(220,170,0,0)";
@@ -593,7 +659,7 @@ BloodSplat = Particle.extend(function(x,y,xs,ys){
 	this.ys = ys;
 	this.life = 400;
 	this.maxlife = this.life;
-	try {this.image = imgBloodSplat;}
+	try {this.image = [imgBloodSplat1,imgBloodSplat2,imgBloodSplat3][Math.floor(Math.random()*3)];}
 	catch (e) {}
 
 	this.type = BLOODSPLAT;

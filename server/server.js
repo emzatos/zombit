@@ -8,6 +8,7 @@
                                                             
 */
 
+mpActive = true; //shut up
 
 klass = require('klass');
 //console.log("klass OK");
@@ -27,18 +28,22 @@ var game = require('../server/game.js');
 io = require('socket.io').listen(8001);
 //io.set("log level",1); //disable debug logging
 
-nicknames = new Array();
+nicknames = [];
 
 io.sockets.on('connection', function (socket) {
   socket.keys = new Array(2048);
 
   //create a player
-  socket.player = new Player(50,50,"Player",socket);
+  socket.player = new Player(20,20,"Player",socket);
   socket.player.inv.push(new Pistol());
   socket.player.inv.push(new AssaultRifle());
   socket.player.inv.push(new Typhoon());
   socket.player.inv.push(new Gauss());
   socket.player.inv.push(new WoodenBat());
+  
+  console.dir(socket.player);
+  console.log(" ---> ");
+  console.dir(socket.player.serializable());
 
   function sendLevel() {
     var ccx = 0;
@@ -47,7 +52,7 @@ io.sockets.on('connection', function (socket) {
     function sendChunk() {
       var chunk = gameLevel.getChunk(ccx*chunkSize,ccy*chunkSize,chunkSize,chunkSize);
       socket.emit("chunk",chunk);
-      
+
       ccx+=1;
       if (ccx>gameLevel.getWidth()/chunkSize) {ccx=0; ccy+=1;}
       if (ccy>gameLevel.getHeight()/chunkSize) {
@@ -66,8 +71,10 @@ io.sockets.on('connection', function (socket) {
       socket.set('nickname', name, function () {
         nicknames.push(name);
         //socket.emit("entity",CircularJSON.stringify(socket.player, safeJSON));
-        socket.emit("entity",socket.player.serialize());
+        socket.emit("newent",makeNewent(socket.player));
+        socket.emit("entity",socket.player.serializable());
         socket.emit("playerind",socket.player.arrIndex);
+		//console.dir(entities);
         sendLevel();
       });
     }
@@ -88,7 +95,7 @@ io.sockets.on('connection', function (socket) {
     else {
       console.log("Unsupported input.");
     }
-  })
+  });
 
   socket.on('disconnect', function() {
     socket.get('nickname', function(err, name) {

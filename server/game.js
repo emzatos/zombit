@@ -6,6 +6,7 @@ entities = new Array();
 items = new Array();
 player = null; //provide compatibility for some clientside code
 mpSocket = null; //provide compatibility for some clientside code
+particlesEnabled = false;
 
 mpMode = SERVER;
 
@@ -64,7 +65,7 @@ setInterval(function(){
 		} while (true);
 		new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 	}}
-},500);
+},10);
 
 timer = setInterval(step,1000/targetFPS);
 
@@ -73,35 +74,44 @@ VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_
 VK_F10 = 121, VK_F11 = 122, VK_ESCAPE=27, VK_ENTER=13, VK_BACKSPACE=8;
 
 //compatibility - nullify resources used by shared scripts to prevent node compile errors.
+Discard = function() {
+	this.src = null;
+	this.play = function(){}
+}
+discard = new Discard();
+
 // icons
-pistolIcon = null;
-assultIcon = null;
-typhoonIcon = null;
-gaussIcon = null;
-batIcon = null;
-genericIcon = null;
+pistolIcon = discard;
+assultIcon = discard;
+typhoonIcon = discard;
+gaussIcon = discard;
+batIcon = discard;
+genericIcon = discard;
 
 // Direction specific player images
-imgPlayer_W = null;
-imgPlayer_A = null;
-imgPlayer_S = null;
-imgPlayer_D = null;
+imgPlayer_W = discard;
+imgPlayer_A = discard;
+imgPlayer_S = discard;
+imgPlayer_D = discard;
 
 // Entities
-imgZombie = null;
-imgBullet = null;
-imgCursor = null;
-imgBloodSplat = null;
+imgZombie = discard;
+imgBullet = discard;
+imgCursor = discard;
+imgBloodSplat = discard;
 
 images = new Array(4);
-for (var i=0; i<images.length; i++) {images[i] = null;}
+for (var i=0; i<images.length; i++) {images[i] = discard;}
 
-imgOverlay = null;
-imgScreenBlood = null;
+imgOverlay = discard;
+imgScreenBlood = discard;
 
-sndGun1=null;
-sndGun2=null;
-sndGun3=null;
-sndTrack1=null;
-sndTrack2=null;
-sndTrack3=null;
+sndGun1=discard;
+sndGun2=discard;
+sndGun3=discard;
+sndTrack1=discard;
+sndTrack2=discard;
+sndTrack3=discard;
+sndHit=discard;
+sndDie=discard;
+sndKill=discard;

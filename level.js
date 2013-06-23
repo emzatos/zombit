@@ -254,7 +254,23 @@ Inventory = klass(function(size,owner) {
 
 	getArray: function() {
 		return array_pad(this.inv,this.size,null);
-	}
+	},
+	
+	serializable: function(output) {
+		if (!output) {output = {};}
+		
+		output.size = this.size;
+		output.owner = this.owner.arrIndex;
+		output.selected = this.selected;
+		output.inv = [];
+		
+		for (var i=0; i<this.inv.length; i++) {
+			output.inv[i] = this.inv[i].serializable();
+		}
+		
+		return output;
+	},
+	unserialize: Entity.unserialize
 })
 
 Item = klass(function (name){
@@ -268,11 +284,55 @@ Item = klass(function (name){
 
 	},
 	destroy: function() {
-		items.splice(this.arrIndex,1);
+		delete items[this.arrIndex];
+	},
+	serializable: function(output) {
+		if (!output) {output = {};}
+		else {output = EntityReference.make(this);}
+		
+		for (var prop in this) {
+			if (this[prop] != null && this[prop] != undefined) {
+			//console.log("setting "+prop);
+				if (prop == "owner") {
+					//this has to be here for some reason
+				}
+				else if (typeof this[prop] === 'undefined') {
+					output[prop] = undefined;
+				}
+				else if (typeof this[prop].serializable === 'function') {
+					output = this[prop].serializable(output);
+				}
+				else if (!(typeof this[prop] === 'function')) {			
+					if (typeof this[prop] === 'object') {
+						//needs a serializer
+					}
+					else {
+						output[prop] = this[prop];
+					}
+				}
+			}
+		}
+		
+		delete output.owner; //shhh it's okay
+		
+		return output;
+	},
+	unserialize: function(src,dest) {
+		if (typeof dest === 'undefined') {dest = this;}
+		for (var prop in src) {
+			//console.log("    src["+prop+"] = "+src[prop]);
+			if (typeof dest[prop] === 'undefined') {dest[prop] = {};}
+			if (typeof src[prop] === 'object') {
+				this.unserialize(src[prop],dest[prop]);
+			}
+			else {
+				dest[prop] = src[prop];
+			}
+		}
 	}
 });
 
-var Weapon = Item.extend(function() {
+Weapon = Item.extend(function() {
 
 })
 .methods ({

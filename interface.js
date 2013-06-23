@@ -67,7 +67,7 @@ function kd(e) { //keydown
 		keys[e.keyCode] = true;
 
 		//send input to server
-		if (mpActive) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
+		if (mpReady) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
 	}
 }
 function ku(e) { //keyup
