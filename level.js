@@ -99,7 +99,7 @@ generatePlants = function(level,prob) {
 			if (tl&&tu || tu&&tr || tr&&td || td&&tl) {
 				if (Math.random()<prob) {
 					//console.log("planted at "+x+","+y);
-					level.setTile(new Tile(DESK,x,y),x,y);
+					level.setTile(new Tile(PLANT,x,y),x,y);
 				}
 			}
 		}
