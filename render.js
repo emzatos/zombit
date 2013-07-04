@@ -128,11 +128,12 @@ function render() {
 
 		//draw fps
 		if (showFPS) {
-		  ctx.font = '8px "uni"';
+		  ctx.font = '10px monospace';
 		  //ctx.fillStyle = "rgba(0,0,0,0.2)";
 		  //ctx.fillRect(2,10,40,4);
 		  ctx.fillStyle = "white";
 		  ctx.fillText("FPS: "+(~~fps),4,12);
+		  ctx.fillText("Delta: "+(tdelta.toFixed(1)),4,24);
 		}
 
 		//draw chat overlay

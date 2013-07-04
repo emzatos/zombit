@@ -68,7 +68,7 @@ function mpConnect() {
 		//console.log(ent);
 		entities[entity.arrIndex] = ent;
 		entities[entity.arrIndex].unserialize(entity.ser);
-	})
+	});
 
 	mpSocket.on("entity", function(entity){
 		//console.log("Recv. ent:");
@@ -83,6 +83,12 @@ function mpConnect() {
 		//deserializeEntity(entity);
 		//var deser = CircularJSON.parse(entity);
 		//entities[deser.arrIndex] = deser;
+	});
+	
+	mpSocket.on("delent", function(entity){
+		if (entities[entity.arrIndex] instanceof Entity) {
+			entities[entity.arrIndex].destroy();
+		}
 	});
 
 	mpSocket.on("msg", function(message) {

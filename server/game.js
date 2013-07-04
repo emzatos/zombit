@@ -20,18 +20,23 @@ gameLevel = punchOutWalls(gameLevel,0.1);
 
 //console.log("def step...");
 
+prevtime = microtime.now();
 step = function() {
+  time = microtime.now();
+  var delta = (time-prevtime)/(1000000/targetFPS);
+  console.log("time: "+time+", delta: "+delta);
 	//process entities
 	for (var ec = 0; ec<entities.length; ec++) {
     	var ent = entities[ec];
-		if (ent instanceof Entity) {ent.step();}
+		if (ent instanceof Entity) {ent.step(delta);}
 	}
 
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {
     	ite = items[ic];
-		if (ite instanceof Item) {ite.step();}
+		if (ite instanceof Item) {ite.step(delta);}
 	}
+	prevtime = time;
 }
 
 d = function(i) {return i;} //compatibility

@@ -150,8 +150,22 @@ function d(s) {
 	//return (60/fps)*s;
 }
 
+tdelta = 1;
+window.performance = window.performance || {};
+performance.now = (function() {
+  return performance.now       ||
+         performance.mozNow    ||
+         performance.msNow     ||
+         performance.oNow      ||
+         performance.webkitNow ||
+         function() { return Date.now(); };
+})();
+prevtime = performance.now();
 function step() {
-	time = new Date().getTime();
+	time = performance.now();
+	//console.log("d "+(time-prevtime));
+	tdelta = (time-prevtime)/(1000/targetFPS);
+	//console.log("e "+delta);
 
 	//monitor framerate
 	var thisFrameTime = (thisLoop=time) - lastLoop;
@@ -162,13 +176,13 @@ function step() {
 	//process entities
 	for (var ec in entities) {
 		var ent = entities[ec];
-		if (ent instanceof Entity) {ent.step();}
+		if (ent instanceof Entity) {ent.step(tdelta);}
 	}
 
 	//process particles
 	for (var ec = 0; ec<particles.length; ec++) {
     	var prt = particles[ec];
-		if (prt instanceof Particle) {prt.step();}
+		if (prt instanceof Particle) {prt.step(tdelta);}
 	}
 
 	/*if (mouseLeft) {
@@ -190,7 +204,7 @@ function step() {
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {
     	ite = items[ic];
-		if (ite instanceof Item) {ite.step();}
+		if (ite instanceof Item) {ite.step(tdelta);}
 	}
 
 	// Switch sprites on key events (for player)
@@ -207,4 +221,5 @@ function step() {
 
 	//now called by animation frame
 	//render();
+	prevtime = time;
 }

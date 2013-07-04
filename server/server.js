@@ -1,16 +1,16 @@
-/*
-      d88888D  .d88b.  .88b  d88. d8888b. d888888b d888888b 
-      YP  d8' .8P  Y8. 88'YbdP`88 88  `8D   `88'   `~~88~~' 
-         d8'  88    88 88  88  88 88oooY'    88       88    
-        d8'   88    88 88  88  88 88~~~b.    88       88    
-       d8' db `8b  d8' 88  88  88 88   8D   .88.      88    
-      d88888P  `Y88P'  YP  YP  YP Y8888P' Y888888P    YP    
-                                                            
-*/
+console.log("");
+console.log("      d88888D  .d88b.  .88b  d88. d8888b. d888888b d888888b ");
+console.log("      YP  d8' .8P  Y8. 88'YbdP`88 88  `8D   `88'   `~~88~~' ");
+console.log("         d8'  88    88 88  88  88 88oooY'    88       88    ");
+console.log("        d8'   88    88 88  88  88 88~~~b.    88       88    ");
+console.log("       d8' db `8b  d8' 88  88  88 88   8D   .88.      88    ");
+console.log("      d88888P  `Y88P'  YP  YP  YP Y8888P' Y888888P    YP    ");
+console.log("");
 
 mpActive = true; //shut up
 
 klass = require('klass');
+microtime = require('microtime');
 //console.log("klass OK");
 CircularJSON = require('circular-json');
 //console.log("circular-json OK");
@@ -24,6 +24,7 @@ var ftrig = require('../fasttrig.js');
 //console.log("fasttrig OK");
 var game = require('../server/game.js');
 //console.log("game OK");
+
 
 io = require('socket.io').listen(8001);
 io.set("log level",1); //disable debug logging
@@ -68,15 +69,22 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('setnick', function (name) {
     if (nicknames.indexOf(name)<0) {
-      socket.set('nickname', name, function () {
-        nicknames.push(name);
-        //socket.emit("entity",CircularJSON.stringify(socket.player, safeJSON));
-        //socket.emit("newent",makeNewent(socket.player));
-        socket.emit("entity",socket.player.serializable());
-        socket.emit("playerind",socket.player.arrIndex);
-		//console.dir(entities);
-        sendLevel();
-      });
+	  if (name.length<12) {
+		  socket.set('nickname', name, function () {
+			nicknames.push(name);
+			//socket.emit("entity",CircularJSON.stringify(socket.player, safeJSON));
+			//socket.emit("newent",makeNewent(socket.player));
+			socket.player.name = name;
+			socket.emit("entity",socket.player.serializable());
+			socket.emit("playerind",socket.player.arrIndex);
+			//console.dir(entities);
+			sendLevel();
+		  });
+	  }
+	  else {
+		socket.emit("kick",{reason: "Nickname too long, must be less than 12 characters."});
+		socket.disconnect();
+	  }
     }
     else {
       socket.emit("kick",{reason: "Nickname in use, choose another."});
