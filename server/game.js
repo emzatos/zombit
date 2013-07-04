@@ -53,7 +53,7 @@ for (var i=0; i<15; i++) {
 //console.log("setting interval...");
 
 //tell zombies to spawn continuously
-setInterval(function(){
+/*setInterval(function(){
 	if (entities.length<50) {
 	for (var i=0; i<1; i++) {
 		var tx,ty,ta;
@@ -65,7 +65,7 @@ setInterval(function(){
 		} while (true);
 		new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 	}}
-},10);
+},10);*/
 
 timer = setInterval(step,1000/targetFPS);
 

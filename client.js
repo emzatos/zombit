@@ -59,44 +59,27 @@ function mpConnect() {
 
 	mpSocket.on("newent", function(entity){
 		var ent = null;
-		console.log("New entity of type "+entity[2].type+" at index "+entity[2].arrIndex+".");
-		console.dir(entity);
-		entity.type = 110;
-		switch (entity.type) {
-			case ENTITY:
-				ent = new Entity();
-			break;
-			case PLAYER:
-				ent = new Player();
-			break;
-			case HOSTILE:
-				ent = new Hostile();
-			break;
-			case ZOMBIE:
-				ent = new Zombie();
-			break;
-			case PROJECTILE:
-				ent = new Projectile();
-			break;
-			case BULLET:
-				ent = new Bullet();
-			break;
-			case PARTICLE:
-				ent = new Particle();
-			break;
-			case BLOODSPLAT:
-				ent = new BloodSplat();
-			break;
-		}
-		entities[entity[2].arrIndex] = ent;
-		entities[entity[2].arrIndex].deserialize(entity[2]);
+		//console.log("New entity of type "+entity[2].type+" at index "+entity[2].arrIndex+".");
+		//console.log("New entity!");
+		//console.dir(entity);
+		//entity[2].type = entity[2].id;
+		ent = constructEntity(entity.type);
+		//console.log("created: ");
+		//console.log(ent);
+		entities[entity.arrIndex] = ent;
+		entities[entity.arrIndex].unserialize(entity.ser);
 	})
 
 	mpSocket.on("entity", function(entity){
-		console.log("Recv. ent:");
-		console.log(entity);
+		//console.log("Recv. ent:");
+		//console.log(entity);
 		
-		entities[entity.arrIndex].deserialize(entity);
+		if (entities[entity.arrIndex] == null || typeof entities[entity.arrIndex] === 'undefined') {
+			//console.log("HELP ME");
+			entities[entity.arrIndex] = constructEntity(entity.type);
+		}
+		
+		entities[entity.arrIndex].unserialize(entity);
 		//deserializeEntity(entity);
 		//var deser = CircularJSON.parse(entity);
 		//entities[deser.arrIndex] = deser;

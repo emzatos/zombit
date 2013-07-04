@@ -92,12 +92,16 @@ function md(e) {
 		mpChatOpen = false;
 		document.body.removeChild(mpChatInput);
 	}
+	
+	if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, btn: 1, state: true});}
 }
 function mu(e) {
 	if (!e) {e=event;}
 	e.preventDefault();
 	mp(e);
 	mouseLeft = false;
+	
+	if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, btn: 1, state: false});}
 }
 function mp(e) {
 	var posx = 0;
@@ -118,6 +122,9 @@ function mp(e) {
 	var mcy = (posy-canvas.offsetTop)*(viewHeight/screenHeight);
 	mouseX = mcx;
 	mouseY = mcy;
+	
+	//if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, x: mouseX, y: mouseY});}
+	if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, facing: player.facing});}
 }
 
 function fullscreen(on) {

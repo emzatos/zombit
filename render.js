@@ -21,206 +21,218 @@ var od,out;
 //particles
 var particles = new Array();
 
+var renderLocked = false;
 function render() {
-  if (dmode==GAME) {
-    //clear screen
-    ctx.fillStyle = "black";
-    ctx.fillRect(0,0,viewWidth,viewHeight);
+  if (!renderLocked) {
+	renderLocked = true;
+	if (dmode==GAME) {
+		//clear screen
+		ctx.fillStyle = "black";
+		ctx.fillRect(0,0,viewWidth,viewHeight);
 
-    ctx.font = '12px "uni"';
+		ctx.font = '12px "uni"';
 
-    //render the tiles
-    drawgameLevel();
+		//render the tiles
+		drawgameLevel(0);
+		drawgameLevel(1);
 
-    //render particles (they're entities, but they must be drawn below the others)
-    for (var ec = 0; ec<particles.length; ec++) {
-      var prt = particles[ec];
-      if (prt instanceof Particle) {
-        if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
-          prt.render(prt.x-viewX,prt.y-viewY);
-        }
-      }
-    }
+		//render particles (they're entities, but they must be drawn below the others)
+		for (var ec = 0; ec<particles.length; ec++) {
+		  var prt = particles[ec];
+		  if (prt instanceof Particle) {
+			if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
+			  prt.render(prt.x-viewX,prt.y-viewY);
+			}
+		  }
+		}
 
-    //render the entities
-    for (var ec = 0; ec<entities.length; ec++) {
-      var ent = entities[ec];
-      if (ent instanceof Entity) {
-        if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
-          ent.render(ent.x-viewX,ent.y-viewY);
-        }
-      }
-    }
+		//render the entities
+		for (var ec = 0; ec<entities.length; ec++) {
+		  var ent = entities[ec];
+		  if (ent instanceof Entity) {
+			if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
+			  ent.render(ent.x-viewX,ent.y-viewY);
+			}
+		  }
+		}
 
-    //draw inventory GUI
-    ctx.fillStyle = "rgba(234,240,90,0.3)";
-    for (var i=0; i<player.inv.size; i++) {
-      var item = player.inv.get(i);
-      if (item!=null) {
-      ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
+		//draw inventory GUI
+		ctx.fillStyle = "rgba(234,240,90,0.3)";
+		for (var i=0; i<player.inv.size; i++) {
+		  var item = player.inv.get(i);
+		  if (item!=null) {
+		  ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
 
-      var bx = viewWidth-92-(18*(player.inv.size-i));
-      ctx.fillRect(bx,4,16,16);
-      ctx.strokeRect(bx,4,16,16);
-      ctx.drawImage(item.icon, bx, 4);
+		  var bx = viewWidth-92-(18*(player.inv.size-i));
+		  ctx.fillRect(bx,4,16,16);
+		  ctx.strokeRect(bx,4,16,16);
+		  if (item.icon) {
+			ctx.drawImage(item.icon, bx, 4);
+		  }
+			
+		  // fill row with weapon icons
+		  //ctx.drawImage(pistolIcon, viewWidth-92-(18*(player.inv.size-0)), 4);
+		  //ctx.drawImage(assultIcon, viewWidth-92-(18*(player.inv.size-1)), 4);
+		  //ctx.drawImage(typhoonIcon, viewWidth-92-(18*(player.inv.size-2)), 4);
+		  //ctx.drawImage(gaussIcon, viewWidth-92-(18*(player.inv.size-3)), 4);
+		  //ctx.drawImage(batIcon, viewWidth-92-(18*(player.inv.size-4)), 4);
+		  }
+		}
 
-      // fill row with weapon icons
-      //ctx.drawImage(pistolIcon, viewWidth-92-(18*(player.inv.size-0)), 4);
-      //ctx.drawImage(assultIcon, viewWidth-92-(18*(player.inv.size-1)), 4);
-      //ctx.drawImage(typhoonIcon, viewWidth-92-(18*(player.inv.size-2)), 4);
-      //ctx.drawImage(gaussIcon, viewWidth-92-(18*(player.inv.size-3)), 4);
-      //ctx.drawImage(batIcon, viewWidth-92-(18*(player.inv.size-4)), 4);
-      }
-    }
+		//draw healthbar
+		ctx.fillStyle = "rgba(234,20,53,0.5)";
+		ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
+		ctx.fillStyle = "rgba(20,230,53,1)";
+		ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
+		ctx.font = '8px "uni"';
+		ctx.fillStyle = "white";
+		ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
 
-    //draw healthbar
-    ctx.fillStyle = "rgba(234,20,53,0.5)";
-    ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
-    ctx.fillStyle = "rgba(20,230,53,1)";
-    ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
-    ctx.font = '8px "uni"';
-    ctx.fillStyle = "white";
-    ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
+		//draw selected item GUI
+		ctx.fillStyle = "rgba(234,240,90,0.3)";
+		ctx.strokeStyle = "rgba(244,250,60,0.6)";
+		ctx.fillRect(viewWidth-90,4,80,25);
+		ctx.strokeRect(viewWidth-90,4,80,25);
 
-    //draw selected item GUI
-    ctx.fillStyle = "rgba(234,240,90,0.3)";
-    ctx.strokeStyle = "rgba(244,250,60,0.6)";
-    ctx.fillRect(viewWidth-90,4,80,25);
-    ctx.strokeRect(viewWidth-90,4,80,25);
+		ctx.fillStyle = "rgba(255,255,255,1)";
+		var ii = player.inv.getSelected();
+		ctx.font = '9px "uni"';
+		ctx.fillText(ii.name,viewWidth-80,13);
 
-    ctx.fillStyle = "rgba(255,255,255,1)";
-    var ii = player.inv.getSelected();
-    ctx.font = '9px "uni"';
-    ctx.fillText(ii.name,viewWidth-80,13);
+		ctx.font = '12px "uni"';
+		if (ii instanceof Gun) {
+		  ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
+		  ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
+		}
 
-    ctx.font = '12px "uni"';
-    if (ii instanceof Gun) {
-      ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
-      ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
-    }
+		//draw score
+		ctx.fillStyle = "rgba(234,240,90,0.3)";
+		ctx.strokeStyle = "rgba(244,250,60,0.6)";
+		ctx.fillRect(viewWidth/2-40,4,80,20);
+		ctx.strokeRect(viewWidth/2-40,4,80,20);
 
-    //draw score
-    ctx.fillStyle = "rgba(234,240,90,0.3)";
-    ctx.strokeStyle = "rgba(244,250,60,0.6)";
-    ctx.fillRect(viewWidth/2-40,4,80,20);
-    ctx.strokeRect(viewWidth/2-40,4,80,20);
+		ctx.font = '13px "uni"';
+		ctx.textAlign = 'center';
+		ctx.fillStyle = "white";
+		ctx.fillText(gameScore,viewWidth/2,18);
+		ctx.textAlign = 'left';
 
-    ctx.font = '13px "uni"';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = "white";
-    ctx.fillText(gameScore,viewWidth/2,18);
-    ctx.textAlign = 'left';
+		//ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
 
-    //ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
+		//draw overlay
+		ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
 
-    //draw overlay
-    ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
+		//apply shaders
+		//shader(srand);
+		if (enableShaders==true) {xshader(xsfx);}
 
-    //apply shaders
-    //shader(srand);
-    if (enableShaders==true) {xshader(xsfx);}
+		//draw fps
+		if (showFPS) {
+		  ctx.font = '8px "uni"';
+		  //ctx.fillStyle = "rgba(0,0,0,0.2)";
+		  //ctx.fillRect(2,10,40,4);
+		  ctx.fillStyle = "white";
+		  ctx.fillText("FPS: "+(~~fps),4,12);
+		}
 
-    //draw fps
-    if (showFPS) {
-      ctx.font = '8px "uni"';
-      //ctx.fillStyle = "rgba(0,0,0,0.2)";
-      //ctx.fillRect(2,10,40,4);
-      ctx.fillStyle = "white";
-      ctx.fillText("FPS: "+(~~fps),4,12);
-    }
+		//draw chat overlay
+		if (mpChatOpen) {
+		  ctx.fillStyle = "rgba(0,0,0,0.7)";
+		  ctx.fillRect(8,viewHeight-24,viewWidth-16,16);
 
-    //draw chat overlay
-    if (mpChatOpen) {
-      ctx.fillStyle = "rgba(0,0,0,0.7)";
-      ctx.fillRect(8,viewHeight-24,viewWidth-16,16);
+		  ctx.font = '14px "uni"';
+		  ctx.fillStyle = "white";
+		  ctx.fillText(mpTypedChat,10,viewHeight-12);
+		}
 
-      ctx.font = '14px "uni"';
-      ctx.fillStyle = "white";
-      ctx.fillText(mpTypedChat,10,viewHeight-12);
-    }
+		//draw chat messages
+		if (mpChatOpen || new Date().getTime()-mpLastMessageTime<mpMessageFadeTime) {
+		  var msgOpacity = mpChatOpen?1:1-(new Date().getTime()-mpLastMessageTime)/mpMessageFadeTime;
+		  ctx.fillStyle = "rgba(255,255,255,"+msgOpacity.toFixed(2)+")";
+		  ctx.font = '8px "uni"';
+		  for (var i=0; i<mpMessages.length; i++) {
+			ctx.fillText(mpMessages[i],8,viewHeight-28-10*i);
+		  }
+		}
 
-    //draw chat messages
-    if (mpChatOpen || new Date().getTime()-mpLastMessageTime<mpMessageFadeTime) {
-      var msgOpacity = mpChatOpen?1:1-(new Date().getTime()-mpLastMessageTime)/mpMessageFadeTime;
-      ctx.fillStyle = "rgba(255,255,255,"+msgOpacity.toFixed(2)+")";
-      ctx.font = '8px "uni"';
-      for (var i=0; i<mpMessages.length; i++) {
-        ctx.fillText(mpMessages[i],8,viewHeight-28-10*i);
-      }
-    }
+		//draw multiplayer overlay
+		if (mpActive && !mpReady) {
+		  ctx.fillStyle = "rgba(0,0,0,0.5)";
+		  ctx.fillRect(0,0,viewWidth,viewHeight);
 
-    //draw multiplayer overlay
-    if (mpActive && !mpReady) {
-      ctx.fillStyle = "rgba(0,0,0,0.5)";
-      ctx.fillRect(0,0,viewWidth,viewHeight);
+		  ctx.fillRect(0,viewHeight/2-24,viewWidth,48);
+		  var txt = mpConnected?"Loading level...":"Connecting...";
 
-      ctx.fillRect(0,viewHeight/2-24,viewWidth,48);
-      var txt = mpConnected?"Loading level...":"Connecting...";
+		  ctx.font = '24px "uni"';
+		  ctx.textAlign = 'center';
+		  ctx.fillStyle = "white";
+		  ctx.fillText(txt,viewWidth/2,viewHeight/2);
+		  ctx.textAlign = 'left';
+		}
 
-      ctx.font = '24px "uni"';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = "white";
-      ctx.fillText(txt,viewWidth/2,viewHeight/2);
-      ctx.textAlign = 'left';
-    }
+		//draw mouse
+		ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
+	  }
+	  else if (dmode==INTRO) {
+		if (intime==null) {intime=new Date().getTime();}
+		var delta = new Date().getTime()-intime;
 
-    //draw mouse
-    ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
-  }
-  else if (dmode==INTRO) {
-    if (intime==null) {intime=new Date().getTime();}
-    var delta = new Date().getTime()-intime;
+		//clear screen
+		ctx.fillStyle = "rgb(40,36,38)";
+		ctx.fillRect(0,0,viewWidth,viewHeight);
 
-    //clear screen
-    ctx.fillStyle = "rgb(40,36,38)";
-    ctx.fillRect(0,0,viewWidth,viewHeight);
+		ctx.font = '12px "uni"';
+		ctx.textAlign = 'center';
+		ctx.fillStyle = "white";
 
-    ctx.font = '12px "uni"';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = "white";
+		var vpos = viewHeight/2-100;
 
-    var vpos = viewHeight/2-100;
+		ctx.font = '40px "uni"';
+		ctx.fillText("Zombit",viewWidth/2,30+vpos);
 
-    ctx.font = '40px "uni"';
-    ctx.fillText("Zombit",viewWidth/2,30+vpos);
+		if (delta>750) {
+		ctx.fillStyle = "lightgray";
+		ctx.font = '13px "uni"';
+		ctx.fillText("Programming & Design by",viewWidth/2,70+vpos);
+		ctx.fillStyle = "white";
+		ctx.font = '22px "uni"';
+		ctx.fillText("Nondefault",viewWidth/2,90+vpos);
+		}
 
-    if (delta>750) {
-    ctx.fillStyle = "lightgray";
-    ctx.font = '13px "uni"';
-    ctx.fillText("Programming & Design by",viewWidth/2,70+vpos);
-    ctx.fillStyle = "white";
-    ctx.font = '22px "uni"';
-    ctx.fillText("Nondefault",viewWidth/2,90+vpos);
-    }
+		if (delta>1500) {
+		ctx.fillStyle = "lightgray";
+		ctx.font = '13px "uni"';
+		ctx.fillText("Graphics & Additional Programming by",viewWidth/2,110+vpos);
+		ctx.fillStyle = "white";
+		ctx.font = '22px "uni"';
+		ctx.fillText("Sachittome",viewWidth/2,130+vpos);
+		}
 
-    if (delta>1500) {
-    ctx.fillStyle = "lightgray";
-    ctx.font = '13px "uni"';
-    ctx.fillText("Graphics & Additional Programming by",viewWidth/2,110+vpos);
-    ctx.fillStyle = "white";
-    ctx.font = '22px "uni"';
-    ctx.fillText("Sachittome",viewWidth/2,130+vpos);
-    }
+		if (delta>2250) {
+		ctx.fillStyle = "lightgray";
+		ctx.font = '9px "uni"';
+		ctx.fillText("Music by",viewWidth/2,150+vpos);
+		ctx.fillStyle = "white";
+		ctx.font = '15px "uni"';
+		ctx.fillText("Sycamore Drive",viewWidth/2,165+vpos);
+		ctx.font = '12px "uni"';
+		ctx.fillText("http://sycamoredrive.co.uk/",viewWidth/2,180+vpos);
+		}
 
-    if (delta>2250) {
-    ctx.fillStyle = "lightgray";
-    ctx.font = '9px "uni"';
-    ctx.fillText("Music by",viewWidth/2,150+vpos);
-    ctx.fillStyle = "white";
-    ctx.font = '15px "uni"';
-    ctx.fillText("Sycamore Drive",viewWidth/2,165+vpos);
-    ctx.font = '12px "uni"';
-    ctx.fillText("http://sycamoredrive.co.uk/",viewWidth/2,180+vpos);
-    }
-
-    ctx.textAlign = 'left';
-  }
+		ctx.textAlign = 'left';
+	  }
   
 	//copy buffer to screen at proper scale
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
+	
+	renderLocked = false;
+	
+	//request another frame
+	requestAnimFrame(render);
+  }
 }
 
-function drawgameLevel() {
+function drawgameLevel(mode) {
   var w = gameLevel.getWidth();
   var h = gameLevel.getHeight();
 
@@ -230,18 +242,47 @@ function drawgameLevel() {
       var sx = x*tileWidth-viewX; //pixel x
       var sy = y*tileHeight-viewY; //pixel y
 
-      var tile = gameLevel.getTile(x,y); //get the tile at this position
+	  if (!mode || mode==0) { //normal rendering
+		  var tile = gameLevel.getTile(x,y); //get the tile at this position
 
-      if (tile!=null) {
-        var tid = tile.id;
-        if (tid!=null) {ctx.drawImage(tileImage(tid), sx, sy);}
-        //"color code" for tile.  temporary use until tile sprites added
-        //var cc = ~~((255/4)*tile.id);
-        //ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
-        //ctx.fillRect(sx,sy,tileWidth,tileHeight);
-        //ctx.strokeStyle = "black";
-        //ctx.strokeRect(sx,sy,tileWidth,tileHeight);
-      }
+		  if (tile!=null) {
+			var tid = tile.id;
+			if (tid!=null) {ctx.drawImage(tileImage(tid), sx, sy);}
+			//"color code" for tile.  temporary use until tile sprites added
+			//var cc = ~~((255/4)*tile.id);
+			//ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
+			//ctx.fillRect(sx,sy,tileWidth,tileHeight);
+			//ctx.strokeStyle = "black";
+			//ctx.strokeRect(sx,sy,tileWidth,tileHeight);
+		  }
+	  }
+	  else if (mode==1) { //border rendering
+		var tile = gameLevel.getTile(x,y); //get the tile at this position
+		if (tile.solid) {
+			var tl = gameLevel.getTile(x-1,y);
+			var tt = gameLevel.getTile(x,y-1);
+			var tr = gameLevel.getTile(x+1,y);
+			var tb = gameLevel.getTile(x,y+1);
+			
+			var offset = (imgBorderTop.width-tileWidth)/2;
+			if (tl && tl.id != tile.id) {ctx.drawImage(imgBorderLeft, sx-offset, sy-offset);}
+			if (tt && tt.id != tile.id) {ctx.drawImage(imgBorderTop, sx-offset, sy-offset);}
+			if (tr && tr.id != tile.id) {ctx.drawImage(imgBorderRight, sx-offset, sy-offset);}
+			if (tb && tb.id != tile.id) {ctx.drawImage(imgBorderBottom, sx-offset, sy-offset);}
+		}
+	  }
+	  else if (mode==2) { //shadow rendering
+		var tile = gameLevel.getTile(x,y); //get the tile at this position
+		if (tile.solid) {
+			var tl = gameLevel.getTile(x-1,y);
+			var tt = gameLevel.getTile(x,y-1);
+			var tr = gameLevel.getTile(x+1,y);
+			var tb = gameLevel.getTile(x,y+1);
+			
+			var offset = (imgBlockShadow.width-tileWidth)/2;
+			if (tl.id != tile.id || tt.id != tile.id || tr.id != tile.id || tb.id != tile.id) {ctx.drawImage(imgBlockShadow, sx-offset, sy-offset);}
+		}
+	  }
     }
   }
 }

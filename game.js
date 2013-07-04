@@ -23,6 +23,16 @@ particlesEnabled = true;
 
 uArgs = null;
 
+//utility function for efficient rendering w/ IE fallback
+window.requestAnimFrame = (function(){
+  return  window.requestAnimationFrame       ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame    ||
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+})();
+
 function init() {
 	//create container to center canvas
 	canvContainer = document.createElement("center");
@@ -103,6 +113,7 @@ function startGame() {
 	player.inv.push(new Gauss());
 	player.inv.push(new WoodenBat());
 	player.inv.push(new NyanGun());
+	console.dir(player.inv);
 	
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -138,6 +149,9 @@ function startGame() {
 
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
+	
+	//start rendering
+	requestAnimFrame(render);
 }
 
 //delta function.  use to make fps scalable
@@ -147,21 +161,15 @@ function d(s) {
 }
 
 function step() {
-	//store time
 	time = new Date().getTime();
 
-	//monitor fps
+	//monitor framerate
 	var thisFrameTime = (thisLoop=time) - lastLoop;
 	frameTime+= (thisFrameTime - frameTime) / filterStrength;
 	lastLoop = thisLoop;
 	fps = (1000/frameTime).toFixed(1);
-
-	//process entities
-	/*for (var ec = 0; ec<entities.length; ec++) {
-    	var ent = entities[ec];
-		if (ent instanceof Entity) {ent.step();}
-	}*/
 	
+	//process entities
 	for (var ec in entities) {
 		var ent = entities[ec];
 		if (ent instanceof Entity) {ent.step();}
@@ -173,7 +181,7 @@ function step() {
 		if (prt instanceof Particle) {prt.step();}
 	}
 
-	if (mouseLeft) {
+	/*if (mouseLeft) {
 		var item = player.inv.getSelected();
 		if (item instanceof Weapon) {
 			item.fire();
@@ -186,7 +194,8 @@ function step() {
 	}
 
 	//reload
-	if (keys[VK_R]) {if (player.inv.getSelected() instanceof Gun) {player.inv.getSelected().reload();}}
+	var rel = player.inv.getSelected().reload;
+	if (keys[VK_R] && rel) {rel();}*/
 
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {
@@ -206,6 +215,6 @@ function step() {
 	if (viewY<0) {viewY = 0;}
 	if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
 
-
-	render();
+	//now called by animation frame
+	//render();
 }

@@ -6,6 +6,13 @@ CLIENT = 1;
 SERVER = 2;
 mpMode = SERVER;
 
+String.prototype.repeat = function(n) {
+	var s = this.toString();
+	var o = s;
+	for (var i=0; i<n-1; i++) {o+=s;}
+	return o;
+}
+
 //util
 irand = function(max) {
 	if (max) {return Math.round(Math.random()*max);}

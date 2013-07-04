@@ -45,6 +45,17 @@ images[1].src = "res/tile/2.png";
 images[2].src = "res/tile/3.png";
 images[3].src = "res/tile/4.png";
 
+var imgBorderLeft = new Image();
+imgBorderLeft.src = "res/tile/border-left.png";
+var imgBorderTop = new Image();
+imgBorderTop.src = "res/tile/border-top.png";
+var imgBorderRight = new Image();
+imgBorderRight.src = "res/tile/border-right.png";
+var imgBorderBottom = new Image();
+imgBorderBottom.src = "res/tile/border-bottom.png";
+var imgBlockShadow = new Image();
+imgBlockShadow.src = "res/tile/shadow.png";
+
 var imgOverlay = new Image();
 imgOverlay.src = "res/overlay.png";
 var imgScreenBlood = new Image();

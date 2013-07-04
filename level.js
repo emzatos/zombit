@@ -120,10 +120,13 @@ punchOutWalls = function(level, prob) {
 
 //Game levels:
 EMPTY=0, FLOOR=1, WALL=2, PLANT=3, DESK=4;
+SOLIDS = [WALL];
 Tile = function(id,x,y) {
 	this.id = id;
 	this.x = x;
 	this.y = y;
+	if (SOLIDS.indexOf(this.id)>=0) {this.solid = true;}
+	else {this.solid = false;}
 	//implement solid
 }
 
@@ -145,7 +148,7 @@ Level.prototype.setTile = function(tile,x,y) {
 	this.data[x][y] = tile;
 }
 Level.prototype.chunkSet = function(chunk) {
-	console.log("set");
+	//console.log("set");
 	//if (chunk.x>=0 && chunk.x+chunk.w<this.getWidth() && chunk.y>=0 && chunk.y+h<this.getHeight()) {
 		for (var x=chunk.x; x<chunk.x+chunk.w; x++) {
 			for (var y=chunk.y; y<chunk.y+chunk.h; y++) {
@@ -194,7 +197,7 @@ Inventory = klass(function(size,owner) {
 	push: function(item) {
 		if (item instanceof Item) {
 			if (this.inv.length<this.size) {
-				item.user = this.owner;
+				item.user = makeEntityReference(this.owner);
 				this.inv.push(item);
 				return this.inv.length-1;
 			}
@@ -256,28 +259,64 @@ Inventory = klass(function(size,owner) {
 		return array_pad(this.inv,this.size,null);
 	},
 	
-	serializable: function(output) {
+	serializable: function(output,depth) {
+		if (depth>MAX_SER_DEPTH) {return;}
+		//console.log(depth);
 		if (!output) {output = {};}
 		
 		output.size = this.size;
-		output.owner = this.owner.arrIndex;
+		output.owner = makeEntityReference(this.owner.arrIndex);
 		output.selected = this.selected;
 		output.inv = [];
 		
 		for (var i=0; i<this.inv.length; i++) {
-			output.inv[i] = this.inv[i].serializable();
+			output.inv[i] = this.inv[i].serializable({},depth+1);
 		}
 		
+		//console.log(output);
 		return output;
 	},
-	unserialize: Entity.unserialize
+	unserialize: function(src,dest) {
+		console.log("THIS GOT CALLED");
+		if (typeof dest === 'undefined') {dest = this;}
+		for (var prop in src) {
+			//console.log("    src["+prop+"] = "+src[prop]);
+			if (typeof dest[prop] === 'undefined') {dest[prop] = {};}
+			if (typeof src[prop] === 'object') {
+				if (src[prop].type && src[prop].type>10000) {
+					//if (!(dest[prop] instanceof Item)) {
+						console.log("SOMETHING IS HAPPENING");
+						
+					//}
+				}
+				this.unserialize(src[prop],dest[prop]);
+			}
+			else {
+				dest[prop] = src[prop];
+			}
+		}
+	}
 })
 
+//must be over 10000
+ITEM = 10001;
+WEAPON = 10002;
+MELEE = 10003;
+WOODENBAT = 10004;
+ZOMBIEATTACK = 10005;
+GUN = 10006;
+PISTOL = 10007;
+ASSAULTRIFLE = 10008;
+TYPHOON = 10009;
+GAUSS = 10010;
+NYANGUN = 10011;
+
 Item = klass(function (name){
-	this.name = name||"Item (Generic)";
+	this.name = name||"Unknown Item";
 	this.arrIndex = items.push(this);
 	this.snd = null;
 	try{this.icon = genericIcon;}catch(e){}
+	this.type = ITEM;
 })
 .methods ({
 	step: function() {
@@ -286,9 +325,11 @@ Item = klass(function (name){
 	destroy: function() {
 		delete items[this.arrIndex];
 	},
-	serializable: function(output) {
+	serializable: function(output,depth) {
 		if (!output) {output = {};}
-		else {output = EntityReference.make(this);}
+		if (depth>MAX_SER_DEPTH) {return;}
+		//console.log(depth);
+		//else {output = EntityReference.make(this);}
 		
 		for (var prop in this) {
 			if (this[prop] != null && this[prop] != undefined) {
@@ -300,7 +341,8 @@ Item = klass(function (name){
 					output[prop] = undefined;
 				}
 				else if (typeof this[prop].serializable === 'function') {
-					output = this[prop].serializable(output);
+					output[prop] = this[prop].serializable(output[prop],depth);
+					//console.log("ser");//soutput = "SER";
 				}
 				else if (!(typeof this[prop] === 'function')) {			
 					if (typeof this[prop] === 'object') {
@@ -333,7 +375,6 @@ Item = klass(function (name){
 });
 
 Weapon = Item.extend(function() {
-
 })
 .methods ({
 
@@ -344,8 +385,9 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 	this.width = width||10;
 	this.delay = delay||10;
 	this.damage = damage||5;
+	this.user = makeEntityReference((user||player));
 	this.timer = 0;
-	this.user = user||player;
+	this.type = MELEE;
 })
 .methods({
 	step: function() {
@@ -360,10 +402,11 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 			for (var ec = 0; ec<entities.length; ec++) {
 		    	var ent = entities[ec];
 				if (ent instanceof Entity) {
-					var dst = pDist(this.user.x,this.user.y,ent.x,ent.y);
-					var dr = Math.abs(pDir(this.user.x,this.user.y,ent.x,ent.y)-this.user.facing);
+					var user = getEntityReference(this.user);
+					var dst = pDist(user.x,user.y,ent.x,ent.y);
+					var dr = Math.abs(pDir(user.x,user.y,ent.x,ent.y)-user.facing);
 					//console.log("dist: "+dst+", dir: "+dr);
-					if (dst<=this.range && ent!=this.user && dr<=radians(this.width)) {
+					if (dst<=this.range && ent!=user && dr<=radians(this.width)) {
 						this.hit(ent);
 						//console.log("hit! "+ent);
 					}
@@ -389,6 +432,7 @@ WoodenBat = Melee.extend(function(){
 
 	this.name = "Wooden Bat";
 	try{this.icon = batIcon}catch(e){}
+	this.type = WOODENBAT;
 })
 .methods({
 
@@ -401,6 +445,7 @@ ZombieAttack = Melee.extend(function(){
 	this.damage = 5;
 
 	this.name = "ZombieAttack";
+	this.type = ZOMBIEATTACK;
 })
 .methods({
 
@@ -416,10 +461,15 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	this.spread = spread||3;
 	this.spd = spd||17;
 	this.friction = 0.001;
-
-	this.user = user||player;
+	this.shot = 1;
+	
+	this.user = makeEntityReference((user||player));
 
 	this.snd = sndGun1;
+	this.type = GUN;
+	
+	this.col1 = "255,205,0";
+	this.col2 = "220,170,0";
 })
 .methods({
 	step: function() {
@@ -434,7 +484,10 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 
 			if (this.ammo>0) {
 				this.ammo-=1;
-				this.bullet();
+				if (this.snd) {this.snd.play();}
+				for (var i=0; i<this.shot; i++) {
+					this.bullet();
+				}
 				//console.log("Fired! Ammo: "+this.ammo);
 
 				this.timer=this.delay;
@@ -452,18 +505,19 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	},
 
 	bullet: function() {
-		if (this.snd) {this.snd.play();}
-
 		//vector converted to xspeed/yspeed
-		var dir = this.user.facing+radians(grand()*this.spread-this.spread*0.5);
+		var user = getEntityReference(this.user);
+		var dir = user.facing+radians(grand()*this.spread-this.spread*0.5);
 		var xs = lDirX(this.spd,dir);
 		var ys = lDirY(this.spd,dir);
 
 		//create bullet and set speeds
-		var blt = new Bullet(this.user.x,this.user.y,this.damage,this.user);
+		var blt = new Bullet(user.x,user.y,this.damage,user);
 		blt.xs = xs;
 		blt.ys = ys;
 		blt.friction = this.friction*(0.8+grand(0.4));
+		blt.col1 = this.col1;
+		blt.col2 = this.col2;
 		return blt;
 	}
 });
@@ -478,6 +532,7 @@ Pistol = Gun.extend(function(){
 	this.spd=19;
 	this.snd = sndGun2;
 	try{this.icon = pistolIcon;}catch(e){}
+	this.type = PISTOL;
 })
 .methods({
 });
@@ -492,6 +547,7 @@ AssaultRifle = Gun.extend(function(){
 	this.spd = 24;
 	this.snd = sndGun1;
 	try{this.icon = assultIcon;}catch(e){}
+	this.type = ASSAULTRIFLE;
 })
 .methods({
 });
@@ -507,6 +563,7 @@ Typhoon = Gun.extend(function(){
 	this.friction = 0.07;
 	this.snd = sndGun3;
 	try{this.icon = typhoonIcon;}catch(e){}
+	this.type = TYPHOON;
 })
 .methods({
 });
@@ -521,6 +578,7 @@ Gauss = Gun.extend(function(){
 	this.spd = 40;
 	this.snd = sndGun2;
 	try{this.icon = gaussIcon;}catch(e){}
+	this.type = GAUSS;
 })
 .methods({
 });
@@ -537,6 +595,7 @@ NyanGun = Gun.extend(function(){
 	this.snd = sndGun3;
 
 	this.colIndex = 0;
+	this.type = NYANGUN;
 })
 .methods({
 	bullet: function() { //for now, we must override this to set bullet color
@@ -549,12 +608,13 @@ NyanGun = Gun.extend(function(){
 		var c2 = "hsla(" + this.colIndex + ", 40%, 40%, 0)";
 
 		//vector converted to xspeed/yspeed
-		var dir = this.user.facing+radians(grand()*this.spread-this.spread*0.5);
+		var user = getEntityReference(user);
+		var dir = user.facing+radians(grand()*this.spread-this.spread*0.5);
 		var xs = lDirX(this.spd,dir);
 		var ys = lDirY(this.spd,dir);
 
 		//create bullet and set speeds
-		var blt = new Bullet(this.user.x,this.user.y,this.damage,this.user);
+		var blt = new Bullet(user.x,user.y,this.damage,user);
 		blt.xs = xs;
 		blt.ys = ys;
 		blt.friction = this.friction*(0.8+grand(0.4));
@@ -564,3 +624,21 @@ NyanGun = Gun.extend(function(){
 		return blt;
 	}
 });
+
+itemIdMap = {};
+itemIdMap[ITEM] = Item;
+itemIdMap[WEAPON] = Weapon;
+itemIdMap[MELEE] = Melee;
+itemIdMap[WOODENBAT] = WoodenBat;
+itemIdMap[ZOMBIEATTACK] = ZombieAttack;
+itemIdMap[GUN] = Gun;
+itemIdMap[PISTOL] = Pistol;
+itemIdMap[ASSAULTRIFLE] = AssaultRifle;
+itemIdMap[TYPHOON] = Typhoon;
+itemIdMap[GAUSS] = Gauss;
+itemIdMap[NYANGUN] = NyanGun;
+
+constructItem = function(id) {
+	try {return new itemIdMap[id];}
+	catch (e) {console.log("Bad item ID: "+id); return null;}
+}

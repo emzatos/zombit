@@ -26,7 +26,7 @@ var game = require('../server/game.js');
 //console.log("game OK");
 
 io = require('socket.io').listen(8001);
-//io.set("log level",1); //disable debug logging
+io.set("log level",1); //disable debug logging
 
 nicknames = [];
 
@@ -71,7 +71,7 @@ io.sockets.on('connection', function (socket) {
       socket.set('nickname', name, function () {
         nicknames.push(name);
         //socket.emit("entity",CircularJSON.stringify(socket.player, safeJSON));
-        socket.emit("newent",makeNewent(socket.player));
+        //socket.emit("newent",makeNewent(socket.player));
         socket.emit("entity",socket.player.serializable());
         socket.emit("playerind",socket.player.arrIndex);
 		//console.dir(entities);
@@ -90,7 +90,16 @@ io.sockets.on('connection', function (socket) {
       console.log("Input: "+input.code+" to "+input.val);
     }
     else if (input.type == INPUT_MOUSE) {
-
+	  if (input.btn) {
+		socket.mouseLeft = input.state;
+	  }
+	  else if (input.facing) {
+		socket.player.facing = input.facing;
+	  }
+	  else if (input.x && input.y) {
+		socket.mouseX = input.x;
+		socket.mouseY = input.y;
+	  }
     }
     else {
       console.log("Unsupported input.");
