@@ -75,22 +75,12 @@ function init() {
 	if (uArgs.indexOf("nointro")>=0) {dmode = GAME;}
 	if (uArgs.indexOf("nomusic")<0) {/*setTimeout(startPlaylist,4900);*/}
 
-	loadResources();
 	loadAudio();
 	addListeners();
 	startGame();
 }
 
-var imgOverlay, imgEntityGeneric, imgPlayer, aniImages=0;
-function loadResources() {
-	//deprecated
-	for(var ii = 0; ii < aniImages.length; ii++) {
-		console.log("loading animation: "+aniImages[ii]);
-		var jj = new Image();
-		jj.src = "res/animation/"+aniImages[ii];
-		aniImages[ii] = jj;
-	}
-}
+var imgOverlay, imgEntityGeneric, imgPlayer;
 
 function tileImage(id) {
 	return images[id];
