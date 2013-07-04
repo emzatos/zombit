@@ -149,7 +149,7 @@ EntityReference = function(obj) {
 	makeEntityReference(obj);
 }
 getEntityReference = function(erObj) { //works for literals and ER instances
-	if (erObj.arrIndex!=null) {
+	if (erObj && erObj.arrIndex!=null) {
 		return entities[erObj.arrIndex];
 	}
 	else {return null;}
@@ -215,9 +215,9 @@ Entity = klass(function (x,y) {
 			//console.log("Server not operational, cannot emit.");
 		}
 	},
-	step: function() {
-		var sx = Math.abs(d(this.xs));
-		var sy = Math.abs(d(this.ys));
+	step: function(dlt) {
+		var sx = Math.abs(dlt*this.xs);
+		var sy = Math.abs(dlt*this.ys);
 
 		//move for xspeed
 		var xm = this.xs>0?1:-1;
@@ -252,8 +252,8 @@ Entity = klass(function (x,y) {
 		if (curtile!=null && curtile.id==FLOOR) {this.y+=(this.ys%1);}
 
 		//apply friction
-		this.xs*=1-this.friction;
-		this.ys*=1-this.friction;
+		this.xs*=1-(this.friction*dlt);
+		this.ys*=1-(this.friction*dlt);
 
 		//tell server to send updates
 		this.mpFrameUpdate();
@@ -294,6 +294,10 @@ Entity = klass(function (x,y) {
 		
 		//delete entities[this.arrIndex];
 		entities[this.arrIndex] = undefined;
+		
+		if (mpMode==SERVER) {
+			io.sockets.emit("delent",{arrIndex: this.arrIndex});
+		}
 	},
 	mpUpdate: function() {
 		if (mpMode==SERVER) {
@@ -392,8 +396,8 @@ Player = Entity.extend(function(x,y,name,owner){
 	this.emitConstruct();
 })
 .methods({
-	step: function() {
-		this.supr();
+	step: function(dlt) {
+		this.supr(dlt);
 
 		if (Math.abs(this.xs)<0.1) {this.xs = 0;}
 		if (Math.abs(this.ys)<0.1) {this.ys = 0;}
@@ -430,6 +434,22 @@ Player = Entity.extend(function(x,y,name,owner){
 			var dir = pDir(pcx,pcy,mouseX,mouseY);
 			player.facing = dir;
 		}
+	},
+	render: function(x,y) {
+		this.supr(x,y);
+		//if (this != player) {
+			ctx.font = '8px "uni"';
+			ctx.textAlign = 'center';
+			var tw = ctx.measureText(this.name).width;
+			
+			ctx.fillStyle = "rgba(0,0,0,0.25)";
+			ctx.fillRect(x-tw/2-2,y-this.image.height/2-13,tw+4,12);
+			
+			ctx.fillStyle = "rgba(255,255,255,0.5)";
+			ctx.fillText(this.name, x, y-12);
+			
+			ctx.textAlign = 'left';
+		//}
 	},
 	damage: function(amount) {
 		this.supr(amount);
@@ -491,8 +511,10 @@ Hostile = Entity.extend(function(x,y,vr){
 	this.type = HOSTILE;
 })
 .methods({
-	step: function() {
-		this.supr();
+	mpFrameUpdate: function() { //don't update automagically
+	},
+	step: function(dlt) {
+		this.supr(dlt);
 
 		if (this.target==T_SEARCH) { //need to find a target (the player for now)
 			//find the nearest target
@@ -509,6 +531,7 @@ Hostile = Entity.extend(function(x,y,vr){
 			if (targ!=null) {
 				if (pDist(this.x,this.y,targ.x,targ.y)<this.visionRadius) { //see if in range
 					this.target = makeEntityReference(targ);
+					this.mpUpdate();
 				}
 			}
 		}
@@ -532,6 +555,7 @@ Hostile = Entity.extend(function(x,y,vr){
 			if (invSelected instanceof Weapon) {
 				if (targetDist<invSelected.range) {
 					this.attack(targ);
+					this.mpUpdate();
 				}
 			}
 		}
@@ -562,14 +586,15 @@ Zombie = Hostile.extend(function(x,y,vr){
 	this.emitConstruct();
 })
 .methods({
-	step: function() {
-		this.supr();
+	step: function(dlt) {
+		this.supr(dlt);
 
 		if (this.target==T_SEARCH) {
 			//randumbly wander if no target
 			if (Math.random()<0.01) {
 				this.xs = -1+Math.random()*2;
 				this.ys = -1+Math.random()*2;
+				this.mpUpdate();
 			}
 		}
 	}
@@ -585,8 +610,8 @@ Projectile = Entity.extend(function(x,y,sender){
 	
 })
 .methods({
-	step: function() {
-		this.supr();
+	step: function(dlt) {
+		this.supr(dlt);
 
 		//check for entity collisions
 		var x1=this.x-this.xs;
@@ -623,8 +648,8 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	this.emitConstruct();
 })
 .methods({
-	step: function() {
-		this.supr();
+	step: function(dlt) {
+		this.supr(dlt);
 		if (Math.abs(this.xs)+Math.abs(this.ys)<3) {this.destroy();}
 	},
 	collide: function(thing) {
@@ -681,7 +706,7 @@ Particle = klass(function(x,y,xs,ys,life) {
 	this.type = PARTICLE;
 })
 .methods({
-	step: function() {
+	step: function(dlt) {
 		this.x+=this.xs;
 		this.y+=this.ys;
 

@@ -419,7 +419,9 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 	hit: function(entity) {
 		//can override to perform custom effect
 		if (entity instanceof Entity) {
-			entity.damage(this.damage);
+			if (typeof entity.damage === 'function') {
+				entity.damage(this.damage);
+			}
 		}
 	}
 });
