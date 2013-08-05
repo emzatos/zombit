@@ -102,7 +102,8 @@ function startGame() {
 	player.inv.push(new Typhoon());
 	player.inv.push(new Gauss());
 	player.inv.push(new WoodenBat());
-	player.inv.push(new NyanGun());
+	player.inv.push(new RandomGunTester(0.5));
+	player.inv.push(new RandomGunTester(0.9));
 	console.dir(player.inv);
 	
 	//spawn some zombies

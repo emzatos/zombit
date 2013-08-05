@@ -10,9 +10,9 @@ console.log("");
 mpActive = true; //shut up
 
 klass = require('klass');
-microtime = require('microtime');
+//microtime = require('microtime');
 //console.log("klass OK");
-CircularJSON = require('circular-json');
+//CircularJSON = require('circular-json');
 //console.log("circular-json OK");
 var entity = require('../entity.js');
 //console.log("entity OK");

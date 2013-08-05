@@ -20,24 +20,32 @@ gameLevel = punchOutWalls(gameLevel,0.1);
 
 //console.log("def step...");
 
-prevtime = microtime.now();
+prevtime = Date.now();
+//prevtime = microtime.now();
 step = function() {
-  time = microtime.now();
-  var delta = (time-prevtime)/(1000000/targetFPS);
-  console.log("time: "+time+", delta: "+delta);
-	//process entities
-	for (var ec = 0; ec<entities.length; ec++) {
-    	var ent = entities[ec];
-		if (ent instanceof Entity) {ent.step(delta);}
-	}
+  time = Date.now();
+  if (time-prevtime>16) {
+	  tdelta = (time-prevtime)/(1000/targetFPS);
+	  //time = microtime.now();
+	  //var delta = (time-prevtime)/(1000000/targetFPS);
+	  console.log("time: "+time+", delta: "+tdelta);
+		//process entities
+		for (var ec = 0; ec<entities.length; ec++) {
+			var ent = entities[ec];
+			if (ent instanceof Entity) {ent.step(tdelta);}
+		}
 
-	//process items (gun timers, etc)
-	for (var ic = 0; ic<items.length; ic++) {
-    	ite = items[ic];
-		if (ite instanceof Item) {ite.step(delta);}
+		//process items (gun timers, etc)
+		for (var ic = 0; ic<items.length; ic++) {
+			ite = items[ic];
+			if (ite instanceof Item) {ite.step(tdelta);}
+		}
+		console.log("D "+(time-prevtime));
+		prevtime = time;
 	}
-	prevtime = time;
+	setImmediate(step);
 }
+
 
 d = function(i) {return i;} //compatibility
 
@@ -72,7 +80,8 @@ for (var i=0; i<15; i++) {
 	}}
 },10);*/
 
-timer = setInterval(step,1000/targetFPS);
+//timer = setInterval(step,1000/targetFPS);
+step();
 
 VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68, VK_R=82, VK_T=84;
 VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_7 = 55, VK_8 = 56, VK_9 = 57; 

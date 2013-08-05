@@ -119,6 +119,7 @@ collisionCircle = function(c1x,c1y,c1r,c2x,c2y,c2r) {
 
 //may not go over 10000
 ENTITY = 10;
+DROPPEDITEM = 9010;
 PLAYER = 110;
 HOSTILE = 210;
 ZOMBIE = 1210;
@@ -357,7 +358,7 @@ Entity = klass(function (x,y) {
 		if (typeof dest === 'undefined') {dest = this;}
 		for (var prop in src) {
 			//console.log("    ".repeat(depth)+"src["+prop+"] = "+src[prop]);
-			if (typeof dest[prop] === 'undefined') {dest[prop] = {};}
+			if (typeof dest[prop] === 'undefined' || dest[prop] == null) {dest[prop] = {};}
 			/*console.log("Deserializing:");
 			console.log(" dest[prop] = ");
 			console.dir(dest[prop]);
@@ -381,13 +382,32 @@ makeNewent = function(ent) {
 	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
 
+DroppedItem = Entity.extend(function(x,y,item){
+	this.x = x;
+	this.y = y;
+	this.item = item;
+	this.type = DROPPEDITEM;
+})
+.methods({
+	step: function() {
+		this.supr();
+	},
+	render: function() {
+		
+	},
+	die: function() {
+	},
+	damage: function() {
+	}
+});
+
 Player = Entity.extend(function(x,y,name,owner){
 	this.name = name;
 	this.owner = owner||window;
 	try {this.image = imgPlayer_W;}
 	catch (e) {}
 	this.spdInc = 0.5;
-	this.inv = new Inventory(6,this);
+	this.inv = new Inventory(7,this);
 	this.friction = 0.2;
 	this.facing = 0;
 
@@ -486,8 +506,10 @@ Player = Entity.extend(function(x,y,name,owner){
 		}
 
 		//reload
-		var rel = this.inv.getSelected().reload;
-		if (this.owner.keys[VK_R] && typeof rel === 'function') {this.inv.getSelected().reload();}
+		if (this.inv && this.inv.getSelected()) {
+			var rel = this.inv.getSelected().reload;
+			if (this.owner.keys[VK_R] && typeof rel === 'function') {this.inv.getSelected().reload();}
+		}
 		
 		//process mouse input
 		if (this.owner.mouseLeft) {
@@ -667,21 +689,25 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 		grad.addColorStop(0, "rgba(255,255,255,1)");
 		grad.addColorStop(1, "rgba(255,255,255,0.5)");*/
 
+		var grad0= ctx.createLinearGradient(x, y, this.xp, this.yp);
+		grad0.addColorStop(0, "rgba(255,255,255,1)");
+		grad0.addColorStop(1, "rgba(255,255,255,0.5)");
+		
 		var grad1= ctx.createLinearGradient(x, y, this.xp, this.yp);
 		grad1.addColorStop(0, "rgba("+this.col1+",1)");
 		grad1.addColorStop(1, "rgba("+this.col2+",0)");
-
+		
 		ctx.lineCap = "round";
 
-		ctx.lineWidth = 3;
+		ctx.lineWidth = 5;
 		ctx.strokeStyle = grad1;
 		ctx.beginPath();
 		ctx.moveTo(this.xp,this.yp);
 		ctx.lineTo(x,y);
 		ctx.stroke();
 
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = "white";
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = grad0;
 		ctx.beginPath();
 		ctx.moveTo(this.xp,this.yp);
 		ctx.lineTo(x,y);
@@ -745,6 +771,7 @@ BloodSplat = Particle.extend(function(x,y,xs,ys){
 
 idMap = {};
 idMap[ENTITY] = Entity;
+idMap[DROPPEDITEM] = DroppedItem;
 idMap[PLAYER] = Player;
 idMap[HOSTILE] = Hostile;
 idMap[ZOMBIE] = Zombie;

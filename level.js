@@ -189,7 +189,7 @@ Chunk = klass(function (x,y,tiles){
 
 Inventory = klass(function(size,owner) {
 	this.size = size;
-	this.owner = owner;
+	this.owner = makeEntityReference(owner);
 	this.inv = new Array();
 	this.selected = 0;
 })
@@ -197,7 +197,7 @@ Inventory = klass(function(size,owner) {
 	push: function(item) {
 		if (item instanceof Item) {
 			if (this.inv.length<this.size) {
-				item.user = makeEntityReference(this.owner);
+				item.owner = this.owner;
 				this.inv.push(item);
 				return this.inv.length-1;
 			}
@@ -265,7 +265,7 @@ Inventory = klass(function(size,owner) {
 		if (!output) {output = {};}
 		
 		output.size = this.size;
-		output.owner = makeEntityReference(this.owner.arrIndex);
+		output.owner = makeEntityReference(this.owner);
 		output.selected = this.selected;
 		output.inv = [];
 		
@@ -334,10 +334,7 @@ Item = klass(function (name){
 		for (var prop in this) {
 			if (this[prop] != null && this[prop] != undefined) {
 			//console.log("setting "+prop);
-				if (prop == "owner") {
-					//this has to be here for some reason
-				}
-				else if (typeof this[prop] === 'undefined') {
+				if (typeof this[prop] === 'undefined') {
 					output[prop] = undefined;
 				}
 				else if (typeof this[prop].serializable === 'function') {
@@ -355,7 +352,10 @@ Item = klass(function (name){
 			}
 		}
 		
-		delete output.owner; //shhh it's okay
+		console.log("Owner: ");
+		console.dir(makeEntityReference(this.owner));
+		output.owner = makeEntityReference(this.owner);
+		//delete output.owner; //shhh it's okay
 		
 		return output;
 	},
@@ -385,7 +385,7 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 	this.width = width||10;
 	this.delay = delay||10;
 	this.damage = damage||5;
-	this.user = makeEntityReference((user||player));
+	this.owner = makeEntityReference((user||player));
 	this.timer = 0;
 	this.type = MELEE;
 })
@@ -402,7 +402,7 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 			for (var ec = 0; ec<entities.length; ec++) {
 		    	var ent = entities[ec];
 				if (ent instanceof Entity) {
-					var user = getEntityReference(this.user);
+					var user = getEntityReference(this.owner);
 					var dst = pDist(user.x,user.y,ent.x,ent.y);
 					var dr = Math.abs(pDir(user.x,user.y,ent.x,ent.y)-user.facing);
 					//console.log("dist: "+dst+", dir: "+dr);
@@ -465,7 +465,7 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	this.friction = 0.001;
 	this.shot = 1;
 	
-	this.user = makeEntityReference((user||player));
+	this.owner = makeEntityReference((user||player));
 
 	this.snd = sndGun1;
 	this.type = GUN;
@@ -502,13 +502,15 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	},
 
 	reload: function() {
-		this.ammo = "R";
-		this.timer = 100;
+		if (this.ammo!="R") {
+			this.ammo = "R";
+			this.timer = 100;
+		}
 	},
 
 	bullet: function() {
 		//vector converted to xspeed/yspeed
-		var user = getEntityReference(this.user);
+		var user = getEntityReference(this.owner);
 		var dir = user.facing+radians(grand()*this.spread-this.spread*0.5);
 		var xs = lDirX(this.spd,dir);
 		var ys = lDirY(this.spd,dir);
@@ -624,6 +626,58 @@ NyanGun = Gun.extend(function(){
 		blt.col1 = c1;
 		blt.col2 = c2;
 		return blt;
+	}
+});
+
+RandomGun = Gun.extend(function(awesomeness){
+	this.awesomeness = awesomeness<0?0:awesomeness>1?1:awesomeness;
+	this.makeRandomProperties(awesomeness);
+})
+.methods({
+	makeRandomProperties: function(awesomeness) {
+		//crappy random gun generation that pretty much only makes assault rifles
+		this.clipsize = Math.ceil(irandr(xexp(150,awesomeness),xexp(150,awesomeness)));
+		this.ammo = this.clipsize;
+		this.delay = ~~grandr((1-awesomeness)*10+2,(1-awesomeness)*20+2);
+		this.damage = grandr(20*awesomeness,(80*awesomeness)-((this.clipsize/250)*50*awesomeness));
+		this.spread = grandr(1,30-xexp(15,awesomeness));
+		this.spd = grandr(awesomeness*12+8,awesomeness*20+8);
+		
+		if (Math.random()<0.15) {
+			var sn = Math.round(irandr(2,4));
+			this.shot = sn;
+			this.delay *= Math.floor(sn/2);
+		}
+		else {
+			this.shot = 1;
+		}
+		
+		this.col1 = rcol(0,255,0,255,0,255);
+		this.col2 = rcol(0,255,0,255,0,255);
+		this.snd = sndGun1;
+		try{this.icon = assultIcon;}catch(e){}
+		this.type = ASSAULTRIFLE;
+		this.name = this.makeName();
+	},
+	
+	makeName: function() {
+		function w(a,i,r) {var rp = ((typeof i === 'undefined')?irandr(0,a.length):i+irandr(-r,r)); return a[rp<0?0:rp>a.length-1?a.length-1:rp];}
+		var adjectives = ["terrible","scrap","salvaged","value","average","decent","quality","refined","perfected","god-tier"];
+		var words = ["photo","proto","fire","light","death","aero","gravi","power","flux","wind","wave","bolt","knife","blade","earth","dark","hell","sun","gyro","techno","electro","multi","super","dragon","plasma","ice","magma"];
+		var suffixes = ["shaker","slasher","blaster","whip","thrower","prong","spiker","booster","chopper","driller","seeker","wand","beam","ray","phaser","saber","launcher","slinger","razer","cutter","burner","storm","fury"];
+		return (w(adjectives,~~(this.awesomeness*adjectives.length),0)+" "+w(words)+w(suffixes)).toProperCase();
+	}
+});
+
+RandomGunTester = RandomGun.extend(function(awesomeness) {
+})
+.methods({
+	reload: function() {
+		if (this.ammo!="R") {
+			this.awesomeness=Math.random();
+			this.makeRandomProperties(this.awesomeness);
+			this.supr();
+		}
 	}
 });
 

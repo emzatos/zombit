@@ -63,7 +63,7 @@ function render() {
 		  if (item!=null) {
 		  ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
 
-		  var bx = viewWidth-92-(18*(player.inv.size-i));
+		  var bx = viewWidth-128-(18*(player.inv.size-i));
 		  ctx.fillRect(bx,4,16,16);
 		  ctx.strokeRect(bx,4,16,16);
 		  if (item.icon) {
@@ -81,40 +81,40 @@ function render() {
 
 		//draw healthbar
 		ctx.fillStyle = "rgba(234,20,53,0.5)";
-		ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size),8);
+		ctx.fillRect(viewWidth-128-(18*(player.inv.size)),22,18*(player.inv.size),8);
 		ctx.fillStyle = "rgba(20,230,53,1)";
-		ctx.fillRect(viewWidth-92-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
+		ctx.fillRect(viewWidth-128-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
 		ctx.font = '8px "uni"';
 		ctx.fillStyle = "white";
-		ctx.fillText(player.life,(viewWidth-92-(18*(player.inv.size)*0.5)-5),28);
+		ctx.fillText(player.life,(viewWidth-128-(18*(player.inv.size)*0.5)-5),28);
 
 		//draw selected item GUI
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
 		ctx.strokeStyle = "rgba(244,250,60,0.6)";
-		ctx.fillRect(viewWidth-90,4,80,25);
-		ctx.strokeRect(viewWidth-90,4,80,25);
+		ctx.fillRect(viewWidth-126,4,112,25);
+		ctx.strokeRect(viewWidth-126,4,112,25);
 
 		ctx.fillStyle = "rgba(255,255,255,1)";
 		var ii = player.inv.getSelected();
 		ctx.font = '9px "uni"';
-		ctx.fillText(ii.name,viewWidth-80,13);
+		ctx.fillText(ii.name,viewWidth-118,13);
 
 		ctx.font = '12px "uni"';
 		if (ii instanceof Gun) {
 		  ctx.fillStyle=ii.ammo!=0 && ii.ammo!="R"?"white":"red";
-		  ctx.fillText("A: "+ii.ammo,viewWidth-80,25);
+		  ctx.fillText("A: "+ii.ammo,viewWidth-118,25);
 		}
 
 		//draw score
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
 		ctx.strokeStyle = "rgba(244,250,60,0.6)";
-		ctx.fillRect(viewWidth/2-40,4,80,20);
-		ctx.strokeRect(viewWidth/2-40,4,80,20);
+		ctx.fillRect(viewWidth/2-40,viewHeight-24,80,20);
+		ctx.strokeRect(viewWidth/2-40,viewHeight-24,80,20);
 
 		ctx.font = '13px "uni"';
 		ctx.textAlign = 'center';
 		ctx.fillStyle = "white";
-		ctx.fillText(gameScore,viewWidth/2,18);
+		ctx.fillText(gameScore,viewWidth/2,viewHeight-10);
 		ctx.textAlign = 'left';
 
 		//ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
@@ -128,12 +128,13 @@ function render() {
 
 		//draw fps
 		if (showFPS) {
-		  ctx.font = '10px monospace';
+		  ctx.font = '8px monospace';
 		  //ctx.fillStyle = "rgba(0,0,0,0.2)";
 		  //ctx.fillRect(2,10,40,4);
 		  ctx.fillStyle = "white";
-		  ctx.fillText("FPS: "+(~~fps),4,12);
-		  ctx.fillText("Delta: "+(tdelta.toFixed(1)),4,24);
+		  ctx.fillText("FPS: "+(~~fps),4,16);
+		  ctx.fillText("Delta: "+(tdelta.toFixed(1)),4,26);
+		  ctx.fillText("Facing: "+(player.facing.toFixed(1)),4,36);
 		}
 
 		//draw chat overlay

@@ -1,5 +1,6 @@
 var sndGun1,sndGun2,sndGun3;
 var sndTrack1,sndTrack2,sndTrack3;
+var sndFootstep,sndReload;
 
 var playlist;
 var playlistIndex = 0;
@@ -11,7 +12,8 @@ function loadAudio() {
 	sndGun1 = loadSoundFile("res/sound/gun1",4);
 	sndGun2 = loadSoundFile("res/sound/gun2",4);
 	sndGun3 = loadSoundFile("res/sound/gun3",4);
-
+	
+	
 	sndTrack1 = loadSoundFile("res/sound/moves");
 	sndTrack1.volume = 0.2;
 

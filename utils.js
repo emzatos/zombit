@@ -19,9 +19,25 @@ irand = function(max) {
 	else {return Math.round(Math.random());}
 }
 
+irandr = function(min,max) {
+	return max<=min?min:irand(max-min)+min;
+}
+
 grand = function(max) {
 	if (max) {return (((Math.random()+Math.random())/2)*max);}
 	else {return ((Math.random()+Math.random())/2);}
+}
+
+grandr = function(min,max) {
+	return max<=min?min:grand(max-min)+min;
+}
+
+rcol = function(rl,rh,gl,gh,bl,bh) {
+	return irandr(rl,rh)+","+irandr(gl,gh)+","+irandr(bl,bh);
+}
+
+xexp = function(max,x) {
+	return ((Math.exp(2.77258872 * x) - 1) / 15)*max;
 }
 
 array_pad  = function(input, pad_size, pad_value) {
@@ -82,6 +98,10 @@ doLine = function(x1,y1,x2,y2,functionToDo,deres)
         y -= yInc;
     }
 }
+
+String.prototype.toProperCase = function () {
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
 
 //store random numbers for very fast random number generation (for shaders, etc.)
 frandArray = new Array(20000);
