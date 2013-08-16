@@ -392,12 +392,12 @@ DroppedItem = Entity.extend(function(x,y,item){
 	step: function() {
 		this.supr();
 	},
-	render: function() {
-		
+	render: function(x,y) {
+		ctx.drawImage(imgShadow,x-tileWidth/2,y-tileHeight/4,tileWidth,tileHeight/2);
+		console.log(this.item.image);
+		ctx.drawImage(this.item.icon,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 	},
-	die: function() {
-	},
-	damage: function() {
+	destroy: function() {
 	}
 });
 
@@ -410,6 +410,7 @@ Player = Entity.extend(function(x,y,name,owner){
 	this.inv = new Inventory(7,this);
 	this.friction = 0.2;
 	this.facing = 0;
+	this.maxSpd = 5;
 
 	this.type = PLAYER;
 	
@@ -425,10 +426,10 @@ Player = Entity.extend(function(x,y,name,owner){
 		this.control();
 
 		//clip speed
-		if (this.xs>5) {this.xs=5;}
-		if (this.xs<-5) {this.xs=-5;}
-		if (this.ys>5) {this.ys=5;}
-		if (this.ys<-5) {this.ys=-5;}
+		if (this.xs>this.maxSpd) {this.xs=this.maxSpd;}
+		if (this.xs<-this.maxSpd) {this.xs=-this.maxSpd;}
+		if (this.ys>this.maxSpd) {this.ys=this.maxSpd;}
+		if (this.ys<-this.maxSpd) {this.ys=-this.maxSpd;}
 
 		//move view to player
 		if (mpMode==CLIENT) {
@@ -509,6 +510,14 @@ Player = Entity.extend(function(x,y,name,owner){
 		if (this.inv && this.inv.getSelected()) {
 			var rel = this.inv.getSelected().reload;
 			if (this.owner.keys[VK_R] && typeof rel === 'function') {this.inv.getSelected().reload();}
+		}
+		
+		//drop items
+		if (this.inv && this.inv.getSelected()) {
+			if (this.owner.keys[VK_Q]) {
+				this.owner.keys[VK_Q] = false;
+				new DroppedItem(this.x,this.y,this.inv.pop(this.inv.selected));
+			}
 		}
 		
 		//process mouse input
@@ -665,8 +674,11 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	
 	this.col1 = "255,205,0";
 	this.col2 = "220,170,0";
+	
+	this.light = null;
 
 	this.type = BULLET;
+	
 	this.emitConstruct();
 })
 .methods({
@@ -684,6 +696,11 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 		this.destroy();
 	},
 	render: function(x,y) {
+		if (this.light==null) {
+			this.light = new EntityLight(this,"rgba("+this.col1+",0.2)",80);
+			registerLight(this.light);
+		}
+	
 		if (this.xp!=null) {
 		/*var grad= ctx.createLinearGradient(x, y, this.xp, this.yp);
 		grad.addColorStop(0, "rgba(255,255,255,1)");
@@ -715,6 +732,10 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 		}
 		this.xp=x;
 		this.yp=y;
+	},
+	destroy: function() {
+		unregisterLight(this.light);
+		this.supr();
 	}
 });
 

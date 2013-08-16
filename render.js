@@ -13,7 +13,7 @@ var defaultScreenHeight = screenHeight;
 var INTRO=0,GAME=1;
 var dmode = INTRO;
 var intime = null;
-var showFPS = true;
+var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = false, enableLightTinting = false;
 
 //advanced shader data
 var od,out;
@@ -34,16 +34,18 @@ function render() {
 
 		//render the tiles
 		drawgameLevel(0);
-		drawgameLevel(1);
+		if (tileShadows) {drawgameLevel(1);}
 
 		//render particles (they're entities, but they must be drawn below the others)
-		for (var ec = 0; ec<particles.length; ec++) {
-		  var prt = particles[ec];
-		  if (prt instanceof Particle) {
-			if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
-			  prt.render(prt.x-viewX,prt.y-viewY);
+		if (drawParticles) {
+			for (var ec = 0; ec<particles.length; ec++) {
+			  var prt = particles[ec];
+			  if (prt instanceof Particle) {
+				if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
+				  prt.render(prt.x-viewX,prt.y-viewY);
+				}
+			  }
 			}
-		  }
 		}
 
 		//render the entities
@@ -55,6 +57,9 @@ function render() {
 			}
 		  }
 		}
+		
+		//render lighting
+		renderLight();
 
 		//draw inventory GUI
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
@@ -120,14 +125,14 @@ function render() {
 		//ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
 
 		//draw overlay
-		ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);
+		if (drawOverlay) {ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);}
 
 		//apply shaders
 		//shader(srand);
 		if (enableShaders==true) {xshader(xsfx);}
 
 		//draw fps
-		if (showFPS) {
+		if (showDebug) {
 		  ctx.font = '8px monospace';
 		  //ctx.fillStyle = "rgba(0,0,0,0.2)";
 		  //ctx.fillRect(2,10,40,4);

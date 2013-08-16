@@ -75,9 +75,136 @@ function init() {
 	if (uArgs.indexOf("nointro")>=0) {dmode = GAME;}
 	if (uArgs.indexOf("nomusic")<0) {/*setTimeout(startPlaylist,4900);*/}
 
+	initLight();
+	
 	loadAudio();
 	addListeners();
 	startGame();
+	
+	//show the gui
+	gui = new dat.GUI({
+		load: {
+		  "preset": "Drunken",
+		  "remembered": {
+			"Default": {
+			  "0": {
+				"viewWidth": 600,
+				"viewHeight": 400,
+				"screenWidth": 1200,
+				"screenHeight": 800,
+				"showDebug": true,
+				"enableShaders": false,
+				"drawParticles": true,
+				"drawOverlay": true,
+				"tileShadows": true,
+				"entityShadows": true
+			  }
+			},
+			"Ice Rink": {
+			  "0": {
+				"viewWidth": 600,
+				"viewHeight": 400,
+				"screenWidth": 1200,
+				"screenHeight": 800,
+				"showDebug": true,
+				"enableShaders": false,
+				"drawParticles": true,
+				"drawOverlay": true,
+				"tileShadows": true,
+				"entityShadows": true
+			  },
+			  "1": {
+				"life": 100,
+				"spdInc": 0.1,
+				"maxSpd": 8,
+				"friction": 0
+			  }
+			},
+			"Drunken": {
+			  "0": {
+				"viewWidth": 600,
+				"viewHeight": 400,
+				"screenWidth": 1200,
+				"screenHeight": 800,
+				"showDebug": true,
+				"enableShaders": false,
+				"drawParticles": true,
+				"drawOverlay": true,
+				"tileShadows": true,
+				"entityShadows": true
+			  },
+			  "1": {
+				"life": 25,
+				"spdInc": -0.2,
+				"maxSpd": 3,
+				"friction": 0.1
+			  }
+			},
+			"Low Quality": {
+			  "0": {
+				"viewWidth": 600,
+				"viewHeight": 400,
+				"screenWidth": 1200,
+				"screenHeight": 800,
+				"showDebug": true,
+				"enableShaders": false,
+				"drawParticles": false,
+				"drawOverlay": false,
+				"tileShadows": false,
+				"entityShadows": false
+			  }
+			}
+		  },
+		  "closed": false,
+		  "folders": {
+			"Display": {
+			  "preset": "Default",
+			  "closed": true,
+			  "folders": {}
+			},
+			"Player": {
+			  "preset": "Default",
+			  "closed": true,
+			  "folders": {}
+			}
+		  }
+		},
+		
+		preset: "Default"
+	});
+	gui.remember(window);
+	gui.remember(player);
+	
+	var display = gui.addFolder("Display");
+	display.add(window, "viewWidth").min(0);
+	display.add(window, "viewHeight").min(0);
+	display.add(window, "screenWidth").min(0);
+	display.add(window, "screenHeight").min(0);
+	
+	display.add(window, "showDebug");
+	display.add(window, "enableShaders");
+	display.add(window, "drawParticles");
+	display.add(window, "drawOverlay");
+	display.add(window, "tileShadows");
+	display.add(window, "entityShadows");
+	
+	display.add(window, "enableLightRendering");
+	display.add(window, "enableLightTinting");
+	
+	var playr = gui.addFolder("Player");
+	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();
+	playr.add(player, "spdInc").step(0.01);
+	playr.add(player, "maxSpd").step(0.01);
+	playr.add(player, "friction").step(0.01);
+	playr.add(window, "godMode");
+	playr.add(window, "randomGun");
+	
+	var mpm = gui.addFolder("Multiplayer (Broken, do not use)");
+	mpm.add(window, "mpServer");
+	mpm.add(window, "mpPort");
+	mpm.add(window, "mpNick");
+	mpm.add(window, "mpStart");
+	mpm.add(window, "mpConnect");
 }
 
 var imgOverlay, imgEntityGeneric, imgPlayer;
@@ -132,6 +259,9 @@ function startGame() {
 			new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 		}}
 	},500);
+
+	//set up some light
+	registerLight(new EntityLight(player,"white",400));
 
 	//start music
 	//setTimeout(startPlaylist,4900);
@@ -223,4 +353,14 @@ function step() {
 	//now called by animation frame
 	//render();
 	prevtime = time;
+}
+
+function godMode() {
+	player.inv.getSelected().ammo = Infinity;
+	player.inv.getSelected().clipsize = Infinity;
+	player.life = Infinity;
+}
+
+function randomGun() {
+	player.inv.inv[player.inv.selected] = new RandomGun(parseFloat(prompt("Enter awesomeness from 0 to 1.")));
 }

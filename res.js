@@ -37,6 +37,8 @@ var imgBloodSplat2 = new Image();
 imgBloodSplat2.src = "res/entity/bloodsplat3.png";
 var imgBloodSplat3 = new Image();
 imgBloodSplat3.src = "res/entity/bloodsplat4.png";
+var imgShadow = new Image();
+imgShadow.src = "res/entity/shadow.png";
 
 var images = new Array(4);
 for (var i=0; i<images.length; i++) {images[i] = new Image();}
