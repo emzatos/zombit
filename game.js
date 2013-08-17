@@ -1,15 +1,15 @@
 var targetFPS = 60;
 var fps = targetFPS;
-var lt = new Date().getTime();
-var gameLevel = null;
+var lt = new Date().getTime(); //used for timing
+var gameLevel = null; //currently loaded level
 
-var tileWidth = 16;
+var tileWidth = 16; //pixel width of a tile
 var tileHeight = 16;
 
-var entities = [];
-var items = [];
+var entities = []; //stores all entities
+var items = []; //stores all items (does this need to exist?)
 
-var gameScore = 0;
+var gameScore = 0; //score...
 
 //settings
 var enableShaders = false; //this works, but it's probably too slow
@@ -19,9 +19,9 @@ var filterStrength = 20;
 var frameTime = 0, lastLoop = new Date, thisLoop;
 var fps = targetFPS;
 
-particlesEnabled = true;
+particlesEnabled = true; //duh
 
-uArgs = null;
+uArgs = null; //user arguments
 
 //utility function for efficient rendering w/ IE fallback
 window.requestAnimFrame = (function(){
@@ -75,11 +75,12 @@ function init() {
 	if (uArgs.indexOf("nointro")>=0) {dmode = GAME;}
 	if (uArgs.indexOf("nomusic")<0) {/*setTimeout(startPlaylist,4900);*/}
 
+	//initialize drawing buffers for lighting
 	initLight();
 	
-	loadAudio();
-	addListeners();
-	startGame();
+	loadAudio(); //load audio
+	addListeners(); //add input listeners
+	startGame(); //generate and populate a level
 	
 	//show the gui
 	gui = new dat.GUI();
@@ -120,12 +121,13 @@ function init() {
 
 var imgOverlay, imgEntityGeneric, imgPlayer;
 
+//no idea why this exists
 function tileImage(id) {
 	return images[id];
 }
 
 function startGame() {
-	mpMode = CLIENT;
+	mpMode = CLIENT; //this is not a sever.  this is for shared code
 
 	//generate gameLevel
 	gameLevel = generateRectRooms(120,120,16);
@@ -133,6 +135,7 @@ function startGame() {
 	gameLevel = generatePlants(gameLevel,0.1);
 	gameLevel = punchOutWalls(gameLevel,0.1);
 	
+	//populate the level with light fixtures
 	addLightsToLevel(gameLevel,196,"rgb(215,191,182)",512,0.3,0.2);
 
 	//create player
@@ -179,6 +182,7 @@ function startGame() {
 	//start music
 	//setTimeout(startPlaylist,4900);
 
+	//switch to game rendering mode in 5 sec
 	setTimeout(function(){dmode=GAME;},5000);
 
 	//set interval for processing
@@ -190,7 +194,7 @@ function startGame() {
 
 //delta function.  use to make fps scalable
 function d(s) {
-	return s;
+	return s;  //LIES
 	//return (60/fps)*s;
 }
 
@@ -227,18 +231,6 @@ function step() {
 	for (var ec = 0; ec<particles.length; ec++) {
     	var prt = particles[ec];
 		if (prt instanceof Particle) {prt.step(tdelta);}
-	}
-
-	/*if (mouseLeft) {
-		var item = player.inv.getSelected();
-		if (item instanceof Weapon) {
-			item.fire();
-		}
-	}
-
-	//inv selection keys
-	for (var nk=49; nk<58; nk++) {
-		if (keys[nk]) {player.inv.select(nk-49);}
 	}
 
 	//reload

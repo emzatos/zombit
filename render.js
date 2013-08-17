@@ -23,8 +23,9 @@ var particles = new Array();
 
 var renderLocked = false;
 function render() {
-  if (!renderLocked) {
-	renderLocked = true;
+  if (!renderLocked) { //if the level is not currently being rendered
+	renderLocked = true; //lock
+	
 	if (dmode==GAME) {
 		//clear screen
 		ctx.fillStyle = "black";
@@ -64,24 +65,18 @@ function render() {
 		//draw inventory GUI
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
 		for (var i=0; i<player.inv.size; i++) {
-		  var item = player.inv.get(i);
-		  if (item!=null) {
-		  ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)";
+			var item = player.inv.get(i);
+			if (item!=null) {
+				ctx.strokeStyle = i==player.inv.selected?"white":"rgba(244,250,60,0.6)"; //selected slots are white outlined
 
-		  var bx = viewWidth-128-(18*(player.inv.size-i));
-		  ctx.fillRect(bx,4,16,16);
-		  ctx.strokeRect(bx,4,16,16);
-		  if (item.icon) {
-			ctx.drawImage(item.icon, bx, 4);
-		  }
-			
-		  // fill row with weapon icons
-		  //ctx.drawImage(pistolIcon, viewWidth-92-(18*(player.inv.size-0)), 4);
-		  //ctx.drawImage(assultIcon, viewWidth-92-(18*(player.inv.size-1)), 4);
-		  //ctx.drawImage(typhoonIcon, viewWidth-92-(18*(player.inv.size-2)), 4);
-		  //ctx.drawImage(gaussIcon, viewWidth-92-(18*(player.inv.size-3)), 4);
-		  //ctx.drawImage(batIcon, viewWidth-92-(18*(player.inv.size-4)), 4);
-		  }
+				//draw the icon for this item
+				var bx = viewWidth-128-(18*(player.inv.size-i));
+				ctx.fillRect(bx,4,16,16);
+				ctx.strokeRect(bx,4,16,16);
+				if (item.icon) {
+				ctx.drawImage(item.icon, bx, 4);
+				}
+			}
 		}
 
 		//draw healthbar
@@ -122,20 +117,16 @@ function render() {
 		ctx.fillText(gameScore,viewWidth/2,viewHeight-10);
 		ctx.textAlign = 'left';
 
-		//ctx.fillText("x: "+(lDirX(10,player.facing)).toFixed(5)+", y: "+(lDirY(10,player.facing)).toFixed(5),60,20);
 
 		//draw overlay
 		if (drawOverlay) {ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);}
 
 		//apply shaders
-		//shader(srand);
 		if (enableShaders==true) {xshader(xsfx);}
 
 		//draw fps
 		if (showDebug) {
 		  ctx.font = '8px monospace';
-		  //ctx.fillStyle = "rgba(0,0,0,0.2)";
-		  //ctx.fillRect(2,10,40,4);
 		  ctx.fillStyle = "white";
 		  ctx.fillText("FPS: "+(~~fps),4,16);
 		  ctx.fillText("Delta: "+(tdelta.toFixed(1)),4,26);
@@ -255,12 +246,6 @@ function drawgameLevel(mode) {
 		  if (tile!=null) {
 			var tid = tile.id;
 			if (tid!=null) {ctx.drawImage(tileImage(tid), sx, sy);}
-			//"color code" for tile.  temporary use until tile sprites added
-			//var cc = ~~((255/4)*tile.id);
-			//ctx.fillStyle = "rgb("+cc+","+cc+","+cc+")";
-			//ctx.fillRect(sx,sy,tileWidth,tileHeight);
-			//ctx.strokeStyle = "black";
-			//ctx.strokeRect(sx,sy,tileWidth,tileHeight);
 		  }
 	  }
 	  else if (mode==1) { //border rendering
