@@ -84,3 +84,11 @@ function renderLight() {
 		compositeLight(ctx);
 	}
 }
+
+function addLightsToLevel(level,spacing,color,size,randomness,chanceBroken) {
+	for (var x=spacing, w=level.getWidth()*tileWidth; x<w; x+=spacing) {
+		for (var y=spacing, h=level.getHeight()*tileHeight; y<h; y+=spacing) {
+			if (Math.random()>chanceBroken) {registerLight(new StaticLight(x,y,color,size-(Math.random()*size*randomness)));}
+		}
+	}
+}

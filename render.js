@@ -13,7 +13,7 @@ var defaultScreenHeight = screenHeight;
 var INTRO=0,GAME=1;
 var dmode = INTRO;
 var intime = null;
-var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = false, enableLightTinting = false;
+var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = true, enableLightTinting = true;
 
 //advanced shader data
 var od,out;

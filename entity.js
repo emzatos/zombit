@@ -513,12 +513,12 @@ Player = Entity.extend(function(x,y,name,owner){
 		}
 		
 		//drop items
-		if (this.inv && this.inv.getSelected()) {
+		/*if (this.inv && this.inv.getSelected()) {
 			if (this.owner.keys[VK_Q]) {
 				this.owner.keys[VK_Q] = false;
 				new DroppedItem(this.x,this.y,this.inv.pop(this.inv.selected));
 			}
-		}
+		}*/
 		
 		//process mouse input
 		if (this.owner.mouseLeft) {

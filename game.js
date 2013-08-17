@@ -82,96 +82,7 @@ function init() {
 	startGame();
 	
 	//show the gui
-	gui = new dat.GUI({
-		load: {
-		  "preset": "Drunken",
-		  "remembered": {
-			"Default": {
-			  "0": {
-				"viewWidth": 600,
-				"viewHeight": 400,
-				"screenWidth": 1200,
-				"screenHeight": 800,
-				"showDebug": true,
-				"enableShaders": false,
-				"drawParticles": true,
-				"drawOverlay": true,
-				"tileShadows": true,
-				"entityShadows": true
-			  }
-			},
-			"Ice Rink": {
-			  "0": {
-				"viewWidth": 600,
-				"viewHeight": 400,
-				"screenWidth": 1200,
-				"screenHeight": 800,
-				"showDebug": true,
-				"enableShaders": false,
-				"drawParticles": true,
-				"drawOverlay": true,
-				"tileShadows": true,
-				"entityShadows": true
-			  },
-			  "1": {
-				"life": 100,
-				"spdInc": 0.1,
-				"maxSpd": 8,
-				"friction": 0
-			  }
-			},
-			"Drunken": {
-			  "0": {
-				"viewWidth": 600,
-				"viewHeight": 400,
-				"screenWidth": 1200,
-				"screenHeight": 800,
-				"showDebug": true,
-				"enableShaders": false,
-				"drawParticles": true,
-				"drawOverlay": true,
-				"tileShadows": true,
-				"entityShadows": true
-			  },
-			  "1": {
-				"life": 25,
-				"spdInc": -0.2,
-				"maxSpd": 3,
-				"friction": 0.1
-			  }
-			},
-			"Low Quality": {
-			  "0": {
-				"viewWidth": 600,
-				"viewHeight": 400,
-				"screenWidth": 1200,
-				"screenHeight": 800,
-				"showDebug": true,
-				"enableShaders": false,
-				"drawParticles": false,
-				"drawOverlay": false,
-				"tileShadows": false,
-				"entityShadows": false
-			  }
-			}
-		  },
-		  "closed": false,
-		  "folders": {
-			"Display": {
-			  "preset": "Default",
-			  "closed": true,
-			  "folders": {}
-			},
-			"Player": {
-			  "preset": "Default",
-			  "closed": true,
-			  "folders": {}
-			}
-		  }
-		},
-		
-		preset: "Default"
-	});
+	gui = new dat.GUI();
 	gui.remember(window);
 	gui.remember(player);
 	
@@ -221,6 +132,8 @@ function startGame() {
 	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);
 	gameLevel = generatePlants(gameLevel,0.1);
 	gameLevel = punchOutWalls(gameLevel,0.1);
+	
+	addLightsToLevel(gameLevel,196,"rgb(215,191,182)",512,0.3,0.2);
 
 	//create player
 	player = new Player(50,50,"Player");
@@ -231,7 +144,7 @@ function startGame() {
 	player.inv.push(new WoodenBat());
 	player.inv.push(new RandomGunTester(0.5));
 	player.inv.push(new RandomGunTester(0.9));
-	console.dir(player.inv);
+
 	
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -261,7 +174,7 @@ function startGame() {
 	},500);
 
 	//set up some light
-	registerLight(new EntityLight(player,"white",400));
+	registerLight(new EntityLight(player,"rgba(200,150,110,0.5)",200));
 
 	//start music
 	//setTimeout(startPlaylist,4900);
