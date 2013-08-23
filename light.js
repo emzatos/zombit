@@ -69,9 +69,6 @@ function renderLight() {
 		lictx.globalCompositeOperation = "source-over";
 		lictx.fillStyle = "rgba(0,0,0,1)";
 		lictx.fillRect(0,0,lightbuffer.width,lightbuffer.height);
-		
-		//lightbuffer.width = lightbuffer.width;
-		
 	
 		lictx.globalCompositeOperation = "destination-out";
 		drawAllLights();

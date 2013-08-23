@@ -214,6 +214,7 @@ Inventory = klass(function(size,owner) {
 		index = Math.floor(index);
 		if (index>=0 && index<this.inv.length) {
 			this.inv[index].user = null;
+			if (index==this.inv.length-1 && this.selected>=this.inv.length-2) {this.selected = this.inv.length-2;}
 			return this.inv.splice(index,1);
 		}
 		else {
@@ -310,6 +311,7 @@ ASSAULTRIFLE = 10008;
 TYPHOON = 10009;
 GAUSS = 10010;
 NYANGUN = 10011;
+GLOWSTICKGUN = 10012;
 
 Item = klass(function (name){
 	this.name = name||"Unknown Item";
@@ -550,7 +552,7 @@ AssaultRifle = Gun.extend(function(){
 	this.spread = 3;
 	this.spd = 24;
 	this.snd = sndGun1;
-	try{this.icon = assultIcon;}catch(e){}
+	try{this.icon = assaultIcon;}catch(e){}
 	this.type = ASSAULTRIFLE;
 })
 .methods({
@@ -655,7 +657,7 @@ RandomGun = Gun.extend(function(awesomeness){
 		this.col1 = rcol(0,255,0,255,0,255);
 		this.col2 = rcol(0,255,0,255,0,255);
 		this.snd = sndGun1;
-		try{this.icon = assultIcon;}catch(e){}
+		try{this.icon = assaultIcon;}catch(e){}
 		this.type = ASSAULTRIFLE;
 		this.name = this.makeName();
 	},
@@ -681,6 +683,37 @@ RandomGunTester = RandomGun.extend(function(awesomeness) {
 	}
 });
 
+GlowstickGun = Gun.extend(function() {
+	this.name = "Glowstick Package";
+	this.clipsize = 2;
+	this.ammo = this.clipsize;
+	this.delay = 20;
+	this.spread = 4;
+	this.spd = 12;
+	this.friction = 0.07;
+	this.snd = sndGun3;
+	try{this.icon = glowstickIcon;}catch(e){}
+	this.type = GLOWSTICKGUN;
+})
+.methods({
+	bullet: function() {
+		//vector converted to xspeed/yspeed
+		var user = getEntityReference(this.owner);
+		var dir = user.facing+radians(grand()*this.spread-this.spread*0.5);
+		var xs = lDirX(this.spd,dir);
+		var ys = lDirY(this.spd,dir);
+
+		//create bullet and set speeds
+		var blt = new Glowstick(user.x,user.y,user);
+		blt.xs = xs;
+		blt.ys = ys;
+		blt.friction = this.friction*(0.8+grand(0.4));
+		blt.col1 = this.col1;
+		blt.col2 = this.col2;
+		return blt;
+	}
+});
+
 itemIdMap = {};
 itemIdMap[ITEM] = Item;
 itemIdMap[WEAPON] = Weapon;
@@ -693,6 +726,7 @@ itemIdMap[ASSAULTRIFLE] = AssaultRifle;
 itemIdMap[TYPHOON] = Typhoon;
 itemIdMap[GAUSS] = Gauss;
 itemIdMap[NYANGUN] = NyanGun;
+itemIdMap[GLOWSTICKGUN] = GlowstickGun;
 
 constructItem = function(id) {
 	try {return new itemIdMap[id];}

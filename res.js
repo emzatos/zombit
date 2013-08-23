@@ -3,14 +3,16 @@
 // icons
 var pistolIcon = new Image();
 pistolIcon.src = "res/icon/pistol.png";
-var assultIcon = new Image();
-assultIcon.src = "res/icon/assult.png";
+var assaultIcon = new Image();
+assaultIcon.src = "res/icon/assault.png";
 var typhoonIcon = new Image();
 typhoonIcon.src = "res/icon/typhoon.png";
 var gaussIcon = new Image();
 gaussIcon.src = "res/icon/gauss.png";
 var batIcon = new Image();
 batIcon.src = "res/icon/bat.png";
+var glowstickIcon = new Image();
+glowstickIcon.src = "res/icon/glowstick.png";
 var genericIcon = new Image();
 genericIcon.src = "res/icon/generic.png";
 

@@ -136,7 +136,7 @@ function startGame() {
 	gameLevel = punchOutWalls(gameLevel,0.1);
 	
 	//populate the level with light fixtures
-	addLightsToLevel(gameLevel,196,"rgb(215,191,182)",512,0.3,0.2);
+	addLightsToLevel(gameLevel,196,"rgb(175,151,112)",512,0.4,0.3);
 
 	//create player
 	player = new Player(50,50,"Player");
@@ -145,7 +145,7 @@ function startGame() {
 	player.inv.push(new Typhoon());
 	player.inv.push(new Gauss());
 	player.inv.push(new WoodenBat());
-	player.inv.push(new RandomGunTester(0.5));
+	player.inv.push(new GlowstickGun());
 	player.inv.push(new RandomGunTester(0.9));
 
 	
@@ -232,10 +232,6 @@ function step() {
     	var prt = particles[ec];
 		if (prt instanceof Particle) {prt.step(tdelta);}
 	}
-
-	//reload
-	var rel = player.inv.getSelected().reload;
-	if (keys[VK_R] && rel) {rel();}*/
 
 	//process items (gun timers, etc)
 	for (var ic = 0; ic<items.length; ic++) {

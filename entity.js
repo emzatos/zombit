@@ -1,3 +1,4 @@
+/** Unused? **/
 safeJSON = function(key,val) {
 	//console.log(key+":"+val);
 	if (key=="mpUpdate") {
@@ -284,6 +285,12 @@ Entity = klass(function (x,y) {
 		//override with collision logic
 	},
 	render: function(x,y) {
+		if (entityShadows) {
+			ctx.globalAlpha = 0.4;
+			ctx.drawImage(imgShadow,x-tileWidth/2,y+tileHeight/5,tileWidth,tileHeight/2);
+
+			ctx.globalAlpha = 1;
+		}
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 	},
 	destroy: function() {
@@ -382,23 +389,44 @@ makeNewent = function(ent) {
 	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
 
+var DROPTIMEOUT = 500;
 DroppedItem = Entity.extend(function(x,y,item){
 	this.x = x;
 	this.y = y;
 	this.item = item;
 	this.type = DROPPEDITEM;
+	this.timestamp = Date.now();
+	this.friction = 0.1;
+
+	//console.log("Dropped a(n) "+item.name);
 })
 .methods({
-	step: function() {
-		this.supr();
+	step: function(dlt) {
+		this.supr(dlt);
+		if (Date.now()-this.timestamp>DROPTIMEOUT) {
+			for (en in entities) {
+				if (entities[en] instanceof Player) {
+					if (Math.abs(entities[en].x-this.x)+Math.abs(entities[en].y-this.y)<tileWidth) {
+						if (entities[en].inv.push(this.item)!=false) {
+							this.destroy();
+							break;
+						}
+					}
+				}
+			}
+		}
 	},
 	render: function(x,y) {
-		ctx.drawImage(imgShadow,x-tileWidth/2,y-tileHeight/4,tileWidth,tileHeight/2);
-		console.log(this.item.image);
-		ctx.drawImage(this.item.icon,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
+		if (entityShadows) {
+			ctx.globalAlpha = 0.4;
+			ctx.drawImage(imgShadow,x-tileWidth/2,y+tileHeight/4,tileWidth,tileHeight/2);
+
+			ctx.globalAlpha = 1;
+		}
+		if (this.item.icon) {ctx.drawImage(this.item.icon,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);}
 	},
-	destroy: function() {
-	}
+	damage: function() {
+	},
 });
 
 Player = Entity.extend(function(x,y,name,owner){
@@ -513,12 +541,14 @@ Player = Entity.extend(function(x,y,name,owner){
 		}
 		
 		//drop items
-		/*if (this.inv && this.inv.getSelected()) {
+		if (this.inv && this.inv.getSelected() && this.inv.inv.length>1) {
 			if (this.owner.keys[VK_Q]) {
 				this.owner.keys[VK_Q] = false;
-				new DroppedItem(this.x,this.y,this.inv.pop(this.inv.selected));
+				var dr = new DroppedItem(this.x,this.y,this.inv.pop(this.inv.selected)[0]);
+				dr.xs = lDirX(5,this.facing);
+				dr.ys = lDirY(5,this.facing);
 			}
-		}*/
+		}
 		
 		//process mouse input
 		if (this.owner.mouseLeft) {
@@ -732,6 +762,40 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 		}
 		this.xp=x;
 		this.yp=y;
+	},
+	destroy: function() {
+		unregisterLight(this.light);
+		this.supr();
+	}
+});
+
+Glowstick = Projectile.extend(function(x,y,owner) {
+	this.x = x;
+	this.y = y;
+	this.owner = owner;
+	this.light = null;
+	
+	this.brightness = 255;
+	this.col = "10,"+Math.floor(this.brightness)+",10";
+
+	try {this.image = glowstickIcon;}
+	catch (e) {}
+})
+.methods({
+	step: function(dlt) {
+		this.supr(dlt);
+		this.light.size-=0.1;
+		this.brightness-=0.1;
+		this.col = "10,"+Math.floor(this.brightness)+",10";
+		if (this.light.size<0) {this.destroy();}
+	},
+	render: function(x,y) {
+		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
+
+		if (this.light==null) {
+			this.light = new EntityLight(this,"rgba("+this.col+",0.5)",255);
+			registerLight(this.light);
+		}
 	},
 	destroy: function() {
 		unregisterLight(this.light);
