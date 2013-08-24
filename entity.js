@@ -1,64 +1,3 @@
-/** Unused? **/
-safeJSON = function(key,val) {
-	//console.log(key+":"+val);
-	if (key=="mpUpdate") {
-		return undefined;
-	}
-	else return val;
-}
-
-tileAt = function(ex, ey) {
-	var bx = Math.floor(ex/tileWidth);
-	var by = Math.floor(ey/tileHeight);
-	if (bx>0 && by>0 && bx<gameLevel.getWidth() && by<gameLevel.getHeight()) {
-		return gameLevel.getTile(bx,by);
-	}
-	else {return null;}
-}
-
-pDir = function(x1,y1,x2,y2) {
-	var xd = x2-x1;
-	var yd = y2-y1;
-
-	return fast_atan2(yd,xd);
-}
-
-pDist = function(x1,y1,x2,y2) {
-	var xd = x2-x1;
-	var yd = y2-y1;
-	return Math.sqrt(xd*xd+yd*yd);
-}
-
-lDirX = function(len,dir) {
-	var val = Math.cos(dir)*len
-	return Math.abs(val)<0?0:val;
-}
-
-lDirY = function(len,dir) {
-	var val = Math.sin(dir)*len
-	return Math.abs(val)<0?0:val;
-}
-
-pVector = function(x1,y1,x2,y2,speed) {
-	var dx = x2 - x1;
-	var dy = y2 - y1;
-	var norm = Math.sqrt(dx * dx + dy * dy);
-	if (norm)
-	{
-	    dx *= (speed / norm);
-	    dy *= (speed / norm);
-	}
-	return [dx,dy];
-}
-
-radians = function(deg) {
-	return deg*0.01745;
-}
-
-degrees = function(rad) {
-	return rad*57.29577;
-}
-
 collisionLine = function(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,returnPoints) {
 	//modified from: http://stackoverflow.com/questions/1073336/circle-line-collision-detection
 	var dlineX2lineX1 = (lineX2-lineX1);
@@ -185,6 +124,8 @@ Entity = klass(function (x,y) {
 	this.life = 100;
 	this.maxlife = this.life;
 
+	this.dropchance = 0.1;
+
 	this.type = ENTITY;
 
 	this.facing = null;
@@ -279,8 +220,18 @@ Entity = klass(function (x,y) {
 				new BloodSplat(this.x-this.width+irand(this.width*2),this.y-this.height+irand(this.height*2),0,0);
 			}
 		}
+
+		if (Math.random()<this.dropchance) {
+			this.doDrops();
+		}
+
 		this.destroy();
 	},
+	
+	doDrops: function() {
+		//drop items upon death
+	},
+
 	collide: function(tile) {
 		//override with collision logic
 	},
@@ -634,12 +585,14 @@ Hostile = Entity.extend(function(x,y,vr){
 	}
 });
 
+var ZOMBIEMAXLIFE = 500;
 Zombie = Hostile.extend(function(x,y,vr){
 	try {this.image = imgZombie;}
 	catch (e) {}
 	this.spd=0.8;
 	this.visionRadius = 160
-	this.life = Math.round(Math.random()*150);
+	this.life = Math.round(Math.random()*ZOMBIEMAXLIFE);
+	this.maxlife = this.life;
 	this.pointValue = Math.round(0.5*this.life);
 	this.inv.push(new ZombieAttack());
 
@@ -658,6 +611,16 @@ Zombie = Hostile.extend(function(x,y,vr){
 				this.mpUpdate();
 			}
 		}
+	},
+
+	doDrops: function() {
+		var gun = new RandomGun((this.maxlife/ZOMBIEMAXLIFE)*0.7);
+		new DroppedItem(this.x,this.y,gun);
+		
+	},
+
+	die: function() {
+		this.supr();
 	}
 });
 

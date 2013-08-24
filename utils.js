@@ -6,6 +6,7 @@ CLIENT = 1;
 SERVER = 2;
 mpMode = SERVER;
 
+//I can modify String all I want
 String.prototype.repeat = function(n) {
 	var s = this.toString();
 	var o = s;
@@ -13,7 +14,11 @@ String.prototype.repeat = function(n) {
 	return o;
 }
 
-//util
+String.prototype.toProperCase = function () {
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
+
+//integer randoms
 irand = function(max) {
 	if (max) {return Math.round(Math.random()*max);}
 	else {return Math.round(Math.random());}
@@ -23,23 +28,40 @@ irandr = function(min,max) {
 	return max<=min?min:irand(max-min)+min;
 }
 
+//normal (guassian) randoms
 grand = function(max) {
-	if (max) {return (((Math.random()+Math.random())/2)*max);}
-	else {return ((Math.random()+Math.random())/2);}
+	if (max) {return (((Math.random()+Math.random()+Math.random())/3)*max);}
+	else {return ((Math.random()+Math.random()+Math.random())/3);}
 }
 
 grandr = function(min,max) {
 	return max<=min?min:grand(max-min)+min;
 }
 
+//fast (pregenerated) randoms. originally used for shaders.
+frandArray = new Array(20000);
+for (var i=0; i<frandArray.length; i++) {frandArray[i] = Math.random();}
+frandPtr = 0;
+frand = function() {
+  frandPtr=frandPtr==frandArray.length-1?0:frandPtr+1;
+  return frandArray[frandPtr];
+}
+ifrand = function(max) {
+  if (max) {return ~~(frand()*max);}
+  else {return ~~(frand());}
+}
+
+//generate random rgb triplet (in string form to be used in css, canvas)
 rcol = function(rl,rh,gl,gh,bl,bh) {
 	return irandr(rl,rh)+","+irandr(gl,gh)+","+irandr(bl,bh);
 }
 
+//return x on an exponential scale of max
 xexp = function(max,x) {
 	return ((Math.exp(2.77258872 * x) - 1) / 15)*max;
 }
 
+//pad an array (unused?)
 array_pad  = function(input, pad_size, pad_value) {
   // http://kevin.vanzonneveld.net
   // +   original by: Waldo Malqui Silva
@@ -67,6 +89,7 @@ array_pad  = function(input, pad_size, pad_value) {
   return pad;
 }
 
+//call functionToDo, passing each x,y pair in a line from x1,y1 to x2,y2
 doLine = function(x1,y1,x2,y2,functionToDo,deres)
 {
 	deres = deres||1;
@@ -99,23 +122,7 @@ doLine = function(x1,y1,x2,y2,functionToDo,deres)
     }
 }
 
-String.prototype.toProperCase = function () {
-    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-};
-
-//store random numbers for very fast random number generation (for shaders, etc.)
-frandArray = new Array(20000);
-for (var i=0; i<frandArray.length; i++) {frandArray[i] = Math.random();}
-frandPtr = 0;
-frand = function() {
-	frandPtr=frandPtr==frandArray.length-1?0:frandPtr+1;
-	return frandArray[frandPtr];
-}
-ifrand = function(max) {
-	if (max) {return ~~(frand()*max);}
-	else {return ~~(frand());}
-}
-
+//unused?
 extend = function() {
     var options, name, src, copy, copyIsArray, clone, target = arguments[0] || {},
         i = 1,
