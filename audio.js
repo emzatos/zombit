@@ -12,7 +12,8 @@ function loadAudio() {
 	sndGun1 = loadSoundFile("res/sound/gun1",4);
 	sndGun2 = loadSoundFile("res/sound/gun2",4);
 	sndGun3 = loadSoundFile("res/sound/gun3",4);
-	
+	sndFootstep = loadSoundFile("res/sound/footstep",4);
+	sndReload = loadSoundFile("res/sound/reload",4);
 	
 	sndTrack1 = loadSoundFile("res/sound/moves");
 	sndTrack1.volume = 0.2;
@@ -30,7 +31,7 @@ function loadAudio() {
 }
 
 function loadSoundFile(src,nchannels) {
-	console.log("Loading sound: "+src);
+	//console.log("Loading sound: "+src);
 	var au = new Audio();
 
 	var source= document.createElement('source');
@@ -44,21 +45,22 @@ function loadSoundFile(src,nchannels) {
 	au.appendChild(source);
 
 	au.load();
-	document.body.appendChild(au);
 
 	if (nchannels>1) {
 		var temp = new Sound(au,nchannels);
+		document.body.appendChild(au);
 		return temp;
 	}
 	else {
 		return au;
+		document.body.appendChild(au);
 	}
 }
 
 function Sound(audioObj,channels) {
 	this.audio = audioObj;
 	this.nchannels = channels;
-	this.channels = new Array();
+	this.channels = [];
 
 	for( var i = 0; i < this.nchannels; i++ ) {
         this.channels.push( this.audio.cloneNode(true) );

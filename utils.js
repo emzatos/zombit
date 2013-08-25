@@ -122,6 +122,68 @@ doLine = function(x1,y1,x2,y2,functionToDo,deres)
     }
 }
 
+//math!
+/** Unused? **/
+safeJSON = function(key,val) {
+ //console.log(key+":"+val);
+ if (key=="mpUpdate") {
+   return undefined;
+ }
+ else return val;
+}
+
+tileAt = function(ex, ey) {
+ var bx = Math.floor(ex/tileWidth);
+ var by = Math.floor(ey/tileHeight);
+ if (bx>0 && by>0 && bx<gameLevel.getWidth() && by<gameLevel.getHeight()) {
+   return gameLevel.getTile(bx,by);
+ }
+ else {return null;}
+}
+
+pDir = function(x1,y1,x2,y2) {
+ var xd = x2-x1;
+ var yd = y2-y1;
+
+ return fast_atan2(yd,xd);
+}
+
+pDist = function(x1,y1,x2,y2) {
+ var xd = x2-x1;
+ var yd = y2-y1;
+ return Math.sqrt(xd*xd+yd*yd);
+}
+
+lDirX = function(len,dir) {
+ var val = Math.cos(dir)*len
+ return Math.abs(val)<0?0:val;
+}
+
+lDirY = function(len,dir) {
+ var val = Math.sin(dir)*len
+ return Math.abs(val)<0?0:val;
+}
+
+pVector = function(x1,y1,x2,y2,speed) {
+ var dx = x2 - x1;
+ var dy = y2 - y1;
+ var norm = Math.sqrt(dx * dx + dy * dy);
+ if (norm)
+ {
+     dx *= (speed / norm);
+     dy *= (speed / norm);
+ }
+ return [dx,dy];
+}
+
+radians = function(deg) {
+ return deg*0.01745;
+}
+
+degrees = function(rad) {
+ return rad*57.29577;
+}
+
 //unused?
 extend = function() {
     var options, name, src, copy, copyIsArray, clone, target = arguments[0] || {},
