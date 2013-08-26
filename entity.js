@@ -48,6 +48,53 @@ collisionLine = function(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2,retu
 	}
 }
 
+collisionLine2 = function(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2) {
+	var d1 = pDist(lineX1,lineY1,circleX,circleY);
+	var d2 = pDist(lineX2,lineY2,circleX,circleY);
+	if (d1<=radius || d2<=radius) {
+		return true;
+	}
+
+	var k1 = ((lineY2-lineY1)/(lineX2-lineX1));
+	var k2 = lineY1;
+	var k3 = -1/k1;
+	var k4 = circleY;
+
+	var xx = (k1*lineX1-k2-k3*circleX+k4)/(k1-k3);
+	var yy = k1*(xx-lineX1)+lineY1;
+
+	var bueno = true;
+	if (lineX2>lineX1) {
+		if (xx>=lineX1 && xx<=lineX2) {}
+		else {bueno = false;}
+	}
+	else {
+		if (xx>=lineX2 && xx<=lineX1) {}
+		else {bueno = false;}
+	}
+
+	if (lineY2>lineY1) {
+		if (yy>=lineY1 && yy<=lineY2) {}
+		else {bueno = false;}
+	}
+	else {
+		if (yy>=lineY2 && yy<=lineY1) {}
+		else {bueno = false;}
+	}
+
+	if (bueno) {
+		if (pDist(circleX,circleY,xx,yy)<radius) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
+}
+
 collisionCircle = function(c1x,c1y,c1r,c2x,c2y,c2r) {
 	if (pDist(c1x,c1y,c2x,c2y)<=c1r+c2r) {
 		return true;
@@ -648,7 +695,7 @@ Projectile = Entity.extend(function(x,y,sender){
 	    	ent = entities[ec];
 			if (ent instanceof Entity) {
 				if (ent!=senderObj && ent!=this && !(ent instanceof Projectile)) {
-					if (collisionLine(ent.x,ent.y,ent.width*0.5,x1,y1,x2,y2,false)) {
+					if (collisionLine2(ent.x,ent.y,ent.width*0.5,x1,y1,x2,y2,false)) {
 						this.collide(ent);
 					}
 				}
