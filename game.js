@@ -102,6 +102,9 @@ function init() {
 	
 	display.add(window, "enableLightRendering");
 	display.add(window, "enableLightTinting");
+
+	var aud = gui.addFolder("Audio");
+	aud.add(window, "masterVolume").min(0).max(1);
 	
 	var playr = gui.addFolder("Player");
 	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();
@@ -136,7 +139,7 @@ function startGame() {
 	gameLevel = punchOutWalls(gameLevel,0.1);
 	
 	//populate the level with light fixtures
-	addLightsToLevel(gameLevel,196,"rgb(175,151,112)",512,0.4,0.3);
+	addLightsToLevel(gameLevel,196,"rgba(175,151,112,0.7)",512,0.4,0.3);
 
 	//create player
 	player = new Player(50,50,"Player");
