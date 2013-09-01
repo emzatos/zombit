@@ -117,10 +117,6 @@ BLOODSPLAT = 1410;
 
 EntityReference = function(obj) {
 	this.arrIndex = null;
-
-	this.make = function(obj) {
-		this = makeEntityReference(obj);
-	}
 	
 	this.get = function() {
 		thisgetEntityReference(this);
@@ -251,10 +247,16 @@ Entity = klass(function (x,y) {
 		//deprecated
 		/*this.x+=d(this.xs);
 		this.y+=d(this.ys);*/
+
+		if (this.life<=0) {this.die();}
 	},
 	damage: function(amount) {
 		this.life-=amount;
 		if (particlesEnabled) {
+			var ht = new FloatingText("-"+Math.round(amount),"255,55,55",this.x,this.y,100);
+			ht.ys=-1;
+			ht.xs=Math.random()*0.5-0.25;
+
 			for (var i=0; i<Math.ceil((amount/(this.maxlife>0?this.maxlife:1))*6); i++) {
 				new BloodSplat(this.x-this.width*0.5+irand(this.width),this.y-this.height*0.5+irand(this.height),0,0);
 			}
@@ -386,6 +388,34 @@ Entity = klass(function (x,y) {
 makeNewent = function(ent) {
 	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
+
+FloatingText = Entity.extend(function(text,color,x,y,maxlife) {
+	this.text = text;
+	this.col = color;
+	this.x = x;
+	this.y = y;
+	this.maxlife = maxlife;
+	this.life = maxlife;
+
+	this.friction = 0;
+	this.width = 0;
+	this.height = 0;
+})
+.methods({
+	step: function(dlt) {
+		this.supr(dlt);
+		this.life-=1;
+	},
+	render: function(x,y) {
+		ctx.fillStyle = "rgba(0,0,0,"+(this.life/this.maxlife)+")";
+		ctx.fillText(this.text,x+1,y+1);
+		ctx.fillStyle = "rgba("+this.col+","+(this.life/this.maxlife)+")";
+		ctx.fillText(this.text,x,y);
+	},
+	die: function() {
+		this.destroy();
+	}
+});
 
 var DROPTIMEOUT = 500;
 DroppedItem = Entity.extend(function(x,y,item){
