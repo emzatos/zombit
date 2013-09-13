@@ -63,26 +63,26 @@ collisionLine2 = function(circleX,circleY,radius,lineX1,lineY1,lineX2,lineY2) {
 	var xx = (k1*lineX1-k2-k3*circleX+k4)/(k1-k3);
 	var yy = k1*(xx-lineX1)+lineY1;
 
-	var bueno = true;
+	var onSegment = true;
 	if (lineX2>lineX1) {
 		if (xx>=lineX1 && xx<=lineX2) {}
-		else {bueno = false;}
+		else {onSegment = false;}
 	}
 	else {
 		if (xx>=lineX2 && xx<=lineX1) {}
-		else {bueno = false;}
+		else {onSegment = false;}
 	}
 
 	if (lineY2>lineY1) {
 		if (yy>=lineY1 && yy<=lineY2) {}
-		else {bueno = false;}
+		else {onSegment = false;}
 	}
 	else {
 		if (yy>=lineY2 && yy<=lineY1) {}
-		else {bueno = false;}
+		else {onSegment = false;}
 	}
 
-	if (bueno) {
+	if (onSegment) {
 		if (pDist(circleX,circleY,xx,yy)<radius) {
 			return true;
 		}
@@ -389,73 +389,6 @@ makeNewent = function(ent) {
 	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
 
-FloatingText = Entity.extend(function(text,color,x,y,maxlife) {
-	this.text = text;
-	this.col = color;
-	this.x = x;
-	this.y = y;
-	this.maxlife = maxlife;
-	this.life = maxlife;
-
-	this.friction = 0;
-	this.width = 0;
-	this.height = 0;
-})
-.methods({
-	step: function(dlt) {
-		this.supr(dlt);
-		this.life-=1;
-	},
-	render: function(x,y) {
-		ctx.fillStyle = "rgba(0,0,0,"+(this.life/this.maxlife)+")";
-		ctx.fillText(this.text,x+1,y+1);
-		ctx.fillStyle = "rgba("+this.col+","+(this.life/this.maxlife)+")";
-		ctx.fillText(this.text,x,y);
-	},
-	die: function() {
-		this.destroy();
-	}
-});
-
-var DROPTIMEOUT = 500;
-DroppedItem = Entity.extend(function(x,y,item){
-	this.x = x;
-	this.y = y;
-	this.item = item;
-	this.type = DROPPEDITEM;
-	this.timestamp = Date.now();
-	this.friction = 0.1;
-
-	//console.log("Dropped a(n) "+item.name);
-})
-.methods({
-	step: function(dlt) {
-		this.supr(dlt);
-		if (Date.now()-this.timestamp>DROPTIMEOUT) {
-			for (en in entities) {
-				if (entities[en] instanceof Player) {
-					if (Math.abs(entities[en].x-this.x)+Math.abs(entities[en].y-this.y)<tileWidth) {
-						if (entities[en].inv.push(this.item)!=false) {
-							this.destroy();
-							break;
-						}
-					}
-				}
-			}
-		}
-	},
-	render: function(x,y) {
-		if (entityShadows) {
-			ctx.globalAlpha = 0.4;
-			ctx.drawImage(imgShadow,x-tileWidth/2,y+tileHeight/4,tileWidth,tileHeight/2);
-
-			ctx.globalAlpha = 1;
-		}
-		if (this.item.icon) {ctx.drawImage(this.item.icon,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);}
-	},
-	damage: function() {
-	},
-});
 
 Player = Entity.extend(function(x,y,name,owner){
 	this.name = name;
@@ -767,7 +700,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	render: function(x,y) {
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col1+",0.2)",80);
+			this.light = new EntityLight(this,"rgba("+this.col1+",0.2)",80,2);
 			registerLight(this.light);
 		}
 	
@@ -833,7 +766,7 @@ Glowstick = Projectile.extend(function(x,y,owner) {
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col+",0.5)",255);
+			this.light = new EntityLight(this,"rgba("+this.col+",0.5)",255,0.8);
 			registerLight(this.light);
 		}
 	},
@@ -892,6 +825,76 @@ BloodSplat = Particle.extend(function(x,y,xs,ys){
 })
 .methods ({
 
+});
+
+FloatingText = Particle.extend(function(text,color,x,y,maxlife) {
+	this.text = text;
+	this.col = color;
+	this.x = x;
+	this.y = y;
+	this.maxlife = maxlife;
+	this.life = maxlife;
+
+	this.friction = 0;
+	this.width = 0;
+	this.height = 0;
+
+	this.type = PARTICLE;
+})
+.methods({
+	step: function(dlt) {
+		this.supr(dlt);
+		this.life-=1;
+	},
+	render: function(x,y) {
+		ctx.fillStyle = "rgba(0,0,0,"+(this.life/this.maxlife)+")";
+		ctx.fillText(this.text,x+1,y+1);
+		ctx.fillStyle = "rgba("+this.col+","+(this.life/this.maxlife)+")";
+		ctx.fillText(this.text,x,y);
+	},
+	die: function() {
+		this.destroy();
+	}
+});
+
+var DROPTIMEOUT = 500;
+DroppedItem = Entity.extend(function(x,y,item){
+	this.x = x;
+	this.y = y;
+	this.item = item;
+	this.type = DROPPEDITEM;
+	this.timestamp = Date.now();
+	this.friction = 0.1;
+
+	//console.log("Dropped a(n) "+item.name);
+})
+.methods({
+	step: function(dlt) {
+		this.supr(dlt);
+		if (Date.now()-this.timestamp>DROPTIMEOUT) {
+			for (en in entities) {
+				if (entities[en] instanceof Player) {
+					if (Math.abs(entities[en].x-this.x)+Math.abs(entities[en].y-this.y)<tileWidth) {
+						if (entities[en].inv.push(this.item)!=false) {
+							this.destroy();
+							break;
+						}
+					}
+				}
+			}
+		}
+	},
+	render: function(x,y) {
+		if (entityShadows) {
+			ctx.globalAlpha = 0.4;
+			ctx.drawImage(imgShadow,x-tileWidth/2,y+tileHeight/4,tileWidth,tileHeight/2);
+
+			ctx.globalAlpha = 1;
+		}
+		if (this.item.icon) {ctx.drawImage(this.item.icon,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);}
+	},
+	damage: function() {
+	},
 });
 
 idMap = {};

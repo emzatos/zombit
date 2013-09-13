@@ -1,5 +1,3 @@
-var masterVolume = 0.7;
-
 var sndGun1,sndGun2,sndGun3;
 var sndTrack1,sndTrack2,sndTrack3;
 var sndFootstep,sndReload;
@@ -17,15 +15,18 @@ function loadAudio() {
 	sndFootstep = loadSoundFile("res/sound/footstep",4);
 	sndReload = loadSoundFile("res/sound/reload",4);
 	
-	sndTrack1 = loadSoundFile("res/sound/moves").setVolume(0.2);
+	sndTrack1 = loadSoundFile("res/sound/moves");
+	sndTrack1.volume = 0.2;
 
-	sndTrack2 = loadSoundFile("res/sound/untoldStory").setVolume(0.2);
+	sndTrack2 = loadSoundFile("res/sound/untoldStory");
+	sndTrack2.volume = 0.2;
 
-	sndTrack3 = loadSoundFile("res/sound/citySounds").setVolume(0.2);
+	sndTrack3 = loadSoundFile("res/sound/citySounds");
+	sndTrack3.volume = 0.2;
 
 	playlist = [sndTrack1, sndTrack2, sndTrack3];
 	for (var i=0; i<playlist.length; i++) {
-		playlist[i].audio.addEventListener("ended",playlistNext,false);
+		playlist[i].addEventListener("ended",playlistNext,false);
 	}
 }
 
@@ -45,22 +46,21 @@ function loadSoundFile(src,nchannels) {
 
 	au.load();
 
-	//if (nchannels>1) {
+	if (nchannels>1) {
 		var temp = new Sound(au,nchannels);
 		document.body.appendChild(au);
 		return temp;
-	/*}
+	}
 	else {
 		return au;
 		document.body.appendChild(au);
-	}*/
+	}
 }
 
 function Sound(audioObj,channels) {
 	this.audio = audioObj;
 	this.nchannels = channels;
 	this.channels = [];
-	this.volume = 1;
 
 	for( var i = 0; i < this.nchannels; i++ ) {
         this.channels.push( this.audio.cloneNode(true) );
@@ -77,16 +77,12 @@ function Sound(audioObj,channels) {
 Sound.prototype.play = function(){
 	if (this.channels.length>0) {
 		this.channels[this.cic].currentTime=0;
-		this.channels[this.cic].volume=this.volume*masterVolume;
 		this.channels[this.cic].play();
 		this.cic = this.cic==this.channels.length-1?0:this.cic+1; //inc ptr
 	}
 }
 Sound.prototype.setVolume = function(vol) {
-	if (vol>=0 && vol<=1) {
-		this.volume = vol;
-	}
-	return this;
+	this.audio.volume = vol;
 }
 
 function startPlaylist() {

@@ -42,7 +42,7 @@ function init() {
 	canvas = document.createElement("canvas");
 	canvas.width = screenWidth;
 	canvas.height = screenHeight;
-	canvas.style.cursor = "none";
+	canvas.style.cursor = "url('res/cursor.cur'), crosshair";
 	canvContainer.appendChild(canvas);
 	sctx = canvas.getContext("2d"); //screen context, shouldn't be draw onto usually
 
@@ -80,7 +80,23 @@ function init() {
 	
 	loadAudio(); //load audio
 	addListeners(); //add input listeners
+
+	mpMode = CLIENT; //this is not a sever.  this is for shared code
+
+	//create player
+	player = new Player(50,50,"Player");
+	player.inv.push(new Pistol());
+	player.inv.push(new AssaultRifle());
+	player.inv.push(new Typhoon());
+	player.inv.push(new Gauss());
+	player.inv.push(new WoodenBat());
+	player.inv.push(new GlowstickGun());
+	player.inv.push(new RandomGunTester(0.9));
+
 	startGame(); //generate and populate a level
+
+	//start rendering
+	requestAnimFrame(render);
 	
 	//show the gui
 	gui = new dat.GUI();
@@ -102,9 +118,7 @@ function init() {
 	
 	display.add(window, "enableLightRendering");
 	display.add(window, "enableLightTinting");
-
-	var aud = gui.addFolder("Audio");
-	aud.add(window, "masterVolume").min(0).max(1);
+	display.add(window, "enableGlare");
 	
 	var playr = gui.addFolder("Player");
 	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();
@@ -127,72 +141,6 @@ var imgOverlay, imgEntityGeneric, imgPlayer;
 //no idea why this exists
 function tileImage(id) {
 	return images[id];
-}
-
-function startGame() {
-	mpMode = CLIENT; //this is not a sever.  this is for shared code
-
-	//generate gameLevel
-	gameLevel = generateRectRooms(120,120,16);
-	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);
-	gameLevel = generatePlants(gameLevel,0.1);
-	gameLevel = punchOutWalls(gameLevel,0.1);
-	
-	//populate the level with light fixtures
-	addLightsToLevel(gameLevel,196,"rgba(175,151,112,0.7)",512,0.4,0.3);
-
-	//create player
-	player = new Player(50,50,"Player");
-	player.inv.push(new Pistol());
-	player.inv.push(new AssaultRifle());
-	player.inv.push(new Typhoon());
-	player.inv.push(new Gauss());
-	player.inv.push(new WoodenBat());
-	player.inv.push(new GlowstickGun());
-	player.inv.push(new RandomGunTester(0.9));
-
-	
-	//spawn some zombies
-	for (var i=0; i<15; i++) {
-		var tx,ty,ta;
-		do {
-			tx = Math.round(Math.random()*(gameLevel.getWidth()-2))+1;
-			ty = Math.round(Math.random()*(gameLevel.getHeight()-2))+1;
-			ta = tileAt(tx,ty);
-			if (ta!=null && ta.id==FLOOR) {break;}
-		} while (true);
-		new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
-	}
-
-	//tell zombies to spawn continuously
-	setInterval(function(){
-		if (entities.length<50) {
-		for (var i=0; i<1; i++) {
-			var tx,ty,ta;
-			do {
-				tx = Math.round(Math.random()*(gameLevel.getWidth()-2))+1;
-				ty = Math.round(Math.random()*(gameLevel.getHeight()-2))+1;
-				ta = tileAt(tx,ty);
-				if (ta!=null && ta.id==FLOOR) {break;}
-			} while (true);
-			new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
-		}}
-	},500);
-
-	//set up some light
-	registerLight(new EntityLight(player,"rgba(200,150,110,0.5)",200));
-
-	//start music
-	//setTimeout(startPlaylist,4900);
-
-	//switch to game rendering mode in 5 sec
-	setTimeout(function(){dmode=GAME;},5000);
-
-	//set interval for processing
-	timer = setInterval(step,1000/targetFPS);
-	
-	//start rendering
-	requestAnimFrame(render);
 }
 
 //delta function.  use to make fps scalable
@@ -224,23 +172,7 @@ function step() {
 	lastLoop = thisLoop;
 	fps = (1000/frameTime).toFixed(1);
 	
-	//process entities
-	for (var ec in entities) {
-		var ent = entities[ec];
-		if (ent instanceof Entity) {ent.step(tdelta);}
-	}
-
-	//process particles
-	for (var ec = 0; ec<particles.length; ec++) {
-    	var prt = particles[ec];
-		if (prt instanceof Particle) {prt.step(tdelta);}
-	}
-
-	//process items (gun timers, etc)
-	for (var ic = 0; ic<items.length; ic++) {
-    	ite = items[ic];
-		if (ite instanceof Item) {ite.step(tdelta);}
-	}
+	processStep();
 
 	// Switch sprites on key events (for player)
 	/*if (keys[VK_LEFT]) {viewX-=3;}

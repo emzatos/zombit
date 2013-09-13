@@ -13,7 +13,7 @@ var defaultScreenHeight = screenHeight;
 var INTRO=0,GAME=1;
 var dmode = INTRO;
 var intime = null;
-var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = true, enableLightTinting = true;
+var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = true, enableLightTinting = true, enableGlare = true;
 
 //advanced shader data
 var od,out;
@@ -167,9 +167,6 @@ function render() {
 		  ctx.fillText(txt,viewWidth/2,viewHeight/2);
 		  ctx.textAlign = 'left';
 		}
-
-		//draw mouse
-		ctx.drawImage(imgCursor,mouseX-imgCursor.width/2,mouseY-imgCursor.height/2);
 	  }
 	  else if (dmode==INTRO) {
 		if (intime==null) {intime=new Date().getTime();}

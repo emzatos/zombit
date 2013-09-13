@@ -61,6 +61,11 @@ xexp = function(max,x) {
 	return ((Math.exp(2.77258872 * x) - 1) / 15)*max;
 }
 
+//todo: implement fast cached sin
+fsin = function(x) {
+  return Math.sin(x);
+}
+
 //pad an array (unused?)
 array_pad  = function(input, pad_size, pad_value) {
   // http://kevin.vanzonneveld.net
