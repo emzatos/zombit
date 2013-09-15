@@ -4,6 +4,7 @@ function addListeners() {
 	canvas.addEventListener("mousemove",mm,false);
 	canvas.addEventListener("mouseup",mu,false);
 	canvas.addEventListener("mousedown",md,false);
+	canvas.addEventListener("mousewheel",mw,false);
 
 	//window.onresize = resizeCheck;
 }
@@ -78,6 +79,7 @@ function ku(e) { //keyup
 }
 
 mouseX = 0, mouseY = 0, mouseLeft = false;
+scrolltotal=0;
 function mm(e) {
 	if (!e) {e=event;}
 	mp(e);
@@ -125,6 +127,10 @@ function mp(e) {
 	
 	//if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, x: mouseX, y: mouseY});}
 	if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, facing: player.facing});}
+}
+function mw(e) {
+	scrolltotal+=wheelDistance(e);
+	console.log(wheelDistance(e));
 }
 
 function fullscreen(on) {

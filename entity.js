@@ -518,6 +518,12 @@ Player = Entity.extend(function(x,y,name,owner){
 				item.fire();
 			}
 		}
+
+		if (this.owner.scrolltotal!=0) {
+			var invpos = (this.inv.selected+this.owner.scrolltotal)%this.inv.size;
+			this.inv.select(invpos<0?this.inv.size+invpos:invpos);
+			this.owner.scrolltotal = 0;
+		}
 	}
 });
 
@@ -700,7 +706,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	render: function(x,y) {
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col1+",0.2)",80,2);
+			this.light = new EntityLight(this,"rgba("+this.col1+",1)",50,1.5);
 			registerLight(this.light);
 		}
 	

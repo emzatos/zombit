@@ -95,6 +95,26 @@ function init() {
 
 	startGame(); //generate and populate a level
 
+	//set up some light
+	var pLight = new EntityLight(player,"rgba(200,150,110,0.5)",200,1);
+	pLight = new SpecialLightContainer(pLight);
+	pLight.drawLight = function(dest,x,y,brightness,mode) {
+		dest.save();
+		dest.globalAlpha = brightness*mode==0?0.5:0;
+		dest.translate(x,y);
+		dest.rotate(player.facing-Math.PI);
+		dest.translate(-(x+imgFlashlightBeam.width),-(y+imgFlashlightBeam.height/2));
+		dest.drawImage(imgFlashlightBeam,x,y);
+		dest.restore();
+	}
+	registerLight(pLight);
+
+	//start music
+	//setTimeout(startPlaylist,4900);
+
+	//switch to game rendering mode in 5 sec
+	setTimeout(function(){dmode=GAME;},5000);
+
 	//start rendering
 	requestAnimFrame(render);
 	

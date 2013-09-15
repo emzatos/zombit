@@ -37,15 +37,6 @@ function startGame() {
 		}}
 	},500);
 
-	//set up some light
-	registerLight(new EntityLight(player,"rgba(200,150,110,0.5)",200,1));
-
-	//start music
-	//setTimeout(startPlaylist,4900);
-
-	//switch to game rendering mode in 5 sec
-	setTimeout(function(){dmode=GAME;},5000);
-
 	//set interval for processing
 	timer = setInterval(step,1000/targetFPS);
 }

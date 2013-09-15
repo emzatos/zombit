@@ -65,4 +65,6 @@ imgOverlay.src = "res/overlay.png";
 var imgScreenBlood = new Image();
 imgScreenBlood.src = "res/screenblood.png";
 var imgGlare = new Image();
-imgGlare.src = "res/glare2.png";
+imgGlare.src = "res/glare5.png";
+var imgFlashlightBeam = new Image();
+imgFlashlightBeam.src = "res/flashlight.png";
