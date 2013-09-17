@@ -36,6 +36,7 @@ function render() {
 		//render the tiles
 		drawgameLevel(0);
 		if (tileShadows) {drawgameLevel(1);}
+		drawgameLevel(2);
 
 		//render particles (they're entities, but they must be drawn below the others)
 		if (drawParticles) {
@@ -237,16 +238,14 @@ function drawgameLevel(mode) {
       var sx = x*tileWidth-viewX; //pixel x
       var sy = y*tileHeight-viewY; //pixel y
 
+      var tile = gameLevel.getTile(x,y); //get the tile at this position
 	  if (!mode || mode==0) { //normal rendering
-		  var tile = gameLevel.getTile(x,y); //get the tile at this position
-
-		  if (tile!=null) {
-			var tid = tile.id;
-			if (tid!=null) {ctx.drawImage(tileImage(tid), sx, sy);}
+		  
+		  if (tile.depth==0) {
+		  	drawtile(tile,sx,sy);
 		  }
 	  }
 	  else if (mode==1) { //border rendering
-		var tile = gameLevel.getTile(x,y); //get the tile at this position
 		if (tile.solid) {
 			var tl = gameLevel.getTile(x-1,y);
 			var tt = gameLevel.getTile(x,y-1);
@@ -259,8 +258,17 @@ function drawgameLevel(mode) {
 			if (tr && tr.id != tile.id) {ctx.drawImage(imgBorderRight, sx-offset, sy-offset);}
 			if (tb && tb.id != tile.id) {ctx.drawImage(imgBorderBottom, sx-offset, sy-offset);}
 		}
+
+		if (tile.depth==1) {
+			drawtile(tile,sx,sy);
+		}
 	  }
-	  else if (mode==2) { //shadow rendering
+	  else if (mode==2) {
+	  	if (tile.depth==2) {
+	  		drawtile(tile,sx,sy);
+	  	}
+	  }
+	  else if (mode==3) { //shadow rendering
 		var tile = gameLevel.getTile(x,y); //get the tile at this position
 		if (tile.solid) {
 			var tl = gameLevel.getTile(x-1,y);
@@ -274,6 +282,13 @@ function drawgameLevel(mode) {
 	  }
     }
   }
+}
+
+function drawtile(tile,x,y) {
+	if (tile!=null) {
+		var tid = tile.id;
+		if (tid!=null) {ctx.drawImage(tileImage(tid), x, y);}
+	}
 }
 
 //shader function, pass function(data,xPixel,yPixel,RedVal,BlueVal,GreenVal) that returns [r,g,b]
