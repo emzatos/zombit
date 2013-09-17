@@ -130,7 +130,7 @@ function mp(e) {
 }
 function mw(e) {
 	scrolltotal+=wheelDistance(e);
-	console.log(wheelDistance(e));
+	//console.log(wheelDistance(e));
 }
 
 function fullscreen(on) {

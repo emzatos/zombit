@@ -1,0 +1,17 @@
+{
+  // Required
+  "app": {
+    "background": {
+      // Optional
+      "scripts": ["appBackground.js"]
+    }
+  },
+  "manifest_version": 2,
+  "name": "Zombit",
+  "version": "100",
+
+  "description": "",
+  "icons": {"16": "res/icon/icon16.png", "128": "res/icon/icon128.png"},
+
+  "update_url": "http://raw.github.com/ndfsac/zombit/chromeapp/appUpdate.xml"
+}

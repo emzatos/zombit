@@ -1,3 +1,5 @@
+window.addEventListener('load', function(){init();}, false);
+
 var targetFPS = 60;
 var fps = targetFPS;
 var lt = new Date().getTime(); //used for timing
@@ -119,7 +121,12 @@ function init() {
 	requestAnimFrame(render);
 	
 	//show the gui
-	gui = new dat.GUI();
+	gui = new dat.GUI({autoPlace: false});
+	gui.close();
+
+	var customContainer = document.getElementById('datgui-container');
+	customContainer.appendChild(gui.domElement);
+
 	gui.remember(window);
 	gui.remember(player);
 	

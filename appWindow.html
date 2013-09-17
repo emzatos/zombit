@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-
 <!--
 			d88888D  .d88b.  .88b  d88. d8888b. d888888b d888888b 
 			YP  d8' .8P  Y8. 88'YbdP`88 88  `8D   `88'   `~~88~~' 
@@ -30,6 +28,8 @@
 			}
 
 			html, body {
+				width: 100%;
+				height: 100%;
 				padding: 0;
 				margin: 0;
 				color: rgb(100,100,100);
@@ -40,6 +40,16 @@
 
 			canvas {
 				box-shadow: 0px 2px 20px black;
+			}
+
+			.wrap {
+				width: 1200px;
+				height: 800px;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				margin-left: -600px;
+				margin-top: -400px;
 			}
 
 			.head {
@@ -69,14 +79,8 @@
 		<script type="text/javascript" src="dat.gui.min.js"></script>
 	</head>
 <body>
-<span style="position: absolute; left: 0px; top: 0px;" id="datgui-container"></span>
-<div style="font-family: uni">&nbsp;</div>
-<center><span class="head"><img src="res/title.png" style="height: 96px; "/></span></center>
-<span id="cc"></span>
-<center>Thanks for trying Zombit Alpha.  The current version is still unstable.  Please report bugs <a href="https://github.com/ndfsac/zombit/issues">here</a>.<br>
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a>
-</center>
-<br>
+<span style="position: absolute; left: 0px; top: 0px; z-index: 1;" id="datgui-container"></span>
+<span id="cc" class="wrap"></span>
 </body>
 
 </html>
