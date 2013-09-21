@@ -763,7 +763,9 @@ Glowstick = Projectile.extend(function(x,y,owner) {
 .methods({
 	step: function(dlt) {
 		this.supr(dlt);
-		this.light.size-=0.1;
+		if (this.light.size) {
+			this.light.size-=0.1;
+		}
 		this.brightness-=0.1;
 		this.col = "10,"+Math.floor(this.brightness)+",10";
 		if (this.light.size<0) {this.destroy();}

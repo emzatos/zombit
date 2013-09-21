@@ -14,6 +14,7 @@ VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_
 VK_F10 = 121, VK_F11 = 122, VK_ESCAPE=27, VK_ENTER=13, VK_BACKSPACE=8;
 var keys = new Array(2048);
 function kd(e) { //keydown
+	if (modalsOpen<=0) {
 	if (!e) {e=event;}
 	if (e.keyCode==VK_F11) {
 		if (!window.screenTop && !window.screenLeft) {
@@ -24,13 +25,18 @@ function kd(e) { //keydown
 		}
 	}
 	if (e.keyCode==VK_F10) {
-		var nick = prompt("Enter nickname: ");
-		var serv = prompt("Enter server IP or domain: ");
-		var port = prompt("Enter server port: ");
-		serv = serv!=""?serv:mpServer;
-		port = port!=""?port:mpPort;
-		nick = nick!=""?nick:mpNick;
-		mpStart(nick,serv,port);
+		showPrompt("Enter nickname: ", function(serv){
+			serv = serv!=""?serv:mpServer;
+
+			showPrompt("Enter server IP or domain: ", function(port){ 
+				port = port!=""?port:mpPort;
+
+				showPrompt("Enter server port: ", function(nick) {
+					nick = nick!=""?nick:mpNick;
+					mpStart(nick,serv,port);
+				})
+			})
+		});
 	}
 	if (e.keyCode==VK_T && !mpChatOpen) {
 		mpChatOpen = true;
@@ -70,12 +76,15 @@ function kd(e) { //keydown
 		//send input to server
 		if (mpReady) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
 	}
+	}
 }
 function ku(e) { //keyup
+	if (modalsOpen<=0) {
 	if (!e) {e=event;}
 	keys[e.keyCode] = false;
 
 	if (mpActive) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: false});}
+	}
 }
 
 mouseX = 0, mouseY = 0, mouseLeft = false;
@@ -106,22 +115,20 @@ function mu(e) {
 	if (mpReady) {mpSocket.emit("input",{type: INPUT_MOUSE, btn: 1, state: false});}
 }
 function mp(e) {
-	var posx = 0;
-	var posy = 0;
+	var el = e.target;
+	var posx = posy = 0;
 
-	if (e.pageX || e.pageY) 	{
-		posx = e.pageX;
-		posy = e.pageY;
-	}
-	else if (e.clientX || e.clientY) 	{
-		posx = e.clientX + document.body.scrollLeft
-			+ document.documentElement.scrollLeft;
-		posy = e.clientY + document.body.scrollTop
-			+ document.documentElement.scrollTop;
+	while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+		posx += el.offsetLeft - el.scrollLeft;
+		posy += el.offsetTop - el.scrollTop;
+		el = el.offsetParent;
 	}
 
-	var mcx = (posx-canvas.offsetLeft)*(viewWidth/screenWidth);
-	var mcy = (posy-canvas.offsetTop)*(viewHeight/screenHeight);
+	posx = e.clientX - posx;
+	posy = e.clientY - posy;
+
+	var mcx = posx*(viewWidth/screenWidth);
+	var mcy = posy*(viewHeight/screenHeight);
 	mouseX = mcx;
 	mouseY = mcy;
 	
@@ -156,4 +163,45 @@ function fullscreen(on) {
 		sctx.mozImageSmoothingEnabled = false;
 		sctx.imageSmoothingEnabled = false;	
 	}
+}
+
+var modalsOpen = 0;
+function makeModal(content,okcallback) {
+	var modal = document.createElement("div");
+	modal.className = "modal";
+	modal.innerHTML = content;
+
+	var okBtn = document.createElement("div");
+	okBtn.className = "modalButton";
+	okBtn.innerHTML = "OK";
+	okBtn.onclick = okcallback;
+
+	modal.appendChild(okBtn);
+	document.body.appendChild(modal);
+	modal.destroy = function(){document.body.removeChild(this); modalsOpen-=1;}
+
+	modalsOpen+=1;
+
+	return modal;
+}
+
+function showAlert(text,callback) {
+	var modal = makeModal(text, function(){
+		callback(true);
+		modal.destroy();
+	});
+}
+
+function showPrompt(text,callback) {
+	var inpt = document.createElement("input");
+	inpt.className = "modalInput";
+	inpt.type = "text";
+
+	var modal = makeModal(text+"<br>", function() {
+		callback(inpt.value);
+		modal.destroy();
+	});
+	modal.appendChild(inpt);
+
+	inpt.focus();
 }

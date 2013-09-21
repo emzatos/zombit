@@ -225,5 +225,7 @@ function godMode() {
 }
 
 function randomGun() {
-	player.inv.inv[player.inv.selected] = new RandomGun(parseFloat(prompt("Enter awesomeness from 0 to 1.")));
+	showPrompt("Enter awesomeness rating (0 to 1):", function(inpt){
+		player.inv.inv[player.inv.selected] = new RandomGun(parseFloat(inpt));
+	});
 }
