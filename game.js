@@ -8,7 +8,7 @@ var gameLevel = null; //currently loaded level
 var tileWidth = 16; //pixel width of a tile
 var tileHeight = 16;
 
-var entities = []; //stores all entities
+//var entities = []; //stores all entities DEPRECATED
 var items = []; //stores all items (does this need to exist?)
 
 var gameScore = 0; //score...
@@ -36,6 +36,8 @@ window.requestAnimFrame = (function(){
 })();
 
 function init() {
+	preload();
+
 	//create container to center canvas
 	canvContainer = document.createElement("center");
 	document.getElementById("cc").appendChild(canvContainer);
@@ -199,7 +201,7 @@ function step() {
 	lastLoop = thisLoop;
 	fps = (1000/frameTime).toFixed(1);
 	
-	processStep();
+	processStep(tdelta);
 
 	// Switch sprites on key events (for player)
 	/*if (keys[VK_LEFT]) {viewX-=3;}

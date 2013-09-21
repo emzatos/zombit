@@ -51,8 +51,8 @@ function render() {
 		}
 
 		//render the entities
-		for (var ec = 0; ec<entities.length; ec++) {
-		  var ent = entities[ec];
+		for (var ec = 0; ec<entityManager.length(); ec++) {
+		  var ent = entityManager.get(ec);
 		  if (ent instanceof Entity) {
 			if (ent.x>viewX && ent.x<viewX+viewWidth && ent.y>viewY && ent.y<viewY+viewHeight) {
 			  ent.render(ent.x-viewX,ent.y-viewY);

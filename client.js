@@ -17,7 +17,7 @@ function mpStart(nick, server, port) {
 	if (!port) {port=mpPort;}
 	if (!nick) {nick=mpNick;}
 	
-	entities = new Array();
+	entityManager.clearAll();
 
 	mpServer = server;
 	mpPort = port;
@@ -49,7 +49,7 @@ function mpConnect() {
 	mpSocket.on("playerind", function(ind) {
 		//store player id and set player to correct ent
 		mpPlayer = ind;
-		player = entities[ind];
+		player = entityManager.get(ind);
 	});
 	
 	mpSocket.on("chunk", function(chunk) {
@@ -66,28 +66,29 @@ function mpConnect() {
 		ent = constructEntity(entity.type);
 		//console.log("created: ");
 		//console.log(ent);
-		entities[entity.arrIndex] = ent;
-		entities[entity.arrIndex].unserialize(entity.ser);
+		entityManager.set(entity.arrIndex, ent);
+		entityManager.get(entity.arrIndex).unserialize(entity.ser);
 	});
 
 	mpSocket.on("entity", function(entity){
 		//console.log("Recv. ent:");
 		//console.log(entity);
-		
-		if (entities[entity.arrIndex] == null || typeof entities[entity.arrIndex] === 'undefined') {
+		var en = entityManager.get(entity.arrIndex);
+		if (en == null || typeof en === 'undefined') {
 			//console.log("HELP ME");
-			entities[entity.arrIndex] = constructEntity(entity.type);
+			entityManager.set(entity.arrIndex, constructEntity(entity.type));
 		}
 		
-		entities[entity.arrIndex].unserialize(entity);
+		entityManager.get(entity.arrIndex).unserialize(entity);
 		//deserializeEntity(entity);
 		//var deser = CircularJSON.parse(entity);
 		//entities[deser.arrIndex] = deser;
 	});
 	
 	mpSocket.on("delent", function(entity){
-		if (entities[entity.arrIndex] instanceof Entity) {
-			entities[entity.arrIndex].destroy();
+		var en = entityManager.get(entity.arrIndex);
+		if (en instanceof Entity) {
+			en.destroy();
 		}
 	});
 

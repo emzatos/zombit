@@ -115,26 +115,85 @@ BULLET = 1310;
 PARTICLE = 410;
 BLOODSPLAT = 1410;
 
-EntityReference = function(obj) {
-	this.arrIndex = null;
-	
-	this.get = function() {
-		thisgetEntityReference(this);
+/**
+ * Stores and manages all entities.
+ */
+EntityManager = function() {
+	this.entities = []; //stores entities
+	this.freespace = []; //records indexes that are available
+
+	/**
+	 * Register a new entity.  This should be performed upon the creation of a new entity
+	 * @param entity an entity to register
+	 */
+	this.register = function(entity) {
+		if (this.entities.indexOf(entity)<0) {
+			var ind;
+			if (this.freespace.length>0) {
+				ind = this.freespace.shift();
+				this.entities[ind] = entity;
+			}
+			else {
+				ind = this.entities.length;
+				this.entities[ind] = entity;
+			}
+			return ind;
+		}
 	}
-	
-	this.serializable = function() {
-		return {arrIndex: this.arrIndex}; //because we don't want to send the functions, and we want this to be automagically serializable by Entity
+
+	/**
+	 * Remove an entity from the registry and free its id for future entities (mostly important in multiplayer)
+	 * @param entity an entity to unregister
+	 */
+	this.unregister = function(entity) {
+		var typeofentity = typeof entity;
+		var ind = typeofentity==="number" || typeofentity==="string"?entity:this.entities.indexOf(entity);
+		if (ind>=0) {
+			if (this.freespace.indexOf(ind)<0) {this.freespace.push(ind);}
+			this.entities[ind] = undefined;
+		} 
 	}
-	
-	this.unserialize = function(src,dest) {
-		dest = new EntityReference(getEntityReference(src)); //again, because we want automagic unserialization
+
+	/**
+	 * Retrieve an entity from the registry.
+	 * @param thing an index number or an EntityReference wrapper
+	 */
+	this.get = function(thing) {
+		var typeofthing = typeof thing;
+		if (typeofthing === "number" || typeofthing === "string") { //entity index
+			if (this.entities[thing] instanceof Entity) {
+				return this.entities[thing];
+			}
+			return null;
+		}
+		else if (thing.arrIndex != null) { //entity reference (index in a wrapper)
+			return this.entities[thing.arrIndex];
+		}
+		else {
+			return null;
+		}
 	}
-	
-	makeEntityReference(obj);
+
+	/**
+	 * Set an entity in the registry
+	 * @param index index to set
+	 * @param entity the entity to store to it
+	 */
+	this.set = function(index, entity) {
+		this.entities[index] = entity; //logan this is probably a bad idea do some input verification or something
+	}
+
+	this.length = function() {return this.entities.length;}
+
+	this.clearAll = function() {
+		this.entities = [];
+		this.freespace = [];
+	}
 }
+
 getEntityReference = function(erObj) { //works for literals and ER instances
 	if (erObj && erObj.arrIndex!=null) {
-		return entities[erObj.arrIndex];
+		return entityManager.get(erObj.arrIndex);
 	}
 	else {return null;}
 }
@@ -150,13 +209,6 @@ makeEntityReference = function(x) { //works for indexes, entities, and serialize
 	}
 }
 
-findSlot = function() {
-	if (entities.length==0) {return 0;}
-	for (var i=0, j=entities.length; i<j; i++) {
-		if (entities[i] == undefined) {return i;}
-	}
-	return entities.length;
-}
 MAX_SER_DEPTH = 5;
 Entity = klass(function (x,y) {
 	this.x = x||50;
@@ -180,12 +232,8 @@ Entity = klass(function (x,y) {
 
 	//entity management code
 	if (!mpActive || mpMode==SERVER) {
-		var slot = findSlot();
-		//console.log(slot);
-		entities[slot] = this;
-		this.arrIndex = slot;
-		
-		//this.arrIndex = entities.push(this)-1;
+		var ind = entityManager.register(this);
+		this.arrIndex = ind;
 	}
 })
 .methods({
@@ -301,7 +349,7 @@ Entity = klass(function (x,y) {
 		}*/
 		
 		//delete entities[this.arrIndex];
-		entities[this.arrIndex] = undefined;
+		entityManager.unregister(this.arrIndex);
 		
 		if (mpMode==SERVER) {
 			io.sockets.emit("delent",{arrIndex: this.arrIndex});
@@ -471,8 +519,8 @@ Player = Entity.extend(function(x,y,name,owner){
 		this.x = 50;
 		this.y = 50;
 		sndDie.play();
-		for (var ec = 0; ec<entities.length; ec++) {
-	    	var ent = entities[ec];
+		for (var ec = 0; ec<entityManager.length(); ec++) {
+	    	var ent = entityManager.get(ec);
 			if (ent instanceof Hostile) {
 				ent.destroy();
 			}
@@ -547,12 +595,13 @@ Hostile = Entity.extend(function(x,y,vr){
 		if (this.target==T_SEARCH) { //need to find a target (the player for now)
 			//find the nearest target
 			var minDist=Infinity,targ=null;
-			for (var i=0; i<entities.length; i++) {
-				if (entities[i] instanceof Player) {
-					var dist = pDist(this.x,this.y,entities[i].x,entities[i].y);
+			for (var i=0; i<entityManager.length(); i++) {
+				var ent = entityManager.get(i);
+				if (ent instanceof Player) {
+					var dist = pDist(this.x,this.y,ent.x,ent.y);
 					if (dist<minDist) {
 						minDist = dist;
-						targ = entities[i];
+						targ = ent;
 					}
 				}
 			}
@@ -660,8 +709,8 @@ Projectile = Entity.extend(function(x,y,sender){
 		var y2=this.y;
 
 		var senderObj = getEntityReference(this.sender);
-    	for (var ec = 0; ec<entities.length; ec++) {
-	    	ent = entities[ec];
+    	for (var ec = 0; ec<entityManager.length(); ec++) {
+	    	ent = entityManager.get(ec);
 			if (ent instanceof Entity) {
 				if (ent!=senderObj && ent!=this && !(ent instanceof Projectile)) {
 					if (collisionLine2(ent.x,ent.y,ent.width*0.5,x1,y1,x2,y2,false)) {
@@ -880,10 +929,11 @@ DroppedItem = Entity.extend(function(x,y,item){
 	step: function(dlt) {
 		this.supr(dlt);
 		if (Date.now()-this.timestamp>DROPTIMEOUT) {
-			for (en in entities) {
-				if (entities[en] instanceof Player) {
-					if (Math.abs(entities[en].x-this.x)+Math.abs(entities[en].y-this.y)<tileWidth) {
-						if (entities[en].inv.push(this.item)!=false) {
+			for (en in entityManager.entities) {
+				var ent = entityManager.get(en);
+				if (ent instanceof Player) {
+					if (Math.abs(ent.x-this.x)+Math.abs(ent.y-this.y)<tileWidth) {
+						if (ent.inv.push(this.item)!=false) {
 							this.destroy();
 							break;
 						}

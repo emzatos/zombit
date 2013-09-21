@@ -403,8 +403,8 @@ Melee = Weapon.extend(function (range,width,delay,damage,user){
 			if (this.snd) {this.snd.play();}
 
 			//find all entities within range
-			for (var ec = 0; ec<entities.length; ec++) {
-		    	var ent = entities[ec];
+			for (var ec = 0; ec<entityManager.length(); ec++) {
+		    	var ent = entityManager.get(ec);
 				if (ent instanceof Entity) {
 					var user = getEntityReference(this.owner);
 					var dst = pDist(user.x,user.y,ent.x,ent.y);

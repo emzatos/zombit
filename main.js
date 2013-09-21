@@ -1,5 +1,10 @@
 //Portion of initialization code shared between client and server
 
+var entityManager;
+function preload() {
+	entityManager = new EntityManager();
+}
+
 function startGame() {
 	//generate gameLevel
 	gameLevel = generateRectRooms(120,120,16);
@@ -24,7 +29,7 @@ function startGame() {
 
 	//tell zombies to spawn continuously
 	setInterval(function(){
-		if (entities.length<50) {
+		if (entityManager.length()<50) {
 		for (var i=0; i<1; i++) {
 			var tx,ty,ta;
 			do {
@@ -41,10 +46,10 @@ function startGame() {
 	timer = setInterval(step,1000/targetFPS);
 }
 
-function processStep() {
+function processStep(tdelta) {
 	//process entities
-	for (var ec in entities) {
-		var ent = entities[ec];
+	for (var ec in entityManager.entities) {
+		var ent = entityManager.get(ec);
 		if (ent instanceof Entity) {ent.step(tdelta);}
 	}
 
