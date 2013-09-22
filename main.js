@@ -1,11 +1,10 @@
 //Portion of initialization code shared between client and server
 
-var entityManager;
-function preload() {
+preload = function() {
 	entityManager = new EntityManager();
 }
 
-function startGame() {
+startGame = function() {
 	//generate gameLevel
 	gameLevel = generateRectRooms(120,120,16);
 	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);
@@ -13,7 +12,7 @@ function startGame() {
 	gameLevel = punchOutWalls(gameLevel,0.1);
 	
 	//populate the level with light fixtures
-	addLightsToLevel(gameLevel,196,"rgb(175,161,152)",512,0.4,0.3,1);
+	if (mpMode==CLIENT) {addLightsToLevel(gameLevel,196,"rgb(175,161,152)",512,0.4,0.3,1);}
 
 	//spawn some zombies
 	for (var i=0; i<15; i++) {
@@ -41,12 +40,9 @@ function startGame() {
 			new Zombie(tx*tileWidth+tileWidth/2, ty*tileHeight+tileHeight/2, 80);
 		}}
 	},500);
-
-	//set interval for processing
-	timer = setInterval(step,1000/targetFPS);
 }
 
-function processStep(tdelta) {
+processStep = function(tdelta) {
 	//process entities
 	for (var ec in entityManager.entities) {
 		var ent = entityManager.get(ec);
@@ -54,9 +50,11 @@ function processStep(tdelta) {
 	}
 
 	//process particles
-	for (var ec = 0; ec<particles.length; ec++) {
-    	var prt = particles[ec];
-		if (prt instanceof Particle) {prt.step(tdelta);}
+	if (mpMode==CLIENT) {
+		for (var ec = 0; ec<particles.length; ec++) {
+	    	var prt = particles[ec];
+			if (prt instanceof Particle) {prt.step(tdelta);}
+		}
 	}
 
 	//process items (gun timers, etc)

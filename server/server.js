@@ -22,8 +22,13 @@ var utils = require('../utils.js');
 //console.log("utils OK");
 var ftrig = require('../fasttrig.js');
 //console.log("fasttrig OK");
+var main = require('../main.js');
+//console.log("main OK");
 var game = require('../server/game.js');
 //console.log("game OK");
+var network = require('../network.js');
+//console.log("network OK");
+
 
 
 io = require('socket.io').listen(8001);

@@ -121,74 +121,75 @@ BLOODSPLAT = 1410;
 EntityManager = function() {
 	this.entities = []; //stores entities
 	this.freespace = []; //records indexes that are available
+	this.types = []; //types of entities
+}
 
-	/**
-	 * Register a new entity.  This should be performed upon the creation of a new entity
-	 * @param entity an entity to register
-	 */
-	this.register = function(entity) {
-		if (this.entities.indexOf(entity)<0) {
-			var ind;
-			if (this.freespace.length>0) {
-				ind = this.freespace.shift();
-				this.entities[ind] = entity;
-			}
-			else {
-				ind = this.entities.length;
-				this.entities[ind] = entity;
-			}
-			return ind;
-		}
-	}
-
-	/**
-	 * Remove an entity from the registry and free its id for future entities (mostly important in multiplayer)
-	 * @param entity an entity to unregister
-	 */
-	this.unregister = function(entity) {
-		var typeofentity = typeof entity;
-		var ind = typeofentity==="number" || typeofentity==="string"?entity:this.entities.indexOf(entity);
-		if (ind>=0) {
-			if (this.freespace.indexOf(ind)<0) {this.freespace.push(ind);}
-			this.entities[ind] = undefined;
-		} 
-	}
-
-	/**
-	 * Retrieve an entity from the registry.
-	 * @param thing an index number or an EntityReference wrapper
-	 */
-	this.get = function(thing) {
-		var typeofthing = typeof thing;
-		if (typeofthing === "number" || typeofthing === "string") { //entity index
-			if (this.entities[thing] instanceof Entity) {
-				return this.entities[thing];
-			}
-			return null;
-		}
-		else if (thing.arrIndex != null) { //entity reference (index in a wrapper)
-			return this.entities[thing.arrIndex];
+/**
+ * Register a new entity.  This should be performed upon the creation of a new entity
+ * @param entity an entity to register
+ */
+EntityManager.prototype.register = function(entity) {
+	if (this.entities.indexOf(entity)<0) {
+		var ind;
+		if (this.freespace.length>0) {
+			ind = this.freespace.shift();
+			this.entities[ind] = entity;
 		}
 		else {
-			return null;
+			ind = this.entities.length;
+			this.entities[ind] = entity;
 		}
+		return ind;
 	}
+}
 
-	/**
-	 * Set an entity in the registry
-	 * @param index index to set
-	 * @param entity the entity to store to it
-	 */
-	this.set = function(index, entity) {
-		this.entities[index] = entity; //logan this is probably a bad idea do some input verification or something
+/**
+ * Remove an entity from the registry and free its id for future entities (mostly important in multiplayer)
+ * @param entity an entity to unregister
+ */
+EntityManager.prototype.unregister = function(entity) {
+	var typeofentity = typeof entity;
+	var ind = typeofentity==="number" || typeofentity==="string"?entity:this.entities.indexOf(entity);
+	if (ind>=0) {
+		if (this.freespace.indexOf(ind)<0) {this.freespace.push(ind);}
+		this.entities[ind] = undefined;
+	} 
+}
+
+/**
+ * Retrieve an entity from the registry.
+ * @param thing an index number or an EntityReference wrapper
+ */
+EntityManager.prototype.get = function(thing) {
+	var typeofthing = typeof thing;
+	if (typeofthing === "number" || typeofthing === "string") { //entity index
+		if (this.entities[thing] instanceof Entity) {
+			return this.entities[thing];
+		}
+		return null;
 	}
-
-	this.length = function() {return this.entities.length;}
-
-	this.clearAll = function() {
-		this.entities = [];
-		this.freespace = [];
+	else if (thing.arrIndex != null) { //entity reference (index in a wrapper)
+		return this.entities[thing.arrIndex];
 	}
+	else {
+		return null;
+	}
+}
+
+/**
+ * Set an entity in the registry
+ * @param index index to set
+ * @param entity the entity to store to it
+ */
+EntityManager.prototype.set = function(index, entity) {
+	this.entities[index] = entity; //logan this is probably a bad idea do some input verification or something
+}
+
+EntityManager.prototype.length = function() {return this.entities.length;}
+
+EntityManager.prototype.clearAll = function() {
+	this.entities = [];
+	this.freespace = [];
 }
 
 getEntityReference = function(erObj) { //works for literals and ER instances

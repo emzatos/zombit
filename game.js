@@ -98,6 +98,9 @@ function init() {
 	player.inv.push(new RandomGunTester(0.9));
 
 	startGame(); //generate and populate a level
+	
+	//set interval for processing
+	timer = setInterval(step,1000/targetFPS);
 
 	//set up some light
 	var pLight = new EntityLight(player,"rgba(200,150,110,0.5)",200,1);

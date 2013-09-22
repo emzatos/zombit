@@ -10,6 +10,7 @@ mpMessages=new Array();
 mpLastMessageTime=new Date().getTime();
 mpMessageFadeTime=5000;
 mpSocket = null;
+networkManager = null;
 
 function mpStart(nick, server, port) {
 	mpActive = true;
@@ -18,6 +19,8 @@ function mpStart(nick, server, port) {
 	if (!nick) {nick=mpNick;}
 	
 	entityManager.clearAll();
+
+	networkManager = new NetworkManager();
 
 	mpServer = server;
 	mpPort = port;
@@ -95,6 +98,14 @@ function mpConnect() {
 	mpSocket.on("msg", function(message) {
 		console.log(message.player+": "+message.content);
 		mpAddMessage(message.player+": "+message.content);
+	});
+
+	mpSocket.on("function", function(func) {
+		console.log("calling "+func.fn+" of "+func.entity+" with args "+func.args);
+	});
+
+	mpSocket.on("property", function(prop) {
+		console.log("setting "+prop.pr+" of "+prop.entity+" to "+prop.val);
 	});
 	
 	mpSocket.on("kick", function(data) {
