@@ -37,6 +37,7 @@
 				background: rgb(20,18,19); 
 				font-family: uni; 
 				font-size: 9pt;
+                                overflow: hidden;
 			}
 
 			canvas {
@@ -71,13 +72,8 @@
 		<script type="text/javascript" src="dat.gui.min.js"></script>
 	</head>
 <body>
-<span style="position: absolute; left: 0px; top: 0px;" id="datgui-container"></span>
-<div style="font-family: uni">&nbsp;</div>
-<center><span class="head"><img src="res/title.png" style="height: 96px; "/></span></center>
-<span id="cc"></span>
-<center>Thanks for trying Zombit Alpha.  The current version is still unstable.  Please report bugs <a href="https://github.com/ndfsac/zombit/issues">here</a>.<br>
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a>
-</center>
+<span style="position: absolute; left: 0px; top: 0px; z-index: 1000;" id="datgui-container"></span>
+<span id="cc" style="position: absolute; left: 0px; top: 0px"></span>
 <br>
 </body>
 

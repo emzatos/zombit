@@ -9,9 +9,6 @@ function addListeners() {
 	//window.onresize = resizeCheck;
 }
 
-VK_LEFT = 37, VK_UP=38, VK_RIGHT=39, VK_DOWN=40, VK_W=87, VK_A=65, VK_S=83, VK_D=68, VK_R=82, VK_T=84, VK_Q=81;
-VK_0 = 48, VK_1 = 49, VK_2 = 50, VK_3 = 51, VK_4 = 52, VK_5 = 53, VK_6 = 54, VK_7 = 55, VK_8 = 56, VK_9 = 57; 
-VK_F10 = 121, VK_F11 = 122, VK_ESCAPE=27, VK_ENTER=13, VK_BACKSPACE=8;
 var keys = new Array(2048);
 function kd(e) { //keydown
 	if (modalsOpen<=0) {
@@ -204,4 +201,54 @@ function showPrompt(text,callback) {
 	modal.appendChild(inpt);
 
 	inpt.focus();
+}
+
+/**
+ * Creates the DatGUI
+ * @returns {undefined}
+ */
+function createGUI() {
+    //show the gui
+	gui = new dat.GUI({autoPlace: false});
+	gui.close();
+
+	var customContainer = document.getElementById('datgui-container');
+	customContainer.appendChild(gui.domElement);
+
+	gui.remember(window);
+	gui.remember(player);
+	
+	var display = gui.addFolder("Display");
+	display.add(window, "viewWidth").min(0);
+	display.add(window, "viewHeight").min(0);
+	display.add(window, "screenWidth").min(0);
+	display.add(window, "screenHeight").min(0);
+	
+	display.add(window, "showDebug");
+	display.add(window, "enableShaders");
+	display.add(window, "drawParticles");
+	display.add(window, "drawOverlay");
+	display.add(window, "tileShadows");
+	display.add(window, "entityShadows");
+	
+	display.add(window, "enableLightRendering");
+	display.add(window, "enableLightTinting");
+	display.add(window, "enableGlare");
+	
+	display.add(window, "frameBlend").min(0).max(1);
+	
+	var playr = gui.addFolder("Player");
+	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();
+	playr.add(player, "spdInc").step(0.01);
+	playr.add(player, "maxSpd").step(0.01);
+	playr.add(player, "friction").step(0.01);
+	playr.add(window, "godMode");
+	playr.add(window, "randomGun");
+	
+	var mpm = gui.addFolder("Multiplayer (Broken, do not use)");
+	mpm.add(window, "mpServer");
+	mpm.add(window, "mpPort");
+	mpm.add(window, "mpNick");
+	mpm.add(window, "mpStart");
+	mpm.add(window, "mpConnect");
 }

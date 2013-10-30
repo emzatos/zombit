@@ -1,19 +1,21 @@
-//viewport settings
-var viewWidth = 600;
-var viewHeight = 400;
-var viewX = 0;
-var viewY = 0;
-
 //output settings
-var screenWidth = 1200;
-var screenHeight = 800;
+var screenWidth = window.innerWidth;
+var screenHeight = window.innerHeight;
 var defaultScreenWidth = screenWidth;
 var defaultScreenHeight = screenHeight;
+
+//viewport settings
+var outputScale = 2;
+var viewWidth = screenWidth/outputScale;
+var viewHeight = screenHeight/outputScale;
+var viewX = 0;
+var viewY = 0;
 
 var INTRO=0,GAME=1;
 var dmode = INTRO;
 var intime = null;
 var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = true, enableLightTinting = true, enableGlare = true;
+var defaultFrameBlend = 0.8, minFrameBlend = 0.4, frameBlend = defaultFrameBlend;
 
 //advanced shader data
 var od,out;
@@ -87,7 +89,7 @@ function render() {
 		ctx.fillRect(viewWidth-128-(18*(player.inv.size)),22,18*(player.inv.size)*(player.life/100),8);
 		ctx.font = '8px "uni"';
 		ctx.fillStyle = "white";
-		ctx.fillText(player.life,(viewWidth-128-(18*(player.inv.size)*0.5)-5),28);
+		ctx.fillText(player.life.toFixed(0),(viewWidth-128-(18*(player.inv.size)*0.5)-5),28);
 
 		//draw selected item GUI
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
@@ -118,6 +120,14 @@ function render() {
 		ctx.fillText(gameScore,viewWidth/2,viewHeight-10);
 		ctx.textAlign = 'left';
 
+        //health effects
+        //calculate blurriness
+        frameBlend = Math.min(1,xexp((player.life/player.maxlife),defaultFrameBlend+minFrameBlend));
+        //draw blood overlay
+        var mult = player.life/player.maxlife, scaleAmt = 80;
+        ctx.globalAlpha = 1-xexp(mult,1);
+        ctx.drawImage(imgScreenBlood,-mult*0.5*scaleAmt,-mult*0.5*scaleAmt,viewWidth+mult*scaleAmt,viewHeight+mult*scaleAmt);
+        ctx.globalAlpha = 1;
 
 		//draw overlay
 		if (drawOverlay) {ctx.drawImage(imgOverlay,0,0,viewWidth,viewHeight);}
@@ -219,7 +229,9 @@ function render() {
 	  }
   
 	//copy buffer to screen at proper scale
+	sctx.globalAlpha = frameBlend;
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
+	sctx.globalAlpha = 1;
 	
 	renderLocked = false;
 	

@@ -38,40 +38,11 @@ window.requestAnimFrame = (function(){
 function init() {
 	preload();
 
-	//create container to center canvas
+        //create container to center canvas
 	canvContainer = document.createElement("center");
 	document.getElementById("cc").appendChild(canvContainer);
-
-	//create canvas element
-	canvas = document.createElement("canvas");
-	canvas.width = screenWidth;
-	canvas.height = screenHeight;
-	canvas.style.cursor = "url('res/cursor.cur'), crosshair";
-	canvContainer.appendChild(canvas);
-	sctx = canvas.getContext("2d"); //screen context, shouldn't be draw onto usually
-
-	//create invisible "buffer" canvas
-	buffer = document.createElement("canvas");
-	buffer.width = viewWidth;
-	buffer.height = viewHeight;
-	ctx = buffer.getContext("2d"); //buffer context
-
-	//suggest to browsers not to antialias
-	ctx.webkitImageSmoothingEnabled = false;
-	ctx.mozImageSmoothingEnabled = false;
-	ctx.imageSmoothingEnabled = false;	
-	sctx.webkitImageSmoothingEnabled = false;
-	sctx.mozImageSmoothingEnabled = false;
-	sctx.imageSmoothingEnabled = false;	
-
-	//clear buffer to black
-	ctx.fillStyle = "black";
-	ctx.fillRect(0,0,viewWidth,viewHeight);
-
-	//initialize advanced shader data
-	oid = ctx.createImageData(viewWidth,viewHeight);
-	dout = oid.data;
-	for (var i=3; i<dout.length; i+=4) {dout[i] = 255;} //set to opaque
+        
+	reinitCanvases();
 	
 	//parse URL flags
 	var loc = document.location.href;
@@ -83,7 +54,6 @@ function init() {
 	initLight();
 	
 	loadAudio(); //load audio
-	addListeners(); //add input listeners
 
 	mpMode = CLIENT; //this is not a sever.  this is for shared code
 
@@ -125,47 +95,45 @@ function init() {
 	//start rendering
 	requestAnimFrame(render);
 	
-	//show the gui
-	gui = new dat.GUI({autoPlace: false});
-	gui.close();
+	createGUI();
+}
 
-	var customContainer = document.getElementById('datgui-container');
-	customContainer.appendChild(gui.domElement);
+function reinitCanvases() {
+        try {canvContainer.removeChild(canvas);}
+        catch (e) {}
+    
+	//create canvas element
+	canvas = document.createElement("canvas");
+	canvas.width = screenWidth;
+	canvas.height = screenHeight;
+	canvas.style.cursor = "url('res/cursor.cur'), crosshair";
+	canvContainer.appendChild(canvas);
+	sctx = canvas.getContext("2d"); //screen context, shouldn't be draw onto usually
 
-	gui.remember(window);
-	gui.remember(player);
-	
-	var display = gui.addFolder("Display");
-	display.add(window, "viewWidth").min(0);
-	display.add(window, "viewHeight").min(0);
-	display.add(window, "screenWidth").min(0);
-	display.add(window, "screenHeight").min(0);
-	
-	display.add(window, "showDebug");
-	display.add(window, "enableShaders");
-	display.add(window, "drawParticles");
-	display.add(window, "drawOverlay");
-	display.add(window, "tileShadows");
-	display.add(window, "entityShadows");
-	
-	display.add(window, "enableLightRendering");
-	display.add(window, "enableLightTinting");
-	display.add(window, "enableGlare");
-	
-	var playr = gui.addFolder("Player");
-	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();
-	playr.add(player, "spdInc").step(0.01);
-	playr.add(player, "maxSpd").step(0.01);
-	playr.add(player, "friction").step(0.01);
-	playr.add(window, "godMode");
-	playr.add(window, "randomGun");
-	
-	var mpm = gui.addFolder("Multiplayer (Broken, do not use)");
-	mpm.add(window, "mpServer");
-	mpm.add(window, "mpPort");
-	mpm.add(window, "mpNick");
-	mpm.add(window, "mpStart");
-	mpm.add(window, "mpConnect");
+	//create invisible "buffer" canvas
+	buffer = document.createElement("canvas");
+	buffer.width = viewWidth;
+	buffer.height = viewHeight;
+	ctx = buffer.getContext("2d"); //buffer context
+
+	//suggest to browsers not to antialias
+	ctx.webkitImageSmoothingEnabled = false;
+	ctx.mozImageSmoothingEnabled = false;
+	ctx.imageSmoothingEnabled = false;	
+	sctx.webkitImageSmoothingEnabled = false;
+	sctx.mozImageSmoothingEnabled = false;
+	sctx.imageSmoothingEnabled = false;	
+
+	//clear buffer to black
+	ctx.fillStyle = "black";
+	ctx.fillRect(0,0,viewWidth,viewHeight);
+
+	//initialize advanced shader data
+	oid = ctx.createImageData(viewWidth,viewHeight);
+	dout = oid.data;
+	for (var i=3; i<dout.length; i+=4) {dout[i] = 255;} //set to opaque
+        
+        addListeners(); //add input listeners
 }
 
 var imgOverlay, imgEntityGeneric, imgPlayer;

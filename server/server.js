@@ -36,6 +36,8 @@ io.set("log level",1); //disable debug logging
 
 nicknames = [];
 
+networkManager = new NetworkManager();
+
 io.sockets.on('connection', function (socket) {
   socket.keys = new Array(2048);
 

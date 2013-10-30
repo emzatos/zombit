@@ -199,8 +199,8 @@ getEntityReference = function(erObj) { //works for literals and ER instances
 	else {return null;}
 }
 makeEntityReference = function(x) { //works for indexes, entities, and serialized ERs
-	if (typeof x === 'number') {
-		return {arrIndex: x};
+	if (typeof x === 'number' || typeof x === 'string') {
+		return {arrIndex: Number(x)};
 	}
 	else if (x!=null && !(typeof x === 'undefined') && !(typeof x.arrIndex === 'undefined')) {
 		return {arrIndex: x.arrIndex};
@@ -298,6 +298,18 @@ Entity = klass(function (x,y) {
 		this.y+=d(this.ys);*/
 
 		if (this.life<=0) {this.die();}
+
+		if (mpMode == SERVER) {
+		networkManager.addProperties(this,
+				[
+					"x",
+					"y",
+					"xs",
+					"ys",
+					"life",
+					"facing",
+				],this.owner||io.sockets.broadcast);
+		}
 	},
 	damage: function(amount) {
 		this.life-=amount;
@@ -350,11 +362,11 @@ Entity = klass(function (x,y) {
 		}*/
 		
 		//delete entities[this.arrIndex];
-		entityManager.unregister(this.arrIndex);
-		
 		if (mpMode==SERVER) {
 			io.sockets.emit("delent",{arrIndex: this.arrIndex});
 		}
+
+		entityManager.unregister(this.arrIndex);
 	},
 	mpUpdate: function() {
 		if (mpMode==SERVER) {
@@ -449,6 +461,8 @@ Player = Entity.extend(function(x,y,name,owner){
 	this.friction = 0.2;
 	this.facing = 0;
 	this.maxSpd = 5;
+	
+	this.healCooldown = 200, this.healTimer = 0, this.healRate = 0.025;
 
 	this.type = PLAYER;
 	
@@ -480,6 +494,14 @@ Player = Entity.extend(function(x,y,name,owner){
 			if (viewX>gameLevel.getWidth()*tileWidth-viewWidth) {viewX = gameLevel.getWidth()*tileWidth-viewWidth;}
 			if (viewY<0) {viewY=0;}
 			if (viewY>gameLevel.getHeight()*tileHeight-viewHeight) {viewY = gameLevel.getHeight()*tileHeight-viewHeight;}
+		}
+		
+		//heal player
+		if (this.healTimer == 0) {
+            this.life = Math.min(this.maxlife,this.life+this.healRate);
+		}
+		else {
+            this.healTimer -= 1;
 		}
 
 		//point player toward mouse
@@ -513,6 +535,7 @@ Player = Entity.extend(function(x,y,name,owner){
 	damage: function(amount) {
 		this.supr(amount);
 		sndHit.play();
+		this.healTimer = this.healCooldown;
 	},
 	die: function() {
 		gameScore = 0;
@@ -576,7 +599,7 @@ Player = Entity.extend(function(x,y,name,owner){
 	}
 });
 
-T_SEARCH=0;
+T_SEARCH=-1;
 Hostile = Entity.extend(function(x,y,vr){
 	this.target = T_SEARCH;
 	this.visionRadius = vr||50;
@@ -593,6 +616,8 @@ Hostile = Entity.extend(function(x,y,vr){
 	step: function(dlt) {
 		this.supr(dlt);
 
+		if (this.target>=0) {this.target = getEntityReference(this.target);}
+
 		if (this.target==T_SEARCH) { //need to find a target (the player for now)
 			//find the nearest target
 			var minDist=Infinity,targ=null;
@@ -608,7 +633,7 @@ Hostile = Entity.extend(function(x,y,vr){
 			}
 			if (targ!=null) {
 				if (pDist(this.x,this.y,targ.x,targ.y)<this.visionRadius) { //see if in range
-					this.target = makeEntityReference(targ);
+					this.target = targ;
 					this.mpUpdate();
 				}
 			}
@@ -637,6 +662,8 @@ Hostile = Entity.extend(function(x,y,vr){
 				}
 			}
 		}
+
+		if (this.target!=T_SEARCH) {this.target = makeEntityReference(this.target);}
 	},
 
 	attack: function(entity) {
@@ -756,7 +783,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	render: function(x,y) {
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col1+",1)",50,1.5);
+			this.light = new EntityLight(this,"rgba("+this.col1+",1)",35,1.1);
 			registerLight(this.light);
 		}
 	
@@ -767,22 +794,22 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 
 		var grad0= ctx.createLinearGradient(x, y, this.xp, this.yp);
 		grad0.addColorStop(0, "rgba(255,255,255,1)");
-		grad0.addColorStop(1, "rgba(255,255,255,0.5)");
+		grad0.addColorStop(1, "rgba(255,255,255,0.6)");
 		
 		var grad1= ctx.createLinearGradient(x, y, this.xp, this.yp);
 		grad1.addColorStop(0, "rgba("+this.col1+",1)");
-		grad1.addColorStop(1, "rgba("+this.col2+",0)");
+		grad1.addColorStop(0.75, "rgba("+this.col2+",0)");
 		
 		ctx.lineCap = "round";
 
-		ctx.lineWidth = 5;
+		ctx.lineWidth = 4;
 		ctx.strokeStyle = grad1;
 		ctx.beginPath();
 		ctx.moveTo(this.xp,this.yp);
 		ctx.lineTo(x,y);
 		ctx.stroke();
 
-		ctx.lineWidth = 2;
+		ctx.lineWidth = 1;
 		ctx.strokeStyle = grad0;
 		ctx.beginPath();
 		ctx.moveTo(this.xp,this.yp);
@@ -801,7 +828,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 Glowstick = Projectile.extend(function(x,y,owner) {
 	this.x = x;
 	this.y = y;
-	this.owner = owner;
+	this.owner = makeEntityReference(owner);
 	this.light = null;
 	
 	this.brightness = 255;

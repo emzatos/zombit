@@ -31,8 +31,8 @@ function StaticLight(x,y,col,size,brightness) { //a light that is drawn at a spe
 	this.col = col;
 	this.size = size;
 	this.brightness = brightness;
-	this.getX = function() {return this.x;}
-	this.getY = function() {return this.y;}
+	this.getX = function() {return this.x;};
+	this.getY = function() {return this.y;};
 }
 
 function EntityLight(entity,col,size,brightness) { //a light that follows an entity
@@ -40,14 +40,14 @@ function EntityLight(entity,col,size,brightness) { //a light that follows an ent
 	this.col = col;
 	this.size = size;
 	this.brightness = brightness;
-	this.getX = function() {return this.entity.x;}
-	this.getY = function() {return this.entity.y;}
+	this.getX = function() {return this.entity.x;};
+	this.getY = function() {return this.entity.y;};
 }
 
 function SpecialLightContainer(light) { //a light that has a custom drawing function
 	this.light = light;
-	this.getX = function() {return this.light.getX();}
-	this.getY = function() {return this.light.getY();}
+	this.getX = function() {return this.light.getX();};
+	this.getY = function() {return this.light.getY();};
 	this.size = this.light.size;
 	this.col = this.light.col||null;
 	this.brightness = this.light.brightness||null;
@@ -83,7 +83,7 @@ function compositeLight(dest,gco) {
 function drawAllLights(dest,gbrightness,mode) {
 	if (mode>0) {ctx.globalCompositeOperation = "lighter";}
 	for (var i=0; i<lightArray.length; i++) {
-		if (lightArray[i]!=null && lightArray[i].col) {
+		if (lightArray[i]!==null && lightArray[i].col) {
 			var x = lightArray[i].getX();
 			var y = lightArray[i].getY();
 			var s = lightArray[i].size;
@@ -151,7 +151,7 @@ function clearCanvas(context, color) {
 	context.fillStyle = color;
 	context.fillRect(0,0,viewWidth,viewHeight);
 	context.globalCompositeOperation = tempa;
-	context.globalAlpha = tempb
+	context.globalAlpha = tempb;
 }
 
 function addLightsToLevel(level,spacing,color,size,randomness,chanceBroken,brightness) {

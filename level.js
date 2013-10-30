@@ -471,7 +471,7 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 	
 	this.owner = makeEntityReference((user||player));
 
-	this.snd = sndGun1;
+	this.snd = sndGun4;
 	this.type = GUN;
 	
 	this.col1 = "255,205,0";
@@ -656,8 +656,8 @@ RandomGun = Gun.extend(function(awesomeness){
 			this.shot = 1;
 		}
 		
-		this.col1 = rcol(0,255,0,255,0,255);
-		this.col2 = rcol(0,255,0,255,0,255);
+		this.col1 = rcol(115,205,115,205,115,205);
+		this.col2 = rcol(0,155,0,155,0,155);
 		this.snd = sndGun1;
 		try{this.icon = assaultIcon;}catch(e){}
 		this.type = ASSAULTRIFLE;

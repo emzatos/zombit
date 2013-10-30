@@ -1,5 +1,5 @@
 mpServer="localhost";
-mpPort=1337;
+mpPort=8001;
 mpReady=false;
 mpActive=false;
 mpConnected=false;
