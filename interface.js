@@ -235,7 +235,11 @@ function createGUI() {
 	display.add(window, "enableLightTinting");
 	display.add(window, "enableGlare");
 	
-	display.add(window, "frameBlend").min(0).max(1);
+	display.add(window, "frameBlend").min(0).max(1).listen();
+	display.add(window, "minFrameBlend").min(0).max(1);
+	display.add(window, "defaultFrameBlend").min(0).max(1);
+	
+	display.add(window, "globalBrightness").min(0).max(2).step(0.1);
 	
 	var playr = gui.addFolder("Player");
 	playr.add(player, "life").min(1).max(player.maxlife).step(1).listen();

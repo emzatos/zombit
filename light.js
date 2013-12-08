@@ -1,6 +1,7 @@
 var lightArray = [];
 var lightbuffer, lictx;
 var gradientbuffer, grctx;
+var globalBrightness = 1;
 
 function initLight() {
 	lightbuffer = document.createElement("canvas");
@@ -57,6 +58,7 @@ function SpecialLightContainer(light) { //a light that has a custom drawing func
 
 var GLARESCALE = 2;
 function drawLight(dest,x,y,col,size,brightness,mode) { //mode0: gradients only, mode1: both, mode2: glare only
+    brightness*=globalBrightness;
 	if (mode<2) {
 		var gr = dest.createRadialGradient(x,y,0,x,y,size/2);
 		gr.addColorStop(0,col);

@@ -15,7 +15,7 @@ var INTRO=0,GAME=1;
 var dmode = INTRO;
 var intime = null;
 var showDebug = true, drawParticles = true, drawOverlay = true, tileShadows = true, entityShadows = true, enableLightRendering = true, enableLightTinting = true, enableGlare = true;
-var defaultFrameBlend = 0.8, minFrameBlend = 0.4, frameBlend = defaultFrameBlend;
+var defaultFrameBlend = 0.95, minFrameBlend = 0.4, frameBlend = defaultFrameBlend;
 
 //advanced shader data
 var od,out;
@@ -122,7 +122,7 @@ function render() {
 
         //health effects
         //calculate blurriness
-        frameBlend = Math.min(1,xexp((player.life/player.maxlife),defaultFrameBlend+minFrameBlend));
+        frameBlend = Math.min(defaultFrameBlend,xexp((player.life/player.maxlife),defaultFrameBlend)+minFrameBlend);
         //draw blood overlay
         var mult = player.life/player.maxlife, scaleAmt = 80;
         ctx.globalAlpha = 1-xexp(mult,1);
