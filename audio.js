@@ -2,19 +2,21 @@ var sndGun1,sndGun2,sndGun3,sndGun4;
 var sndTrack1,sndTrack2,sndTrack3;
 var sndFootstep,sndReload;
 
+var volumeMaster = 0.8;
+
 var playlist;
 var playlistIndex = 0;
 
 function loadAudio() {
-	sndDie = loadSoundFile("res/sound/die",2);
-	sndHit = loadSoundFile("res/sound/hit",2);
-	sndKill = loadSoundFile("res/sound/kill",4);
-	sndGun1 = loadSoundFile("res/sound/gun1",4);
-	sndGun2 = loadSoundFile("res/sound/gun2",4);
-	sndGun3 = loadSoundFile("res/sound/gun3",4);
-	sndGun4 = loadSoundFile("res/sound/gun4",4);
-	sndFootstep = loadSoundFile("res/sound/footstep",4);
-	sndReload = loadSoundFile("res/sound/reload",4);
+	sndDie = loadSoundFile("res/sound/die",2,0.5);
+	sndHit = loadSoundFile("res/sound/hit",2,0.8);
+	sndKill = loadSoundFile("res/sound/kill",4,0.7);
+	sndGun1 = loadSoundFile("res/sound/gun1",4,0.4);
+	sndGun2 = loadSoundFile("res/sound/gun2",4,0.4);
+	sndGun3 = loadSoundFile("res/sound/gun3",4,0.4);
+	sndGun4 = loadSoundFile("res/sound/gun4",4,0.8);
+	sndFootstep = loadSoundFile("res/sound/footstep",4,0.2);
+	sndReload = loadSoundFile("res/sound/reload",4,0.7);
 	
 	sndTrack1 = loadSoundFile("res/sound/moves");
 	sndTrack1.volume = 0.2;
@@ -27,11 +29,11 @@ function loadAudio() {
 
 	playlist = [sndTrack1, sndTrack2, sndTrack3];
 	for (var i=0; i<playlist.length; i++) {
-		playlist[i].addEventListener("ended",playlistNext,false);
+		playlist[i].audio.addEventListener("ended",playlistNext,false);
 	}
 }
 
-function loadSoundFile(src,nchannels) {
+function loadSoundFile(src,nchannels,vol) {
 	//console.log("Loading sound: "+src);
 	var au = new Audio();
 
@@ -46,22 +48,18 @@ function loadSoundFile(src,nchannels) {
 	au.appendChild(source);
 
 	au.load();
-
-	if (nchannels>1) {
-		var temp = new Sound(au,nchannels);
-		document.body.appendChild(au);
-		return temp;
-	}
-	else {
-		return au;
-		document.body.appendChild(au);
-	}
+	au.vol = vol;
+	
+	var temp = new Sound(au,nchannels,vol);
+	document.body.appendChild(au);
+	return temp;
 }
 
-function Sound(audioObj,channels) {
+function Sound(audioObj,channels,vol) {
 	this.audio = audioObj;
 	this.nchannels = channels;
 	this.channels = [];
+	this.vol = vol;
 
 	for( var i = 0; i < this.nchannels; i++ ) {
         this.channels.push( this.audio.cloneNode(true) );
@@ -77,6 +75,7 @@ function Sound(audioObj,channels) {
 }
 Sound.prototype.play = function(){
 	if (this.channels.length>0) {
+		this.channels[this.cic].volume = this.vol*volumeMaster;
 		this.channels[this.cic].currentTime=0;
 		this.channels[this.cic].play();
 		this.cic = this.cic==this.channels.length-1?0:this.cic+1; //inc ptr

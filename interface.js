@@ -255,4 +255,7 @@ function createGUI() {
 	mpm.add(window, "mpNick");
 	mpm.add(window, "mpStart");
 	mpm.add(window, "mpConnect");
+	
+	var audm = gui.addFolder("Audio");
+	audm.add(window, "volumeMaster").min(0).max(1).step(0.05);
 }
