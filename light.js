@@ -145,6 +145,47 @@ function renderLight() {
 	}
 }
 
+function renderLight2() {
+	if (enableLightRendering) {
+		lictx.globalCompositeOperation = "source-over";
+		clearCanvas(lictx,"black");
+		clearCanvas(grctx,"rgba(0,0,0,0)");
+
+		//first composite: subtract opacity from lit areas of view
+		lictx.globalCompositeOperation = "destination-out";
+		drawAllLights(grctx,1,0);
+		//two passes because it looks better (less dim and blurry)
+		lictx.drawImage(gradientbuffer,0,0);
+		//lictx.drawImage(gradientbuffer,0,0);
+		compositeLight(ctx,"source-over");
+
+		if (enableLightTinting) { //dest-out does not modify color, output must be re-colorized
+			//pre-render colored gradients, they will be used twice
+			clearCanvas(grctx, "rgba(0,0,0,0)");
+			drawAllLights(grctx,1,0);
+
+			//second composite: colorize
+			lictx.globalCompositeOperation = "lighter";
+			lictx.drawImage(gradientbuffer,0,0);
+			ctx.globalAlpha = 0.5;
+			compositeLight(ctx,"color");
+
+			clearCanvas(lictx,"black");
+			
+			//final composite: create bloom (also makes color more vibrant) and glare
+			//lictx.globalCompositeOperation = "lighter";
+			//bloom (ish)
+			//lictx.globalAlpha = 0.3;
+			//lictx.drawImage(gradientbuffer,0,0);
+			//glare
+			lictx.globalAlpha = 1;
+			drawAllLights(lictx,0.6,2); //draw only glare, we used pre-rendered color gradients
+			compositeLight(ctx,"lighter");
+			
+		}
+	}
+}
+
 function clearCanvas(context, color) {
 	var tempa = context.globalCompositeOperation;
 	var tempb = context.globalAlpha;

@@ -5,11 +5,12 @@ var defaultScreenWidth = screenWidth;
 var defaultScreenHeight = screenHeight;
 
 //viewport settings
-var outputScale = 2;
+var outputScale = 2.5;
 var viewWidth = screenWidth/outputScale;
 var viewHeight = screenHeight/outputScale;
 var viewX = 0;
 var viewY = 0;
+var viewRange = 0.5;
 
 var INTRO=0,GAME=1;
 var dmode = INTRO;
@@ -27,8 +28,9 @@ var renderLocked = false;
 function render() {
   if (!renderLocked) { //if the level is not currently being rendered
 	renderLocked = true; //lock
-	
+
 	if (dmode==GAME) {
+
 		//clear screen
 		ctx.fillStyle = "black";
 		ctx.fillRect(0,0,viewWidth,viewHeight);
@@ -61,9 +63,9 @@ function render() {
 			}
 		  }
 		}
-		
+
 		//render lighting
-		renderLight();
+		renderLight2();
 
 		//draw inventory GUI
 		ctx.fillStyle = "rgba(234,240,90,0.3)";
@@ -227,14 +229,14 @@ function render() {
 
 		ctx.textAlign = 'left';
 	  }
-  
+
 	//copy buffer to screen at proper scale
 	sctx.globalAlpha = frameBlend;
 	sctx.drawImage(buffer,0,0,screenWidth,screenHeight);
 	sctx.globalAlpha = 1;
-	
+
 	renderLocked = false;
-	
+
 	//request another frame
 	requestAnimFrame(render);
   }
@@ -252,7 +254,7 @@ function drawgameLevel(mode) {
 
       var tile = gameLevel.getTile(x,y); //get the tile at this position
 	  if (!mode || mode==0) { //normal rendering
-		  
+
 		  if (tile.depth==0) {
 		  	drawtile(tile,sx,sy);
 		  }
@@ -263,7 +265,7 @@ function drawgameLevel(mode) {
 			var tt = gameLevel.getTile(x,y-1);
 			var tr = gameLevel.getTile(x+1,y);
 			var tb = gameLevel.getTile(x,y+1);
-			
+
 			var offset = (imgBorderTop.width-tileWidth)/2;
 			if (tl && tl.id != tile.id) {ctx.drawImage(imgBorderLeft, sx-offset, sy-offset);}
 			if (tt && tt.id != tile.id) {ctx.drawImage(imgBorderTop, sx-offset, sy-offset);}
@@ -287,7 +289,7 @@ function drawgameLevel(mode) {
 			var tt = gameLevel.getTile(x,y-1);
 			var tr = gameLevel.getTile(x+1,y);
 			var tb = gameLevel.getTile(x,y+1);
-			
+
 			var offset = (imgBlockShadow.width-tileWidth)/2;
 			if (tl.id != tile.id || tt.id != tile.id || tr.id != tile.id || tb.id != tile.id) {ctx.drawImage(imgBlockShadow, sx-offset, sy-offset);}
 		}

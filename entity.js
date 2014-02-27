@@ -485,8 +485,10 @@ Player = Entity.extend(function(x,y,name,owner){
 
 		//move view to player
 		if (mpMode==CLIENT) {
-			viewX = ~~(this.x-viewWidth/2);
-			viewY = ~~(this.y-viewHeight/2);
+			var mOffsetX = (mouseX-viewWidth/2)*viewRange;
+			var mOffsetY = (mouseY-viewHeight/2)*viewRange;
+			viewX = (viewX*3+(~~(this.x-viewWidth/2+mOffsetX)))/4;
+			viewY = (viewY*3+(~~(this.y-viewHeight/2+mOffsetY)))/4;
 
 			//clip view pos
 			
@@ -762,6 +764,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	this.col2 = "220,170,0";
 	
 	this.light = null;
+	this.light2 = null;
 
 	this.type = BULLET;
 	
@@ -783,8 +786,11 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	render: function(x,y) {
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col1+",1)",35,1.1);
+			this.light = new EntityLight(this,"rgba("+this.col1+",1)",40,0.7);
 			registerLight(this.light);
+
+			this.light2 = new EntityLight(this,"rgba("+this.col1+",1)",120,0.2);
+			registerLight(this.light2);
 		}
 	
 		if (this.xp!=null) {
@@ -821,6 +827,7 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	destroy: function() {
 		unregisterLight(this.light);
+		unregisterLight(this.light2);
 		this.supr();
 	}
 });
