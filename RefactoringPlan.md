@@ -1,5 +1,10 @@
 The Great Refactoring
 =====================
+<br>
+
+<center>
+<img src="http://imgs.xkcd.com/comics/good_code.png" alt="Drawing" style="width: 300px;"/>
+</center>
 
 Purpose
 -------
