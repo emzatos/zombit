@@ -6,10 +6,11 @@ preload = function() {
 
 startGame = function() {
 	//generate gameLevel
-	gameLevel = generateRectRooms(120,120,16);
-	//gameLevel = generateNoise(120,120,[WALL,FLOOR]);
-	gameLevel = generatePlants(gameLevel,0.1);
-	gameLevel = punchOutWalls(gameLevel,0.1);
+	gameLevel = LevelFactory.makeEmptyRoom(120,120);
+	LevelFactory.addRectRooms(gameLevel,16);
+	LevelFactory.addPlants(gameLevel,0.1);
+	LevelFactory.addDoorways(gameLevel,0.1);
+	LevelFactory.
 	
 	//populate the level with light fixtures
 	if (mpMode==CLIENT) {addLightsToLevel(gameLevel,196,"rgb(175,161,152)",512,0.4,0.3,1);}

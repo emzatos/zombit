@@ -153,8 +153,21 @@ makeEntityReference = function(x) { //works for indexes, entities, and serialize
 	}
 }
 
+idMap = {};
+onScriptsLoaded.push(function(){
+	idMap[ENTITY] = Entity;
+	idMap[DROPPEDITEM] = DroppedItem;
+	idMap[PLAYER] = Player;
+	idMap[HOSTILE] = Hostile;
+	idMap[ZOMBIE] = Zombie;
+	idMap[PROJECTILE] = Projectile;
+	idMap[BULLET] = Bullet;
+	idMap[PARTICLE] = Particle;
+	idMap[BLOODSPLAT] = BloodSplat;
+});
+
 //include entities
-include("entities/entity.js");
+include("entities/Entity.js");
 include("entities/Player.js");
 include("entities/DroppedItem.js");
 include("entities/hostile/Hostile.js");
@@ -170,16 +183,6 @@ makeNewent = function(ent) {
 	return {ind: ent.arrIndex, type: ent.type, ser: ent.serializable()};
 }
 
-idMap = {};
-idMap[ENTITY] = Entity;
-idMap[DROPPEDITEM] = DroppedItem;
-idMap[PLAYER] = Player;
-idMap[HOSTILE] = Hostile;
-idMap[ZOMBIE] = Zombie;
-idMap[PROJECTILE] = Projectile;
-idMap[BULLET] = Bullet;
-idMap[PARTICLE] = Particle;
-idMap[BLOODSPLAT] = BloodSplat;
 constructEntity = function(id) {
 	return new idMap[id];
 }

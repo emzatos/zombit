@@ -1,4 +1,9 @@
-window.addEventListener('load', function(){init();}, false);
+window.addEventListener('load', function(){
+	onScriptsLoaded.push(function(){
+		init();
+	});
+	loadScripts();
+}, false);
 
 var targetFPS = 60;
 var fps = targetFPS;
@@ -37,8 +42,7 @@ window.requestAnimFrame = (function(){
 
 function init() {
 	preload();
-
-        //create container to center canvas
+    //create container to center canvas
 	canvContainer = document.createElement("center");
 	document.getElementById("cc").appendChild(canvContainer);
         
@@ -96,6 +100,24 @@ function init() {
 	requestAnimFrame(render);
 	
 	createGUI();
+}
+
+function loadScripts() {
+	include("fasttrig.js");
+	include("encode64.js");
+	include("klass.js");
+	include("interface.js");
+	include("level/level.js");
+	include("main.js");
+	include("entities/EntityManager.js");
+	include("render.js");
+	include("light.js");
+	include("res.js");
+	include("audio.js");
+	include("utils.js");
+	include("client.js");
+	include("network.js");
+	include("dat.gui.min.js");
 }
 
 function reinitCanvases() {
@@ -208,14 +230,29 @@ function randomGun() {
  * Must be redefined in server code.
  * @param filename the file path to load
  */
+scriptsToLoad = 0;
+scriptsLoaded = 0;
+onScriptsLoaded = [];
 function include(filename) {
+  scriptsToLoad++;
   var d = window.document;
   var isXML = d.documentElement.nodeName !== 'HTML' || !d.write; // Latter is for silly comprehensiveness
   var js = d.createElementNS && isXML ? d.createElementNS('http://www.w3.org/1999/xhtml', 'script') : d.createElement('script');
   js.setAttribute('type', 'text/javascript');
   js.setAttribute('src', filename);
   js.setAttribute('defer', 'defer');
-  js.onload = function(){Core.assetLoaded();};
+  js.onload = function(){
+  	scriptsLoaded++;
+  	if (scriptsLoaded>=scriptsToLoad) {
+  		for (var i=0; i<onScriptsLoaded.length; i++) {
+  			onScriptsLoaded[i]();
+  		}
+
+  		onScriptsLoaded = [];
+  		scriptsLoaded = 0;
+  		scriptsToLoad = 0;
+  	}
+  };
   d.getElementsByTagNameNS && isXML ? (d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0] ? d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0].appendChild(js) : d.documentElement.insertBefore(js, d.documentElement.firstChild) // in case of XUL
   ) : d.getElementsByTagName('head')[0].appendChild(js);
   // save include state for reference by include_once
