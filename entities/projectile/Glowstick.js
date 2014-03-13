@@ -5,7 +5,7 @@ Glowstick = Projectile.extend(function(x,y,owner) {
 	this.light = null;
 	
 	this.brightness = 255;
-	this.col = "10,"+Math.floor(this.brightness)+",10";
+	this.col = Math.floor(this.brightness/3)+","+Math.floor(this.brightness)+","+Math.floor(this.brightness/3);
 
 	try {this.image = glowstickIcon;}
 	catch (e) {}
@@ -17,14 +17,14 @@ Glowstick = Projectile.extend(function(x,y,owner) {
 			this.light.size-=0.1;
 		}
 		this.brightness-=0.1;
-		this.col = "10,"+Math.floor(this.brightness)+",10";
+		this.col = Math.floor(this.brightness/3)+","+Math.floor(this.brightness)+","+Math.floor(this.brightness/3);
 		if (this.light.size<0) {this.destroy();}
 	},
 	render: function(x,y) {
 		ctx.drawImage(this.image,x-tileWidth/2,y-tileHeight/2,tileWidth,tileHeight);
 
 		if (this.light==null) {
-			this.light = new EntityLight(this,"rgba("+this.col+",0.5)",255,0.8);
+			this.light = new EntityLight(this,"rgb("+this.col+")",255,0.8);
 			registerLight(this.light);
 		}
 	},

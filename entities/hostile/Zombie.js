@@ -1,4 +1,4 @@
-var ZOMBIEMAXLIFE = 500;
+var ZOMBIEMAXLIFE = 100;
 Zombie = Hostile.extend(function(x,y,vr){
 	try {this.image = imgZombie;}
 	catch (e) {}
@@ -7,7 +7,7 @@ Zombie = Hostile.extend(function(x,y,vr){
 
 	this.spd=0.8;
 	this.visionRadius = 160
-	this.life = Math.round(Math.random()*ZOMBIEMAXLIFE);
+	this.life = irandr(25,ZOMBIEMAXLIFE);
 	this.maxlife = this.life;
 	this.pointValue = Math.round(0.5*this.life);
 	this.inv.push(new ZombieAttack());
@@ -39,6 +39,11 @@ Zombie = Hostile.extend(function(x,y,vr){
 	},
 
 	die: function() {
+		this.supr();
+	},
+
+	destroy: function() {
+		Zombie.count--;
 		this.supr();
 	}
 });

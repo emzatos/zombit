@@ -3,6 +3,7 @@ var sndTrack1,sndTrack2,sndTrack3;
 var sndFootstep,sndReload;
 var sndSplat = [];
 var sndBulletImpact;
+var sndStep = [];
 
 var gunSounds = {
 	ar: [],
@@ -23,18 +24,22 @@ function loadAudio() {
 	sndGun1 = loadSoundFile("res/sound/gun1",4,0.4);
 	sndGun2 = loadSoundFile("res/sound/gun2",4,0.4);
 	sndGun3 = loadSoundFile("res/sound/gun3",4,0.4);
-	sndGun4 = loadSoundFile("res/sound/gun4",4,0.8);
+	//sndGun4 = loadSoundFile("res/sound/gun4",4,0.8);
 	sndFootstep = loadSoundFile("res/sound/footstep",4,0.2);
 	sndReload = loadSoundFile("res/sound/reload",4,0.7);
 
+	sndStep[1] = loadSoundFile("res/sound/step_1",2,1);
+	sndStep[4] = loadSoundFile("res/sound/step_4",2,1);
+	sndStep[5] = loadSoundFile("res/sound/step_5",2,1);
+
 	gunSounds.ar.push([
-		loadSoundFile("res/sound/AR_1_1",4,0.7),
-		loadSoundFile("res/sound/AR_1_2",4,0.7)
+		loadSoundFile("res/sound/AR_1_1",4,0.3),
+		loadSoundFile("res/sound/AR_1_2",4,0.3)
 	]);
 	
 	gunSounds.ar.push([
-		loadSoundFile("res/sound/AR_2_1",4,0.7),
-		loadSoundFile("res/sound/AR_2_2",4,0.7)
+		loadSoundFile("res/sound/AR_2_1",4,0.5),
+		loadSoundFile("res/sound/AR_2_2",4,0.5)
 	]);
 
 	for (var i=0; i<4; i++) {

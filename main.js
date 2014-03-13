@@ -28,7 +28,7 @@ startGame = function() {
 
 	//tell zombies to spawn continuously
 	setInterval(function(){
-		if (Zombie.count<80) {
+		if (Zombie.count<120) {
 		for (var i=0; i<1; i++) {
 			var tx,ty,ta;
 			do {

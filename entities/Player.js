@@ -14,6 +14,9 @@ Player = Entity.extend(function(x,y,name,owner){
 	this.type = PLAYER;
 	
 	this.emitConstruct();
+
+	this.footstepInterval = 40;
+	this.footstepTimer = 0;
 })
 .methods({
 	step: function(dlt) {
@@ -64,6 +67,16 @@ Player = Entity.extend(function(x,y,name,owner){
 			var dir = pDir(pcx,pcy,mouseX,mouseY);
 			player.facing = dir;
 		}
+
+		if (this.footstepTimer >= this.footstepInterval) {
+			this.footstepTimer = 0;
+			var tile = gameLevel.getTile(~~(this.x/tileWidth),~~(this.y/tileWidth));
+			if (tile.sound!=null) {
+				tile.sound.audio.volume = (grandr(0,1));
+				tile.sound.play();
+			}
+		}
+		this.footstepTimer+=Math.sqrt(this.xs*this.xs+this.ys*this.ys);
 	},
 	render: function(x,y) {
 		this.supr(x,y);
