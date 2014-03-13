@@ -9,6 +9,7 @@ var targetFPS = 60;
 var fps = targetFPS;
 var lt = new Date().getTime(); //used for timing
 var gameLevel = null; //currently loaded level
+var gamePaused = false;
 
 var tileWidth = 16; //pixel width of a tile
 var tileHeight = 16;
@@ -150,6 +151,12 @@ function reinitCanvases() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0,0,viewWidth,viewHeight);
 
+	noiseCanvas = document.createElement("canvas");
+	noiseCanvas.width = noiseWidth;
+	noiseCanvas.height = noiseHeight;
+	noiseCtx = noiseCanvas.getContext("2d");
+	noiseData = noiseCtx.getImageData(0,0,noiseWidth,noiseHeight);
+
 	//initialize advanced shader data
 	oid = ctx.createImageData(viewWidth,viewHeight);
 	dout = oid.data;
@@ -217,12 +224,17 @@ function godMode() {
 	player.inv.getSelected().ammo = Infinity;
 	player.inv.getSelected().clipsize = Infinity;
 	player.life = Infinity;
+	player.maxlife = Infinity;
 }
 
 function randomGun() {
 	showPrompt("Enter awesomeness rating (0 to 1):", function(inpt){
-		player.inv.inv[player.inv.selected] = new RandomGun(parseFloat(inpt));
+		player.inv.push(new RandomGun(parseFloat(inpt)));
 	});
+}
+
+function giveNyanGun() {
+	player.inv.push(new NyanGun());
 }
 
 /**
@@ -230,46 +242,62 @@ function randomGun() {
  * Must be redefined in server code.
  * @param filename the file path to load
  */
+scriptLoadQueue = [];
 scriptsToLoad = 0;
 scriptsLoaded = 0;
 onScriptsLoaded = [];
-function include(filename) {
-  scriptsToLoad++;
-  var d = window.document;
-  var isXML = d.documentElement.nodeName !== 'HTML' || !d.write; // Latter is for silly comprehensiveness
-  var js = d.createElementNS && isXML ? d.createElementNS('http://www.w3.org/1999/xhtml', 'script') : d.createElement('script');
-  js.setAttribute('type', 'text/javascript');
-  js.setAttribute('src', filename);
-  js.setAttribute('defer', 'defer');
-  js.onload = function(){
-  	scriptsLoaded++;
-  	if (scriptsLoaded>=scriptsToLoad) {
-  		for (var i=0; i<onScriptsLoaded.length; i++) {
-  			onScriptsLoaded[i]();
+isScriptLoading = false;
+function include(filename,loadImmediately) {
+  if (isScriptLoading && !loadImmediately) {
+  	scriptLoadQueue.push(filename);
+  }
+  else {
+  	  isScriptLoading = true;
+	  scriptsToLoad++;
+	  var d = window.document;
+	  var isXML = d.documentElement.nodeName !== 'HTML' || !d.write; // Latter is for silly comprehensiveness
+	  var js = d.createElementNS && isXML ? d.createElementNS('http://www.w3.org/1999/xhtml', 'script') : d.createElement('script');
+	  js.setAttribute('type', 'text/javascript');
+	  js.setAttribute('src', filename);
+	  js.setAttribute('defer', 'defer');
+	  js.onload = function(){
+	  	scriptsLoaded++;
+	  	
+	  	if (scriptLoadQueue.length>0) {
+  			include(scriptLoadQueue.shift(),true);
+  		}
+  		else {
+  			isScriptLoading = false;
   		}
 
-  		onScriptsLoaded = [];
-  		scriptsLoaded = 0;
-  		scriptsToLoad = 0;
-  	}
-  };
-  d.getElementsByTagNameNS && isXML ? (d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0] ? d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0].appendChild(js) : d.documentElement.insertBefore(js, d.documentElement.firstChild) // in case of XUL
-  ) : d.getElementsByTagName('head')[0].appendChild(js);
-  // save include state for reference by include_once
-  var cur_file = {};
-  cur_file[window.location.href] = 1;
+	  	if (scriptsLoaded>=scriptsToLoad) {
+	  		for (var i=0; i<onScriptsLoaded.length; i++) {
+	  			onScriptsLoaded[i]();
+	  		}
 
-  // BEGIN REDUNDANT
-  this.php_js = this.php_js || {};
-  // END REDUNDANT
-  if (!this.php_js.includes) {
-	this.php_js.includes = cur_file;
-  }
-  if (!this.php_js.includes[filename]) {
-	this.php_js.includes[filename] = 1;
-  } else {
-	this.php_js.includes[filename]++;
-  }
+	  		onScriptsLoaded = [];
+	  		scriptsLoaded = 0;
+	  		scriptsToLoad = 0;
+	  	}
+	  };
+	  d.getElementsByTagNameNS && isXML ? (d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0] ? d.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'head')[0].appendChild(js) : d.documentElement.insertBefore(js, d.documentElement.firstChild) // in case of XUL
+	  ) : d.getElementsByTagName('head')[0].appendChild(js);
+	  // save include state for reference by include_once
+	  var cur_file = {};
+	  cur_file[window.location.href] = 1;
 
-  return this.php_js.includes[filename];
+	  // BEGIN REDUNDANT
+	  this.php_js = this.php_js || {};
+	  // END REDUNDANT
+	  if (!this.php_js.includes) {
+		this.php_js.includes = cur_file;
+	  }
+	  if (!this.php_js.includes[filename]) {
+		this.php_js.includes[filename] = 1;
+	  } else {
+		this.php_js.includes[filename]++;
+	  }
+
+	  return this.php_js.includes[filename];
+  }
 }

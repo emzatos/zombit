@@ -45,7 +45,7 @@ Entity = klass(function (x,y) {
 		var xm = this.xs>0?1:-1;
 		for (var xx=0; xx<Math.floor(sx); xx++) {
 			var ctile = tileAt(this.x+xm+(xm*this.width*0.5),this.y);
-			if (ctile!=null && ctile.id==FLOOR) {
+			if (ctile!=null && !isSolid(ctile)) {
 				this.x+=xm;
 			}
 			else {
@@ -55,13 +55,13 @@ Entity = klass(function (x,y) {
 			}
 		}
 		var curtile = tileAt(this.x+(this.xs%1)+(xm*this.width*0.5),this.y);
-		if (curtile!=null && curtile.id==FLOOR) {this.x+=(this.xs%1);}
+		if (curtile!=null && !isSolid(curtile)) {this.x+=(this.xs%1);}
 
 		//move for yspeed
 		var ym = this.ys>0?1:-1;
 		for (var yy=0; yy<Math.floor(sy); yy++) {
 			var ctile = tileAt(this.x,this.y+ym+(ym*this.height*0.5));
-			if (ctile!=null && ctile.id==FLOOR) {
+			if (ctile!=null && !isSolid(ctile)) {
 				this.y+=ym;
 			}
 			else {
@@ -71,7 +71,7 @@ Entity = klass(function (x,y) {
 			}
 		}
 		curtile = tileAt(this.x,this.y+(this.ys%1)+(ym*this.height*0.5));
-		if (curtile!=null && curtile.id==FLOOR) {this.y+=(this.ys%1);}
+		if (curtile!=null && !isSolid(curtile)) {this.y+=(this.ys%1);}
 
 		//apply friction
 		this.xs*=1-(this.friction*dlt);
@@ -101,10 +101,6 @@ Entity = klass(function (x,y) {
 	damage: function(amount) {
 		this.life-=amount;
 		if (particlesEnabled) {
-			var ht = new FloatingText("-"+Math.round(amount),"255,55,55",this.x,this.y,100);
-			ht.ys=-1;
-			ht.xs=Math.random()*0.5-0.25;
-
 			for (var i=0; i<Math.ceil((amount/(this.maxlife>0?this.maxlife:1))*6); i++) {
 				new BloodSplat(this.x-this.width*0.5+irand(this.width),this.y-this.height*0.5+irand(this.height),0,0);
 			}

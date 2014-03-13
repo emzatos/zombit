@@ -42,12 +42,11 @@ imgBloodSplat3.src = "res/entity/bloodsplat4.png";
 var imgShadow = new Image();
 imgShadow.src = "res/entity/shadow.png";
 
-var images = new Array(4);
-for (var i=0; i<images.length; i++) {images[i] = new Image();}
-images[0].src = "res/tile/1.png";
-images[1].src = "res/tile/2.png";
-images[2].src = "res/tile/3.png";
-images[3].src = "res/tile/4.png";
+var images = new Array(6);
+for (var i=0; i<images.length; i++) {
+	images[i] = new Image();
+	images[i].src = "res/tile/"+i+".png";
+}
 
 var imgBorderLeft = new Image();
 imgBorderLeft.src = "res/tile/border-left.png";
@@ -68,3 +67,9 @@ var imgGlare = new Image();
 imgGlare.src = "res/glare5.png";
 var imgFlashlightBeam = new Image();
 imgFlashlightBeam.src = "res/flashlight.png";
+
+var imgSplatter = [];
+for (var i=0; i<5; i++) {
+	imgSplatter[i] = new Image();
+	imgSplatter[i].src = "res/splatter"+i+".png";
+}

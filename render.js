@@ -5,12 +5,19 @@ var defaultScreenWidth = screenWidth;
 var defaultScreenHeight = screenHeight;
 
 //viewport settings
-var outputScale = 2.5;
+var outputScale = 3;
 var viewWidth = screenWidth/outputScale;
 var viewHeight = screenHeight/outputScale;
 var viewX = 0;
 var viewY = 0;
 var viewRange = 0.5;
+
+var noiseCanvas;
+var noiseCtx;
+var noiseWidth = 128;
+var noiseHeight = 128;
+var noiseIntensity = 60;
+var noiseData;
 
 var INTRO=0,GAME=1;
 var dmode = INTRO;
@@ -46,7 +53,7 @@ function render() {
 		if (drawParticles) {
 			for (var ec = 0; ec<particles.length; ec++) {
 			  var prt = particles[ec];
-			  if (prt instanceof Particle) {
+			  if (prt instanceof Particle && prt.depth>=0) {
 				if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
 				  prt.render(prt.x-viewX,prt.y-viewY);
 				}
@@ -62,6 +69,17 @@ function render() {
 			  ent.render(ent.x-viewX,ent.y-viewY);
 			}
 		  }
+		}
+
+		if (drawParticles) {
+			for (var ec = 0; ec<particles.length; ec++) {
+			  var prt = particles[ec];
+			  if (prt instanceof Particle && prt.depth<0) {
+				if (prt.x>viewX && prt.x<viewX+viewWidth && prt.y>viewY && prt.y<viewY+viewHeight) {
+				  prt.render(prt.x-viewX,prt.y-viewY);
+				}
+			  }
+			}
 		}
 
 		//render lighting
@@ -179,6 +197,13 @@ function render() {
 		  ctx.fillStyle = "white";
 		  ctx.fillText(txt,viewWidth/2,viewHeight/2);
 		  ctx.textAlign = 'left';
+		}
+
+		createNoise(noiseIntensity);
+		for (var x=0, w=~~(viewWidth/noiseWidth)+1; x<w; x++) {
+			for (var y=0, h=~~(viewHeight/noiseHeight)+1; y<h; y++) {
+				ctx.drawImage(noiseCanvas,x*noiseWidth,y*noiseHeight);
+			}
 		}
 	  }
 	  else if (dmode==INTRO) {
@@ -301,49 +326,12 @@ function drawgameLevel(mode) {
 function drawtile(tile,x,y) {
 	if (tile!=null) {
 		var tid = tile.id;
-		if (tid!=null) {ctx.drawImage(tileImage(tid), x, y);}
+		if (tid!=null) {
+			//ctx.strokeStyle = "white";
+			//ctx.strokeRect(x,y,16,16);
+			ctx.drawImage(tileImage(tid), x, y);
+		}
 	}
-}
-
-//shader function, pass function(data,xPixel,yPixel,RedVal,BlueVal,GreenVal) that returns [r,g,b]
-function shader(func) {
-  var id = ctx.getImageData(0,0,viewWidth,viewHeight);
-  var dat = id.data;
-
-  //var d2 = dat.clone();
-  for (var x=1; x<viewWidth-1; x++) {
-    for (var y=1; y<viewHeight-1; y++) {
-      var cr = dat[ri(x,y)];
-      var cg = dat[gi(x,y)];
-      var cb = dat[bi(x,y)];
-      var result = func(dat,x,y,cr,cg,cb);
-
-      dat[ri(x,y)]=result[0];
-      dat[gi(x,y)]=result[1];
-      dat[bi(x,y)]=result[2];
-    }
-  }
-  ctx.putImageData(id,0,0);
-}
-
-function xshader(func) {
-  var id = ctx.getImageData(0,0,viewWidth,viewHeight);
-  var dat = id.data;
-
-  //var d2 = dat.clone();
-  for (var x=1; x<viewWidth-1; x++) {
-    for (var y=1; y<viewHeight-1; y++) {
-      var cr = dat[ri(x,y)];
-      var cg = dat[gi(x,y)];
-      var cb = dat[bi(x,y)];
-      var result = func(dat,x,y,cr,cg,cb);
-
-      dout[ri(x,y)]=result[0];
-      dout[gi(x,y)]=result[1];
-      dout[bi(x,y)]=result[2];
-    }
-  }
-  ctx.putImageData(oid,0,0);
 }
 
 //color indexes
@@ -351,56 +339,9 @@ function ri(x,y) {return ((x)+(y)*viewWidth)*4+0;}
 function gi(x,y) {return ((x)+(y)*viewWidth)*4+1;}
 function bi(x,y) {return ((x)+(y)*viewWidth)*4+2;}
 function ai(x,y) {return ((x)+(y)*viewWidth)*4+3;}
-//function ri(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+0;}
-//function gi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+1;}
-//function bi(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+2;}
-//function ai(x,y) {return ((x<0?0:x>viewWidth?viewWidth:x)+(y<0?0:y>viewHeight?viewHeight:y)*viewWidth)*4+3;}
-
-function sthresh(d,x,y,r,g,b) { //threshold
-  var res = [0,0,0];
-  res[0] = r>127?255:0;
-  res[1] = g>127?255:0;
-  res[2] = b>127?255:0;
-  return res;
-}
-
-function srand(d,x,y,r,g,b) { //noise
-  var res = [0,0,0];
-  var ra = frand()*255;
-  res[0] = ra;
-  res[1] = ra;
-  res[2] = ra;
-  return res;
-}
-
-function sfx(d,x,y,r,g,b) { //red channel blur + threshold
-  var res = [0,0,0];
-  var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
-  res[0] = colLevel(r,20,237)*dm;
-  res[1] = colLevel(g,38,202)*dm;
-  res[2] = colLevel(b,9,240)*dm;
-  return res;
-}
-
-function xsfx(d,x,y,r,g,b) { //red channel blur + threshold
-  var res = [0,0,0];
-  var dm = 0.8+frand()*0.2*((0.8*Math.abs((viewHeight*0.5)-y)/(viewHeight*0.5))+0.2);
-  res[0] = colLevel(r,13,202)*dm;
-  res[1] = colLevel(g,5,232)*dm;
-  res[2] = colLevel(b,10,200)*dm;
-  return res;
-}
 
 function colLevel(col,min,max) {
   return (col/255)*max+min;
-}
-
-function sblur(d,x,y,r,g,b) { //red channel blur + threshold
-  var res = [0,0,0];
-  res[0] = (d[ri(x-1,y)]+d[ri(x+1,y)])/2;
-  res[1] = g;
-  res[2] = (d[bi(x+2,y)]+d[bi(x,y)])/2;
-  return res;
 }
 
 function strokeEllipse(ctx, x, y, w, h) {
@@ -420,4 +361,13 @@ function strokeEllipse(ctx, x, y, w, h) {
   ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
   ctx.closePath();
   ctx.stroke();
+}
+
+function createNoise(intensity) {
+	var data = noiseData.data;
+	for (var i=0; i<noiseWidth*noiseHeight*4; i+=4) {
+		data[i+2] = data[i+1] = data[i] = 0;
+		data[i+3] = (~~(Math.random()*intensity));
+	}
+	noiseCtx.putImageData(noiseData,0,0);
 }

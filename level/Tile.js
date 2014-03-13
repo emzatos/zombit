@@ -1,6 +1,6 @@
-EMPTY=0, FLOOR=1, WALL=2, PLANT=3, DESK=4;
-SOLIDS = [WALL];
-DEPTHS = [0,0,2,2,2]; //depths: 0-bottom, 1-shadow layer, 2-top layer
+EMPTY=0, FLOOR=1, WALL=2, PLANT=3, GRASS=4, WOODFLOOR=5;
+SOLIDS = [WALL,PLANT];
+DEPTHS = [0,0,2,2,0,0]; //depths: 0-bottom, 1-shadow layer, 2-top layer
 
 Tile = function(id,x,y) {
 	this.id = id;
@@ -12,8 +12,10 @@ Tile = function(id,x,y) {
 	//implement solid
 }
 
-images = new Array();
-images = ["1.png", "2.png", "3.png", "4.png", "5.png"];
 tileImage = function(id) {
 	return images[id];
+}
+
+isSolid = function(tile) {
+	return SOLIDS.indexOf(tile.id)>=0;
 }

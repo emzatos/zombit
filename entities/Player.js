@@ -82,6 +82,9 @@ Player = Entity.extend(function(x,y,name,owner){
 		//}
 	},
 	damage: function(amount) {
+		var ht = new FloatingText("-"+Math.round(amount),"255,55,55",this.x,this.y,100);
+		ht.ys=-1;
+		ht.xs=Math.random()*0.5-0.25;
 		this.supr(amount);
 		sndHit.play();
 		this.healTimer = this.healCooldown;

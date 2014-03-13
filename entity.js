@@ -385,6 +385,14 @@ Entity = klass(function (x,y) {
 				dest[prop] = src[prop];
 			}
 		}
+	},
+	distanceTo: function(ent) {
+		if (ent instanceof Entity) {
+			var dx = this.x-ent.x;
+			var dy = this.y-ent.y;
+			return Math.sqrt(dx*dx+dy*dy);
+		}
+		return 1;
 	}
 });
 makeNewent = function(ent) {

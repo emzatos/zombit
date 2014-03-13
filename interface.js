@@ -12,67 +12,72 @@ function addListeners() {
 var keys = new Array(2048);
 function kd(e) { //keydown
 	if (modalsOpen<=0) {
-	if (!e) {e=event;}
-	if (e.keyCode==VK_F11) {
-		if (!window.screenTop && !window.screenLeft) {
-			fullscreen(true);
-		}
-		else {
-			fullscreen(false);
-		}
-	}
-	if (e.keyCode==VK_F10) {
-		showPrompt("Enter nickname: ", function(serv){
-			serv = serv!=""?serv:mpServer;
+		if (!e) {e=event;}
 
-			showPrompt("Enter server IP or domain: ", function(port){ 
-				port = port!=""?port:mpPort;
+		if (e.keyCode==VK_ESCAPE) {
+			gamePaused = !gamePaused;
+		}
 
-				showPrompt("Enter server port: ", function(nick) {
-					nick = nick!=""?nick:mpNick;
-					mpStart(nick,serv,port);
+		if (e.keyCode==VK_F11) {
+			if (!window.screenTop && !window.screenLeft) {
+				fullscreen(true);
+			}
+			else {
+				fullscreen(false);
+			}
+		}
+		if (e.keyCode==VK_F10) {
+			showPrompt("Enter nickname: ", function(serv){
+				serv = serv!=""?serv:mpServer;
+
+				showPrompt("Enter server IP or domain: ", function(port){ 
+					port = port!=""?port:mpPort;
+
+					showPrompt("Enter server port: ", function(nick) {
+						nick = nick!=""?nick:mpNick;
+						mpStart(nick,serv,port);
+					})
 				})
-			})
-		});
-	}
-	if (e.keyCode==VK_T && !mpChatOpen) {
-		mpChatOpen = true;
-		mpChatInput = document.createElement("input");
-		mpChatInput.type = "text";
-		mpChatInput.style.position = "absolute";
-		mpChatInput.style.left = "-100px";
-		mpChatInput.style.top = "-100px";
-		document.body.appendChild(mpChatInput);
-		mpChatInput.addEventListener("input",function() {
-			mpTypedChat = mpChatInput.value;
-		},false);
-		/*mpChatInput.addEventListener("blur",function(){
-			mpChatOpen = false;
-			document.body.removeChild(mpChatInput);
-		},false);*/
-		mpChatInput.focus();
-		e.preventDefault();
-	}
-	else if (e.keyCode==VK_ESCAPE && mpChatOpen) {
-		try {
-			mpChatOpen = false;
-			document.body.removeChild(mpChatInput);
-		} catch (e) {}
-	}
-	else if (e.keyCode==VK_ENTER && mpChatOpen) {
-		mpSendChat();
-		try {
-			mpChatOpen = false;
-			document.body.removeChild(mpChatInput);
-		} catch (e) {}
-		
-	}
-	if (!mpChatOpen) {
-		keys[e.keyCode] = true;
+			});
+		}
+		if (e.keyCode==VK_T && !mpChatOpen) {
+			mpChatOpen = true;
+			mpChatInput = document.createElement("input");
+			mpChatInput.type = "text";
+			mpChatInput.style.position = "absolute";
+			mpChatInput.style.left = "-100px";
+			mpChatInput.style.top = "-100px";
+			document.body.appendChild(mpChatInput);
+			mpChatInput.addEventListener("input",function() {
+				mpTypedChat = mpChatInput.value;
+			},false);
+			/*mpChatInput.addEventListener("blur",function(){
+				mpChatOpen = false;
+				document.body.removeChild(mpChatInput);
+			},false);*/
+			mpChatInput.focus();
+			e.preventDefault();
+		}
+		else if (e.keyCode==VK_ESCAPE && mpChatOpen) {
+			try {
+				mpChatOpen = false;
+				document.body.removeChild(mpChatInput);
+			} catch (e) {}
+		}
+		else if (e.keyCode==VK_ENTER && mpChatOpen) {
+			mpSendChat();
+			try {
+				mpChatOpen = false;
+				document.body.removeChild(mpChatInput);
+			} catch (e) {}
+			
+		}
+		if (!mpChatOpen) {
+			keys[e.keyCode] = true;
 
-		//send input to server
-		if (mpReady) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
-	}
+			//send input to server
+			if (mpReady) {mpSocket.emit("input",{type: INPUT_KB, code: e.keyCode, val: true});}
+		}
 	}
 }
 function ku(e) { //keyup
@@ -248,6 +253,7 @@ function createGUI() {
 	playr.add(player, "friction").step(0.01);
 	playr.add(window, "godMode");
 	playr.add(window, "randomGun");
+	playr.add(window, "giveNyanGun");
 	
 	var mpm = gui.addFolder("Multiplayer (Broken, do not use)");
 	mpm.add(window, "mpServer");

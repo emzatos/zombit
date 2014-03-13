@@ -3,6 +3,8 @@ Zombie = Hostile.extend(function(x,y,vr){
 	try {this.image = imgZombie;}
 	catch (e) {}
 
+	Zombie.count++;
+
 	this.spd=0.8;
 	this.visionRadius = 160
 	this.life = Math.round(Math.random()*ZOMBIEMAXLIFE);
@@ -12,6 +14,9 @@ Zombie = Hostile.extend(function(x,y,vr){
 
 	this.type = ZOMBIE;
 	this.emitConstruct();
+})
+.statics({
+	count: 0
 })
 .methods({
 	step: function(dlt) {

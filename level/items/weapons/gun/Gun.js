@@ -31,7 +31,15 @@ Gun = Weapon.extend(function(clipsize,ammo,delay,damage,spread,spd,user) {
 
 			if (this.ammo>0) {
 				this.ammo-=1;
-				if (this.snd) {this.snd.play();}
+				if (typeof this.snd === 'object') {
+					if (this.snd instanceof Array) {
+						this.snd[~~(this.snd.length*Math.random())].play();
+					}
+					else {
+						this.snd.play();
+					}
+				}
+
 				for (var i=0; i<this.shot; i++) {
 					this.bullet();
 				}

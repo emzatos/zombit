@@ -73,6 +73,6 @@ Hostile = Entity.extend(function(x,y,vr){
 	die: function() {
 		this.supr();
 		if (mpMode != SERVER) {gameScore+=this.pointValue;}
-		sndKill.play();
+		sndSplat.random().play(pDist(this.x,this.y,player.x,player.y));
 	}
 });

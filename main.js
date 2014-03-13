@@ -7,10 +7,9 @@ preload = function() {
 startGame = function() {
 	//generate gameLevel
 	gameLevel = LevelFactory.makeEmptyRoom(120,120);
-	LevelFactory.addRectRooms(gameLevel,16);
-	LevelFactory.addPlants(gameLevel,0.1);
-	LevelFactory.addDoorways(gameLevel,0.1);
-	LevelFactory.
+	gameLevel = LevelFactory.addRectRooms(gameLevel,16);
+	gameLevel = LevelFactory.addPlants(gameLevel,0.1);
+	gameLevel = LevelFactory.addDoorways(gameLevel,0.1);
 	
 	//populate the level with light fixtures
 	if (mpMode==CLIENT) {addLightsToLevel(gameLevel,196,"rgb(175,161,152)",512,0.4,0.3,1);}
@@ -29,7 +28,7 @@ startGame = function() {
 
 	//tell zombies to spawn continuously
 	setInterval(function(){
-		if (entityManager.length()<50) {
+		if (Zombie.count<80) {
 		for (var i=0; i<1; i++) {
 			var tx,ty,ta;
 			do {
@@ -44,23 +43,25 @@ startGame = function() {
 }
 
 processStep = function(tdelta) {
-	//process entities
-	for (var ec in entityManager.entities) {
-		var ent = entityManager.get(ec);
-		if (ent instanceof Entity) {ent.step(tdelta);}
-	}
-
-	//process particles
-	if (mpMode==CLIENT) {
-		for (var ec = 0; ec<particles.length; ec++) {
-	    	var prt = particles[ec];
-			if (prt instanceof Particle) {prt.step(tdelta);}
+	if (!gamePaused) {
+		//process entities
+		for (var ec in entityManager.entities) {
+			var ent = entityManager.get(ec);
+			if (ent instanceof Entity) {ent.step(tdelta);}
 		}
-	}
 
-	//process items (gun timers, etc)
-	for (var ic = 0; ic<items.length; ic++) {
-    	ite = items[ic];
-		if (ite instanceof Item) {ite.step(tdelta);}
+		//process particles
+		if (mpMode==CLIENT) {
+			for (var ec = 0; ec<particles.length; ec++) {
+		    	var prt = particles[ec];
+				if (prt instanceof Particle) {prt.step(tdelta);}
+			}
+		}
+
+		//process items (gun timers, etc)
+		for (var ic = 0; ic<items.length; ic++) {
+	    	ite = items[ic];
+			if (ite instanceof Item) {ite.step(tdelta);}
+		}
 	}
 }

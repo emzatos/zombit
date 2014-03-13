@@ -23,10 +23,30 @@ Bullet = Projectile.extend(function(x,y,damage,sender){
 	},
 	collide: function(thing) {
 		if (thing instanceof Entity) {
-			//thing.damage(this.damage);
-				thing.damage(this.damage);
-			//console.log("damaged ent! new health "+thing.life);
-			//this.destroy();
+			thing.damage(this.damage);
+			
+			if (thing instanceof Hostile) {
+				var dx = -this.xs;
+				var dy = -this.ys;
+				var len = Math.sqrt(dx*dx+dy*dy);
+				dx/=len;
+				dy/=len;
+
+				function rnd() {return Math.random()*3-1.5;}
+				for (var i=0; i<~~(this.damage/10)+1; i++) {
+					var xx = dx*rnd();
+					var yy = dy*2*rnd();
+					var spl = new Splatter(thing.x,thing.y-4,xx,yy,yy*0.5,2-(0.5*Math.abs(yy)));
+					if (yy<0) {spl.depth = 1;}
+				}
+			}
+		}
+		else if (thing instanceof Tile) {
+			for (var i=0; i<5; i++) {
+				new Spark(this.x,this.y,grandr(-5,5),grandr(-5,5),this.col1);
+			}
+
+			sndBulletImpact.play(pDist(this.x,this.y,player.x,player.y));
 		}
 		this.destroy();
 	},

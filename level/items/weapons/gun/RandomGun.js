@@ -23,7 +23,7 @@ RandomGun = Gun.extend(function(awesomeness){
 		
 		this.col1 = rcol(115,205,115,205,115,205);
 		this.col2 = rcol(0,155,0,155,0,155);
-		this.snd = sndGun1;
+		this.snd = gunSounds.ar.random();
 		try{this.icon = assaultIcon;}catch(e){}
 		this.type = ASSAULTRIFLE;
 		this.name = this.makeName();

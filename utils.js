@@ -22,6 +22,10 @@ String.prototype.toProperCase = function () {
     return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 };
 
+Array.prototype.random = function() {
+  return this[~~(Math.random()*this.length)];
+}
+
 //integer randoms
 irand = function(max) {
 	if (max) {return Math.round(Math.random()*max);}

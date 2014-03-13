@@ -9,12 +9,16 @@ Particle = klass(function(x,y,xs,ys,life) {
 	try {this.image = imgBloodSplat;}
 	catch (e) {}
 
+	this.depth = 1;
+	this.gravity = 0;
+
 	this.type = PARTICLE;
 })
 .methods({
 	step: function(dlt) {
 		this.x+=this.xs;
 		this.y+=this.ys;
+		this.ys+=this.gravity;
 
 		this.life-=1;
 		if (this.life<0) {this.destroy();}

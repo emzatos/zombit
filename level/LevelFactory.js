@@ -30,7 +30,8 @@ var LevelFactory = {
 	        if (x2>maxX-minX) {x2=maxX-minX;}
 	        if (y2>maxY-minY) {y2=maxY-minY;}
 	        
-	        level = drawTileRect(level, x1, y1, x2, y2, WALL);
+	        level = LevelFactory.fillTileRect(level,x1,y1,x2,y2,[FLOOR,GRASS,WOODFLOOR].random());
+	        level = LevelFactory.drawTileRect(level, x1, y1, x2, y2, WALL);
 	    }
 	    
 	    //knock out chunks
@@ -44,7 +45,7 @@ var LevelFactory = {
 	        if (x2>maxX-minX) {x2=maxX-minX;}
 	        if (y2>maxY-minY) {y2=maxY-minY;}
 	        
-	        level = fillTileRect(level, x1, y1, x2, y2, FLOOR);
+	        level = LevelFactory.fillTileRect(level, x1, y1, x2, y2, FLOOR);
 	    }
 	    
 	    return level;
